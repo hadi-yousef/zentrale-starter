@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<title>Zentrale</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23007AFF'/%3E%3Ccircle cx='16' cy='16' r='6' fill='white'/%3E%3C/svg%3E">
+<!-- Quelle der Zentrale. bauen.py setzt die Symbole (Lucide) ein und schreibt index.html. -->
+<style>
+:root{
+  --bg:#F2F2F7;--card:#FFFFFF;--grp:#FFFFFF;--grp2:#FFFFFF;--sheet:#F2F2F7;--segon:#FFFFFF;
+  --ink:#1D1D1F;--ink2:#86868B;--ink3:#C7C7CC;--sep:rgba(60,60,67,.16);--fill:rgba(120,120,128,.13);--hover:rgba(0,0,0,.035);
+  --blue:#007AFF;--green:#34C759;--orange:#FF9500;--red:#FF3B30;--purple:#AF52DE;--teal:#30B0C7;--indigo:#5856D6;
+  --pink:#FF2D55;--cyan:#32ADE6;--gray:#8E8E93;--yellow:#FFCC00;--mint:#00C7BE;--brown:#A2845E;
+  --warnink:#C93400;--badink:#D70015;
+  --shadow:0 1px 1px rgba(0,0,0,.03),0 6px 24px rgba(0,0,0,.05);--shadow2:0 2px 4px rgba(0,0,0,.04),0 12px 32px rgba(0,0,0,.09);
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,system-ui,sans-serif;
+  --disp:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,system-ui,sans-serif;
+  --round:"SF Pro Rounded",ui-rounded,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#000000;--card:#1C1C1E;--grp:#1C1C1E;--grp2:#2C2C2E;--sheet:#1C1C1E;--segon:#636366;
+  --ink:#F5F5F7;--ink2:#98989D;--ink3:#48484A;--sep:rgba(84,84,88,.6);--fill:rgba(118,118,128,.24);--hover:rgba(255,255,255,.05);
+  --blue:#0A84FF;--green:#30D158;--orange:#FF9F0A;--red:#FF453A;--purple:#BF5AF2;--teal:#40C8E0;--indigo:#5E5CE6;
+  --pink:#FF375F;--cyan:#64D2FF;--gray:#98989D;--yellow:#FFD60A;--mint:#63E6E2;--brown:#AC8E68;
+  --warnink:#FF9F0A;--badink:#FF6961;--shadow:none;--shadow2:none}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.42 var(--font);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-variant-numeric:tabular-nums;letter-spacing:-.006em}
+body.noscroll{overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;text-align:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+a{color:var(--blue);text-decoration:none}
+h1,h2,h3,p{margin:0}
+code{font:12.5px var(--mono);background:var(--fill);padding:1px 5px;border-radius:5px;overflow-wrap:anywhere}
+pre{font:12.5px/1.55 var(--mono);background:var(--fill);padding:14px 16px;border-radius:12px;overflow:auto;color:var(--ink);margin:12px 0 0;white-space:pre-wrap}
+svg.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+:focus-visible{outline:3px solid color-mix(in srgb,var(--blue) 50%,transparent);outline-offset:2px}
+[hidden]{display:none!important}
+
+/* Kopf, Seiten */
+.wrap{max-width:1080px;margin:0 auto;padding:30px 36px 72px}
+.hd{margin-bottom:18px;display:flex;align-items:flex-start;gap:12px}
+.hdt{flex:1;min-width:0}
+.hd h1{font:700 34px/1.08 var(--disp);letter-spacing:-.022em}
+.hd p{margin-top:5px;color:var(--ink2);font-size:14px}
+.page{display:none}.page.on{display:block;animation:ein .25s ease}
+@keyframes ein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* Navigation: am Rechner Seitenleiste, am Handy unten eine Leiste */
+.side{display:none}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;justify-content:space-around;padding:7px 4px calc(8px + env(safe-area-inset-bottom));
+  background:color-mix(in srgb,var(--card) 82%,transparent);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid var(--sep)}
+.tabbar>a{position:relative;flex:1;max-width:96px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:500;color:var(--ink2)}
+.tabbar .i{width:25px;height:25px;stroke-width:1.8}
+.tabbar .on{color:var(--blue)}
+.tabbar .badge{position:absolute;top:-5px;left:calc(50% + 4px)}
+body{padding-bottom:calc(64px + env(safe-area-inset-bottom))}
+@media (min-width:1000px){
+  body{padding-bottom:0}
+  .tabbar{display:none}
+  #app{padding-left:240px}
+  .side{display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;width:240px;z-index:30;padding:18px 12px 24px;overflow-y:auto;
+    background:color-mix(in srgb,var(--card) 55%,var(--bg));border-right:.5px solid var(--sep)}
+  .wrap{padding-top:34px}
+}
+.slogo{display:flex;align-items:center;gap:10px;padding:2px 10px 18px;font:700 20px var(--disp);letter-spacing:-.015em}
+.side>a{display:flex;align-items:center;gap:10px;min-height:34px;padding:4px 10px;border-radius:8px;font-size:14.5px;color:var(--ink)}
+.side>a:hover:not(.on){background:var(--hover)}
+.side>a.on{background:var(--blue);color:#fff}
+.side>a .sq{width:24px;height:24px;border-radius:6px}.side>a .sq .i{width:14px;height:14px}
+.side>a .n{margin-left:auto;color:var(--ink2);font-size:13px}
+.side>a.on .n{color:rgba(255,255,255,.85)}
+.side .grow{flex:1}
+.side .wer{padding:10px;color:var(--ink2);font-size:12.5px}
+.badge{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--red);color:#fff;font-size:11px;font-weight:600;display:grid;place-items:center}
+
+/* Segmente */
+.seg{display:inline-flex;background:var(--fill);border-radius:10px;padding:3px;gap:2px;max-width:100%;overflow-x:auto;scrollbar-width:none;margin-bottom:18px}
+.seg>button{display:flex;align-items:center;gap:6px;padding:6px 15px;border-radius:8px;font-size:13.5px;font-weight:500;white-space:nowrap}
+.seg>button:hover:not(.on){background:var(--hover)}
+.seg .on{background:var(--segon);box-shadow:0 1px 3px rgba(0,0,0,.12),0 0 0 .5px rgba(0,0,0,.04)}
+.seg .c{color:var(--ink2);font-weight:400}
+
+/* Status und Symbole */
+.dot{width:8px;height:8px;border-radius:50%;flex:none;background:var(--ink3);display:inline-block}
+.dot.ok{background:var(--green)}.dot.warn{background:var(--orange)}.dot.bad{background:var(--red)}.dot.run{background:var(--blue)}
+.chip{display:inline-flex;align-items:center;font-size:12px;font-weight:500;padding:2px 8px;border-radius:6px;background:var(--fill);color:var(--ink2);white-space:nowrap}
+.chip.warn{background:color-mix(in srgb,var(--orange) 15%,transparent);color:var(--warnink)}
+.chip.bad{background:color-mix(in srgb,var(--red) 14%,transparent);color:var(--badink)}
+.chip.ok{background:color-mix(in srgb,var(--green) 15%,transparent);color:color-mix(in srgb,var(--green) 70%,var(--ink))}
+.chip.run{background:color-mix(in srgb,var(--blue) 13%,transparent);color:var(--blue)}
+.sq{--c:var(--blue);width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:#fff;flex:none;background:linear-gradient(180deg,color-mix(in srgb,var(--c) 80%,#fff),var(--c))}
+.sq .i{width:17px;height:17px}
+.sq.xl{width:46px;height:46px;border-radius:12px}.sq.xl .i{width:24px;height:24px}
+.circ{width:30px;height:30px;border-radius:50%;background:var(--fill);display:grid;place-items:center;flex:none}
+
+/* Kacheln */
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:8px}
+.tile{display:flex;flex-direction:column;width:100%;background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:16px 18px;transition:transform .18s,box-shadow .18s;min-width:0}
+button.tile:hover{transform:translateY(-1px);box-shadow:var(--shadow2)}
+.th{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:600;margin-bottom:12px}
+.big{font:600 32px/1 var(--round);letter-spacing:-.01em}
+.big small{font:500 14px var(--font);color:var(--ink2);margin-left:5px;letter-spacing:0}
+@media (max-width:760px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.wrap{padding:22px 16px 60px}.hd h1{font-size:30px}}
+
+/* Listen */
+.gh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;font:600 20px/1.2 var(--disp);letter-spacing:-.012em;margin:30px 2px 10px}
+.gh:first-child{margin-top:4px}
+.gh span{font:400 14px var(--font);color:var(--ink2);letter-spacing:0}
+.gh2{font-size:13px;font-weight:400;color:var(--ink2);margin:18px 16px 7px}
+.grp{background:var(--grp);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+.row{display:flex;align-items:center;gap:12px;width:100%;padding:9px 14px;min-height:52px;position:relative;text-align:left;color:var(--ink)}
+.row+.row::before{content:"";position:absolute;left:56px;right:0;top:0;height:.5px;background:var(--sep)}
+.row.noi+.row::before,.row+.row.noi::before{left:16px}
+button.row:hover{background:var(--hover)}
+.row .t{flex:1;min-width:0}
+.row .t b{display:block;font-weight:400;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .t>span{display:block;color:var(--ink2);font-size:13px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .t>span.ml{white-space:normal}
+.row .v{color:var(--ink2);font-size:14px;white-space:nowrap;text-align:right}
+.row.done .t b{color:var(--ink2);text-decoration:line-through}
+.row.more .t b{color:var(--blue)}
+.chev{color:var(--ink3);width:14px;height:14px;stroke-width:2.6;margin-left:-3px}
+.kv{display:flex;justify-content:space-between;align-items:baseline;gap:18px;padding:11px 16px;position:relative;font-size:15px}
+.kv+.kv::before{content:"";position:absolute;left:16px;right:0;top:0;height:.5px;background:var(--sep)}
+.kv>span{color:var(--ink2);text-align:right;min-width:0;overflow-wrap:anywhere;white-space:pre-line}
+.note{color:var(--ink2);font-size:13px;margin:10px 16px 0;line-height:1.45}
+.empty{background:var(--grp);border-radius:14px;padding:26px 22px;color:var(--ink2);text-align:center;font-size:14.5px;box-shadow:var(--shadow)}
+.empty b{color:var(--ink);font-weight:600;display:block;margin-bottom:2px}
+.empty .i{width:28px;height:28px;display:block;margin:0 auto 8px;color:var(--ink3)}
+.cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 22px}
+@media (max-width:860px){.cols{grid-template-columns:minmax(0,1fr)}}
+.ck{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--ink3);display:grid;place-items:center;flex:none;color:transparent}
+.ck .i{width:14px;height:14px;stroke-width:3}
+.ck.an{background:var(--green);border-color:var(--green);color:#fff}
+.ck:hover:not(.an){border-color:var(--blue)}
+
+/* Knöpfe und Eingaben */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:36px;padding:0 16px;border-radius:10px;font-weight:600;font-size:14.5px;background:var(--fill);color:var(--blue);white-space:nowrap;transition:filter .15s,opacity .15s}
+.btn .i{width:15px;height:15px}
+.btn.pri{background:var(--blue);color:#fff}
+.btn.danger{color:var(--red)}
+.btn.sm{height:28px;padding:0 11px;font-size:13px;border-radius:8px}
+.btn:hover:not(:disabled){filter:brightness(.96)}
+.btn:disabled{opacity:.45;cursor:default}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.inp{height:38px;border-radius:10px;border:0;background:var(--fill);padding:0 12px;font:inherit;font-size:15px;color:inherit;min-width:0;width:100%}
+textarea.inp{height:auto;min-height:90px;padding:10px 12px;line-height:1.45;resize:vertical}
+textarea.inp.lang{min-height:340px;font:13.5px/1.5 var(--mono)}
+.inp:focus{outline:2px solid color-mix(in srgb,var(--blue) 55%,transparent)}
+select.inp{padding-right:8px}
+.form{display:flex;flex-direction:column;gap:10px;background:var(--grp);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
+.form .zeile{display:flex;gap:10px;flex-wrap:wrap}.form .zeile>*{flex:1 1 140px}
+.form label{font-size:12.5px;color:var(--ink2);display:flex;flex-direction:column;gap:4px}
+.suche{display:flex;align-items:center;gap:8px;height:40px;border-radius:11px;background:var(--fill);padding:0 12px;color:var(--ink2);margin-bottom:16px}
+.suche input{flex:1;border:0;background:none;font:inherit;font-size:16px;color:var(--ink);outline:none;min-width:0}
+
+/* Blätter */
+.veil{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,.3);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s}
+.veil.open{opacity:1;visibility:visible}
+.sheet{width:min(640px,100%);max-height:min(88vh,920px);display:flex;flex-direction:column;background:var(--sheet);border-radius:22px;box-shadow:0 24px 80px rgba(0,0,0,.3);
+  transform:translateY(14px) scale(.98);transition:transform .28s cubic-bezier(.2,.8,.2,1);overflow:hidden;--grp:var(--grp2);--shadow:none}
+.veil.open .sheet{transform:none}
+.sh-head{display:flex;align-items:center;gap:14px;padding:20px 20px 14px;flex:none}
+.sh-t{min-width:0;flex:1}
+.sh-t h2{font:700 22px/1.15 var(--disp);letter-spacing:-.015em;overflow-wrap:anywhere}
+.sh-t p{color:var(--ink2);font-size:13.5px;margin-top:2px}
+.x{width:30px;height:30px;border-radius:50%;background:var(--fill);display:grid;place-items:center;color:var(--ink2);flex:none;align-self:flex-start}
+.x .i{width:15px;height:15px;stroke-width:2.6}
+.sh-body{overflow-y:auto;padding:0 20px 24px;overscroll-behavior:contain}
+.sh-body>.gh2:first-child{margin-top:4px}
+.acts{display:flex;gap:10px;margin-bottom:6px;flex-wrap:wrap}
+.acts .btn{flex:1;height:40px;background:var(--grp)}
+.acts .btn.pri{background:var(--blue)}
+@media (max-width:640px){.veil{padding:0;align-items:flex-end}.sheet{border-radius:18px 18px 0 0;max-height:94vh;width:100%}}
+
+/* Berichte: Fragen wie in der Nachrichten-App */
+.chat{display:flex;flex-direction:column;gap:8px;padding:4px 2px}
+.bl{max-width:82%;padding:9px 13px;border-radius:18px;font-size:15px;line-height:1.38;white-space:pre-wrap;overflow-wrap:anywhere}
+.bl.ag{align-self:flex-start;background:var(--grp);border-bottom-left-radius:6px}
+.bl.ich{align-self:flex-end;background:var(--blue);color:#fff;border-bottom-right-radius:6px}
+.bl small{display:block;font-size:11.5px;opacity:.7;margin-bottom:2px}
+.vor{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;margin:4px 0 2px}
+.vor .btn{border-radius:18px;background:color-mix(in srgb,var(--blue) 13%,transparent)}
+.antwort{display:flex;gap:8px;margin-top:10px}
+.antwort .inp{border-radius:19px}
+
+/* Markdown */
+.mdx{font-size:15px;line-height:1.55;overflow-wrap:anywhere}
+.mdx h2,.mdx h3,.mdx h4,.mdx h5{font-family:var(--disp);margin:18px 0 6px;line-height:1.25}
+.mdx h2{font-size:22px}.mdx h3{font-size:18px}.mdx h4,.mdx h5{font-size:16px}
+.mdx>:first-child{margin-top:0}
+.mdx p{margin:0 0 10px}
+.mdx ul,.mdx ol{margin:0 0 10px;padding-left:22px}
+.mdx li.cb{list-style:none;margin-left:-20px}.mdx li.cb::before{content:"○ ";color:var(--ink2)}.mdx li.cb.an::before{content:"● ";color:var(--green)}
+.mdx blockquote{margin:0 0 10px;padding:4px 12px;border-left:3px solid var(--ink3);color:var(--ink2)}
+.mdx table{border-collapse:collapse;margin:0 0 12px;font-size:14px;display:block;overflow-x:auto}
+.mdx th,.mdx td{border:.5px solid var(--sep);padding:5px 9px;text-align:left}
+.mdx hr{border:0;border-top:.5px solid var(--sep);margin:14px 0}
+.papier{background:var(--grp);border-radius:14px;padding:16px 18px}
+
+/* Eigene Fenster statt alert/confirm/prompt: am Rechner mittig, am Handy unten wie bei iOS */
+.dlg{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,.32);opacity:0;visibility:hidden;transition:opacity .18s,visibility .18s}
+.dlg.open{opacity:1;visibility:visible}
+.dlgbox{width:min(330px,100%);display:flex;flex-direction:column;gap:8px}
+.dlgk1,.dlgab{background:color-mix(in srgb,var(--grp2) 94%,transparent);-webkit-backdrop-filter:blur(30px);backdrop-filter:blur(30px);border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.dlgtx{padding:20px 20px 16px;text-align:center}
+.dlgtx b{display:block;font:600 16px/1.3 var(--disp)}
+.dlgtx p{margin-top:6px;color:var(--ink2);font-size:13.5px;line-height:1.4;white-space:pre-line}
+.dlgtx .inp{margin-top:14px;text-align:left}
+.dlg button{display:block;width:100%;padding:13px 16px;font-size:16px;color:var(--blue);border-top:.5px solid var(--sep);text-align:center}
+.dlg button:hover{background:var(--hover)}
+.dlg button.rot{color:var(--red)}
+.dlg button.fett,.dlgab button{font-weight:600}
+.dlgab button{border-top:0}
+@media (max-width:640px){.dlg{align-items:flex-end;padding:0 10px calc(10px + env(safe-area-inset-bottom))}.dlgbox{width:100%}}
+
+/* Anmelden */
+.login{max-width:380px;margin:12vh auto 0;text-align:center;padding:0 20px}
+.login .sq{margin:0 auto 16px}
+.login h1{font:700 28px var(--disp);margin-bottom:6px}
+.login p{color:var(--ink2);font-size:14px;margin-bottom:18px}
+.login form{display:flex;flex-direction:column;gap:10px}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:90;background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:12px;font-size:14px;box-shadow:var(--shadow2);opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+@media (min-width:1000px){.toast{bottom:28px;margin-left:120px}}
+</style>
+</head>
+<body>
+<div id="login" class="login" hidden></div>
+<div id="app" hidden>
+  <nav class="side" id="side" aria-label="Bereiche"></nav>
+  <div class="wrap"><main id="pages"></main></div>
+  <nav class="tabbar" id="tabbar" aria-label="Bereiche"></nav>
+</div>
+<div class="veil" id="veil"><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+<div class="dlg" id="dlg"></div>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+const ICONS = {"arrow-right": "<path d=\"M5 12h14\" /> <path d=\"m12 5 7 7-7 7\" />", "arrow-up": "<path d=\"m5 12 7-7 7 7\" /> <path d=\"M12 19V5\" />", "badge": "<path d=\"M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z\" />", "bot": "<path d=\"M12 8V4H8\" /> <rect width=\"16\" height=\"12\" x=\"4\" y=\"8\" rx=\"2\" /> <path d=\"M2 14h2\" /> <path d=\"M20 14h2\" /> <path d=\"M15 13v2\" /> <path d=\"M9 13v2\" />", "check": "<path d=\"M20 6 9 17l-5-5\" />", "chevron-right": "<path d=\"m9 18 6-6-6-6\" />", "circle-dot": "<circle cx=\"12\" cy=\"12\" r=\"1\" /> <circle cx=\"12\" cy=\"12\" r=\"10\" />", "file-text": "<path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\" /> <path d=\"M14 2v5a1 1 0 0 0 1 1h5\" /> <path d=\"M10 9H8\" /> <path d=\"M16 13H8\" /> <path d=\"M16 17H8\" />", "folder": "<path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z\" />", "folder-plus": "<path d=\"M12 10v6\" /> <path d=\"M9 13h6\" /> <path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z\" />", "form": "<path d=\"M4 14h6\" /> <path d=\"M4 2h10\" /> <rect x=\"4\" y=\"18\" width=\"16\" height=\"4\" rx=\"1\" /> <rect x=\"4\" y=\"6\" width=\"16\" height=\"4\" rx=\"1\" />", "grid": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" /> <path d=\"M3 9h18\" /> <path d=\"M3 15h18\" /> <path d=\"M9 3v18\" /> <path d=\"M15 3v18\" />", "hd": "<path d=\"M10 12H6\" /> <path d=\"M10 15V9\" /> <path d=\"M14 14.5a.5.5 0 0 0 .5.5h1a2.5 2.5 0 0 0 2.5-2.5v-1A2.5 2.5 0 0 0 15.5 9h-1a.5.5 0 0 0-.5.5z\" /> <path d=\"M6 15V9\" /> <rect x=\"2\" y=\"5\" width=\"20\" height=\"14\" rx=\"2\" />", "key-round": "<path d=\"M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z\" /> <circle cx=\"16.5\" cy=\"7.5\" r=\".5\" fill=\"currentColor\" />", "layout-grid": "<rect width=\"7\" height=\"7\" x=\"3\" y=\"3\" rx=\"1\" /> <rect width=\"7\" height=\"7\" x=\"14\" y=\"3\" rx=\"1\" /> <rect width=\"7\" height=\"7\" x=\"14\" y=\"14\" rx=\"1\" /> <rect width=\"7\" height=\"7\" x=\"3\" y=\"14\" rx=\"1\" />", "list-checks": "<path d=\"M13 5h8\" /> <path d=\"M13 12h8\" /> <path d=\"M13 19h8\" /> <path d=\"m3 17 2 2 4-4\" /> <path d=\"m3 7 2 2 4-4\" />", "message-square-text": "<path d=\"M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z\" /> <path d=\"M7 11h10\" /> <path d=\"M7 15h6\" /> <path d=\"M7 7h8\" />", "notebook-pen": "<path d=\"M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4\" /> <path d=\"M2 6h4\" /> <path d=\"M2 10h4\" /> <path d=\"M2 14h4\" /> <path d=\"M2 18h4\" /> <path d=\"M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z\" />", "pencil": "<path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\" /> <path d=\"m15 5 4 4\" />", "plus": "<path d=\"M5 12h14\" /> <path d=\"M12 5v14\" />", "rotate-ccw": "<path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\" /> <path d=\"M3 3v5h5\" />", "search": "<path d=\"m21 21-4.34-4.34\" /> <circle cx=\"11\" cy=\"11\" r=\"8\" />", "sheet": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" ry=\"2\" /> <line x1=\"3\" x2=\"21\" y1=\"9\" y2=\"9\" /> <line x1=\"3\" x2=\"21\" y1=\"15\" y2=\"15\" /> <line x1=\"9\" x2=\"9\" y1=\"9\" y2=\"21\" /> <line x1=\"15\" x2=\"15\" y1=\"9\" y2=\"21\" />", "star": "<path d=\"M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z\" />", "text": "<path d=\"M21 5H3\" /> <path d=\"M15 12H3\" /> <path d=\"M17 19H3\" />", "trash-2": "<path d=\"M10 11v6\" /> <path d=\"M14 11v6\" /> <path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6\" /> <path d=\"M3 6h18\" /> <path d=\"M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\" />", "wifi-off": "<path d=\"M12 20h.01\" /> <path d=\"M8.5 16.429a5 5 0 0 1 7 0\" /> <path d=\"M5 12.859a10 10 0 0 1 5.17-2.69\" /> <path d=\"M19 12.859a10 10 0 0 0-2.007-1.523\" /> <path d=\"M2 8.82a15 15 0 0 1 4.177-2.643\" /> <path d=\"M22 8.82a15 15 0 0 0-11.288-3.764\" /> <path d=\"m2 2 20 20\" />", "x": "<path d=\"M18 6 6 18\" /> <path d=\"m6 6 12 12\" />"};
+
+/* ---------- Werkzeuge ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const icon = (k, cls = "i") => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[k] || ""}</svg>`;
+const CHEV = icon("chevron-right", "i chev");
+const sq = (ic, c, cls = "") => `<span class="sq ${cls}" style="--c:var(--${c})">${icon(ic)}</span>`;
+const sh = spec => `data-sheet="${esc(spec)}"`;
+const val = t => `<span class="v">${t}</span>`;
+const chip = (t, c = "") => `<span class="chip ${c}">${esc(t)}</span>`;
+function row(lead, title, sub, trail, act, cls = ""){
+  const tag = act ? "button" : "div";
+  return `<${tag} class="row${lead ? "" : " noi"}${cls ? " " + cls : ""}"${act ? ` type="button" ${act}` : ""}>${lead || ""}<span class="t"><b>${title}</b>${sub ? `<span>${sub}</span>` : ""}</span>${trail || ""}${act ? CHEV : ""}</${tag}>`;
+}
+const grp = rows => rows ? `<div class="grp">${rows}</div>` : "";
+const gh = (t, sub) => `<h2 class="gh">${t}${sub ? `<span>${sub}</span>` : ""}</h2>`;
+const gh2 = t => `<h3 class="gh2">${t}</h3>`;
+const kv = (k, v) => v === "" || v == null ? "" : `<div class="kv">${k}<span>${v}</span></div>`;
+const empty = (t, ic) => `<div class="empty">${ic ? icon(ic) : ""}${t}</div>`;
+const note = t => `<p class="note">${t}</p>`;
+const OPEN = new Set();
+function more(key, items, n, fn){
+  const all = OPEN.has(key), list = all ? items : items.slice(0, n);
+  return list.map(fn).join("") + (items.length > n ? `<button class="row noi more" type="button" data-more="${esc(key)}"><span class="t"><b>${all ? "Weniger anzeigen" : `Alle ${items.length} anzeigen`}</b></span></button>` : "");
+}
+function setHtml(el, html){
+  if (!el || el._h === html) return;
+  const ae = document.activeElement;
+  if (ae && el.contains(ae) && /^(SELECT|INPUT|TEXTAREA)$/.test(ae.tagName)) return;
+  el.innerHTML = html; el._h = html;
+}
+function ago(t){
+  if (!t) return "noch nie";
+  const s = Math.max(0, Date.now()/1000 - t);
+  if (s < 90) return "gerade eben";
+  if (s < 3600) return `vor ${Math.round(s/60)} Min.`;
+  if (s < 172800) return `vor ${Math.round(s/3600)} Std.`;
+  return `vor ${Math.round(s/86400)} Tagen`;
+}
+const datum = d => d ? new Date(d + "T12:00:00").toLocaleDateString("de-DE") : "";
+const heute = () => new Date().toISOString().slice(0, 10);
+const wer = id => id === "besitzer" ? "Du" : id === "zentrale" ? "Zentrale" : id;
+function toast(t){ const e = $("toast"); e.textContent = t; e.classList.add("on"); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove("on"), 2200); }
+
+/* Markdown wie in Obsidian: Überschriften, Listen, Aufgabenlisten, Tabellen, Fett, Kursiv, Code, Zitate, Links */
+const mdStart = Z => { if (Z[0] && Z[0].trim() === "---") { const e = Z.findIndex((z, i) => i > 0 && z.trim() === "---"); if (e > 0) return e + 1; } return 0; };
+function md(src){
+  const Z = esc(src).replace(/\r\n/g, "\n").split("\n");
+  const inl = t => t.replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>").replace(/(^|[^*\w])\*([^*\s][^*]*?)\*(?!\w)/g, "$1<i>$2</i>")
+    .replace(/\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|([^\]]+))?\]\]/g, (m, z, a) => `<b>${a || z}</b>`)
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  const out = []; let liste = "", code = null, para = [], tab = [];
+  const absatz = () => { if (para.length) { out.push(`<p>${inl(para.join(" "))}</p>`); para = []; } };
+  const tabelle = () => { if (!tab.length) return;
+    const zelle = z => z.trim().replace(/^\||\|$/g, "").split("|").map(c => inl(c.trim())), kopf = tab.length > 1 && /^[\s|:-]+$/.test(tab[1]);
+    out.push(`<table>${kopf ? `<tr>${zelle(tab[0]).map(c => `<th>${c}</th>`).join("")}</tr>` : ""}${tab.slice(kopf ? 2 : 0).map(z => `<tr>${zelle(z).map(c => `<td>${c}</td>`).join("")}</tr>`).join("")}</table>`); tab = []; };
+  const zu = () => { absatz(); tabelle(); if (liste) { out.push(`</${liste}>`); liste = ""; } };
+  const li = (art, html) => { absatz(); tabelle(); if (liste !== art) { if (liste) out.push(`</${liste}>`); out.push(`<${art}>`); liste = art; } out.push(html); };
+  for (const z of Z.slice(mdStart(Z))) {
+    let m;
+    if (code !== null) { if (z.startsWith("```")) { out.push(`<pre>${code.join("\n")}</pre>`); code = null; } else code.push(z); continue; }
+    if (z.startsWith("```")) { zu(); code = []; continue; }
+    if (/^\s*\|.*\|\s*$/.test(z)) { absatz(); if (liste) { out.push(`</${liste}>`); liste = ""; } tab.push(z); continue; }
+    tabelle();
+    if ((m = z.match(/^(#{1,4})\s+(.*)/))) { zu(); out.push(`<h${m[1].length + 1}>${inl(m[2])}</h${m[1].length + 1}>`); continue; }
+    if ((m = z.match(/^\s*[-*]\s+\[( |x|X)\]\s+(.*)$/))) { li("ul", `<li class="cb${m[1] === " " ? "" : " an"}">${inl(m[2])}</li>`); continue; }
+    if ((m = z.match(/^\s*[-*]\s+(.*)/))) { li("ul", `<li>${inl(m[1])}</li>`); continue; }
+    if ((m = z.match(/^\s*\d+[.)]\s+(.*)/))) { li("ol", `<li>${inl(m[1])}</li>`); continue; }
+    if ((m = z.match(/^&gt;\s?(.*)/))) { zu(); out.push(`<blockquote>${inl(m[1])}</blockquote>`); continue; }
+    if (/^\s*(---+|\*\*\*+)\s*$/.test(z)) { zu(); out.push("<hr>"); continue; }
+    if (!z.trim()) { zu(); continue; }
+    if (liste) { out.push(`</${liste}>`); liste = ""; }
+    para.push(z.trim());
+  }
+  if (code !== null) out.push(`<pre>${code.join("\n")}</pre>`);
+  zu();
+  return `<div class="mdx">${out.join("")}</div>`;
+}
+
+/* ---------- Eigene Fenster (Promise), nie alert/confirm/prompt ---------- */
+function dialog(html, fokus){
+  return new Promise(res => {
+    const d = $("dlg"); d.innerHTML = `<div class="dlgbox">${html}</div>`; d.classList.add("open");
+    const fertig = v => { d.classList.remove("open"); d.onclick = null; d.onkeydown = null; res(v); };
+    d.onclick = e => { const b = e.target.closest("[data-dlg]"); if (b) fertig(b.dataset.dlg === "ok" ? (d.querySelector("input,textarea")?.value ?? true) : null); else if (e.target === d) fertig(null); };
+    d.onkeydown = e => { if (e.key === "Escape") fertig(null); if (e.key === "Enter" && e.target.tagName === "INPUT") { e.preventDefault(); fertig(e.target.value); } };
+    setTimeout(() => (d.querySelector(fokus || "input,textarea") || d.querySelector("[data-dlg=ok]"))?.focus(), 50);
+  });
+}
+const bestaetigen = (titel, text, knopf = "OK", rot = false) => dialog(`<div class="dlgk1"><div class="dlgtx"><b>${esc(titel)}</b>${text ? `<p>${esc(text)}</p>` : ""}</div><button type="button" data-dlg="ok" class="${rot ? "rot" : ""} fett">${esc(knopf)}</button></div><div class="dlgab"><button type="button" data-dlg="nein">Abbrechen</button></div>`).then(v => v !== null);
+const meldung = (titel, text) => dialog(`<div class="dlgk1"><div class="dlgtx"><b>${esc(titel)}</b>${text ? `<p>${esc(text)}</p>` : ""}</div><button type="button" data-dlg="ok" class="fett">OK</button></div>`);
+const eingeben = (titel, text, wert = "") => dialog(`<div class="dlgk1"><div class="dlgtx"><b>${esc(titel)}</b>${text ? `<p>${esc(text)}</p>` : ""}<input class="inp" value="${esc(wert)}"></div><button type="button" data-dlg="ok" class="fett">Fertig</button></div><div class="dlgab"><button type="button" data-dlg="nein">Abbrechen</button></div>`);
+
+/* ---------- Schnittstelle: jede Abfrage trägt den Schlüssel des Besitzers ---------- */
+let KEY = "";
+try { KEY = localStorage.getItem("zentrale-schluessel") || ""; } catch(e) {}
+async function api(pfad, body){
+  const r = await fetch(pfad, {method: body ? "POST" : "GET", cache: "no-store", headers: {Authorization: "Bearer " + KEY, ...(body ? {"Content-Type": "application/json"} : {})}, body: body ? JSON.stringify(body) : undefined});
+  const d = await r.json().catch(() => ({}));
+  if (r.status === 401) { abmelden(); throw new Error("Schlüssel fehlt oder ist falsch."); }
+  if (!r.ok) throw new Error(d.fehler || "Die Zentrale hat abgelehnt.");
+  return d;
+}
+async function post(pfad, body){
+  try { const d = await api(pfad, body); await laden(); return d; }
+  catch(e) { meldung("Hat nicht geklappt", e.message); return null; }
+}
+
+/* ---------- Daten ---------- */
+const D = {pos: null, wuensche: null, berichte: null, notizen: null, agenten: null, ich: null, fehler: ""};
+async function laden(){
+  if (!KEY) return;
+  try {
+    const [pos, wuensche, berichte, notizen, agenten] = await Promise.all(["/api/pos", "/api/wuensche", "/api/berichte", "/api/notizen", "/api/agenten"].map(p => api(p)));
+    Object.assign(D, {pos, wuensche, berichte, notizen, agenten, fehler: ""});
+  } catch(e) { D.fehler = e.message; }
+  renderAll();
+}
+const offeneFragen = b => b.fragen.filter(f => !f.antwort).length;
+const projekt = id => (D.pos?.projekte || []).find(p => p.id === id);
+const aufgabenVon = pid => (D.pos?.aufgaben || []).filter(a => a.projekt === pid);
+const wunschZu = id => [...(D.wuensche?.offen || []), ...(D.wuensche?.erledigt || [])].find(w => w.id === id || String(w.nr) === String(id));
+const PRIO = {hoch: ["Hoch", "red"], mittel: ["Mittel", "orange"], niedrig: ["Niedrig", "gray"], "": ["Ohne Priorität", "gray"]};
+
+/* ---------- Seiten ---------- */
+const PAGES = [
+  {id: "uebersicht", title: "Übersicht", icon: "layout-grid", farbe: "blue"},
+  {id: "projekte", title: "Projekte", icon: "folder", farbe: "orange"},
+  {id: "wuensche", title: "Wünsche", icon: "star", farbe: "yellow"},
+  {id: "berichte", title: "Berichte", icon: "message-square-text", farbe: "green"},
+  {id: "notizen", title: "Notizen", icon: "notebook-pen", farbe: "indigo"},
+];
+let PAGE = "uebersicht";
+const UI = {projektSicht: "aktiv", q: "", treffer: null};
+function zaehler(id){
+  if (id === "wuensche") return D.wuensche ? D.wuensche.offen.length : "";
+  if (id === "projekte") return D.pos ? D.pos.projekte.filter(p => p.status === "aktiv").length : "";
+  if (id === "notizen") return D.notizen ? D.notizen.notizen.length : "";
+  return "";
+}
+const fragenOffen = () => (D.berichte?.berichte || []).reduce((n, b) => n + offeneFragen(b), 0);
+function renderNav(){
+  const f = fragenOffen();
+  setHtml($("side"), `<div class="slogo">${sq("circle-dot", "blue")}Zentrale</div>` + PAGES.map(p => `<a href="#${p.id}" class="${p.id === PAGE ? "on" : ""}">${sq(p.icon, p.farbe)}${esc(p.title)}${p.id === "berichte" && f ? `<span class="badge" style="margin-left:auto">${f}</span>` : `<span class="n">${zaehler(p.id)}</span>`}</a>`).join("")
+    + `<div class="grow"></div><div class="wer">Angemeldet als Besitzer · <a href="#" data-act="abmelden">Abmelden</a></div>`);
+  setHtml($("tabbar"), PAGES.map(p => `<a href="#${p.id}" class="${p.id === PAGE ? "on" : ""}">${icon(p.icon)}${esc(p.title)}${p.id === "berichte" && f ? `<span class="badge">${f}</span>` : ""}</a>`).join(""));
+}
+function kopf(titel, sub, knopf){ return `<div class="hd"><div class="hdt"><h1>${esc(titel)}</h1>${sub ? `<p>${sub}</p>` : ""}</div>${knopf || ""}</div>`; }
+
+/* Übersicht: was offen ist, auf einen Blick */
+function viewUebersicht(){
+  const W = D.wuensche?.offen || [], A = (D.pos?.aufgaben || []).filter(a => !a.erledigt), P = (D.pos?.projekte || []).filter(p => p.status === "aktiv");
+  const B = (D.berichte?.berichte || []).filter(b => offeneFragen(b) || !b.gelesen);
+  const meine = A.filter(a => a.fuer === "besitzer").sort((a, b) => (a.faellig || "9999").localeCompare(b.faellig || "9999"));
+  const tag = new Date().toLocaleDateString("de-DE", {weekday: "long", day: "numeric", month: "long"});
+  const kachel = (seite, ic, farbe, titel, zahl, klein) => `<button class="tile" type="button" data-nav="${seite}"><div class="th">${sq(ic, farbe)}${titel}</div><div class="big">${zahl}<small>${klein}</small></div></button>`;
+  return kopf("Übersicht", esc(tag))
+    + `<div class="grid">${kachel("wuensche", "star", "yellow", "Wünsche", W.length, `offen, ${W.filter(w => w.prio === "hoch").length} hoch`)}`
+    + kachel("berichte", "message-square-text", "green", "Fragen", fragenOffen(), "offen")
+    + kachel("projekte", "list-checks", "orange", "Aufgaben", A.length, "offen")
+    + kachel("projekte", "folder", "blue", "Projekte", P.length, "aktiv") + `</div>`
+    + `<div class="cols"><div>`
+    + gh("Wartet auf dich") + (B.length || meine.length ? grp(B.map(berichtZeile).join("") + more("ue-meine", meine, 6, aufgabeZeile)) : empty("<b>Nichts offen</b>Keine Fragen und keine Aufgaben für dich.", "check"))
+    + `</div><div>`
+    + gh("Wichtigste Wünsche") + (W.length ? grp(more("ue-w", W, 6, wunschZeile)) : empty("<b>Noch keine Wünsche</b>Sag deinem Agenten, was du haben willst. Er trägt es hier ein.", "star"))
+    + gh("Agenten") + agentenListe()
+    + `</div></div>`;
+}
+function agentenListe(){
+  const G = (D.agenten?.agenten || []).filter(a => a.id !== "besitzer");
+  if (!G.length) return empty("<b>Noch kein Agent</b>Anlegen mit <code>py start.py agent-neu claude</code> und <code>py start.py agent-neu codex</code>", "bot");
+  return grp(G.map(a => row(`<span class="circ">${icon("bot")}</span>`, esc(a.id), "zuletzt " + esc(ago(a.zuletzt)), `<span class="dot ${a.zuletzt && Date.now()/1000 - a.zuletzt < 900 ? "ok" : ""}"></span>`)).join(""));
+}
+
+/* Projekte und Aufgaben */
+function projektZeile(p){
+  const offen = aufgabenVon(p.id).filter(a => !a.erledigt).length;
+  return row(sq(p.symbol || "folder", p.farbe || "gray"), esc(p.name), p.naechster_schritt ? "Als Nächstes: " + esc(p.naechster_schritt) : esc(p.beschreibung), offen ? val(offen + " offen") : "", sh("projekt:" + p.id));
+}
+function aufgabeZeile(a){
+  const p = projekt(a.projekt), spaet = a.faellig && !a.erledigt && a.faellig < heute();
+  const sub = [p ? esc(p.name) : "", a.faellig ? (spaet ? `<span style="color:var(--red)">fällig ${datum(a.faellig)}</span>` : "fällig " + datum(a.faellig)) : "", a.fuer !== "besitzer" ? "für " + esc(a.fuer) : ""].filter(Boolean).join(" · ");
+  return `<div class="row${a.erledigt ? " done" : ""}"><button type="button" class="ck${a.erledigt ? " an" : ""}" data-act="abhaken" data-id="${esc(a.id)}" aria-label="Abhaken">${icon("check")}</button><span class="t"><b>${esc(a.titel)}</b>${sub ? `<span>${sub}</span>` : ""}</span></div>`;
+}
+function viewProjekte(){
+  const P = D.pos?.projekte || [], zahl = s => P.filter(p => p.status === s).length;
+  const L = P.filter(p => p.status === UI.projektSicht).sort((a, b) => b.geaendert - a.geaendert);
+  const lose = (D.pos?.aufgaben || []).filter(a => !a.projekt && !a.erledigt);
+  return kopf("Projekte", `${zahl("aktiv")} aktiv · ${zahl("ruht")} ruhen · ${zahl("archiv")} im Archiv`, `<button class="btn pri" type="button" ${sh("projekt-neu")}>${icon("plus")}Projekt</button>`)
+    + `<div class="seg">${["aktiv", "ruht", "archiv"].map(s => `<button type="button" data-sicht="${s}" class="${UI.projektSicht === s ? "on" : ""}">${{aktiv: "Aktiv", ruht: "Ruht", archiv: "Archiv"}[s]} <span class="c">${zahl(s)}</span></button>`).join("")}</div>`
+    + (L.length ? grp(L.map(projektZeile).join("")) : empty(P.length ? "Hier ist gerade nichts." : "<b>Noch keine Projekte</b>Dein Agent trägt sie nach der Bestandsaufnahme ein.", "folder"))
+    + (lose.length ? gh("Aufgaben ohne Projekt") + grp(lose.map(aufgabeZeile).join("")) : "");
+}
+
+/* Wünsche */
+function wunschZeile(w){
+  const S = (D.pos?.aufgaben || []).filter(a => a.wunsch === w.id), fertig = S.filter(a => a.erledigt).length;
+  const letzte = w.notizen.length ? w.notizen[w.notizen.length - 1].text : w.text;
+  const [pt, pc] = PRIO[w.prio || ""];
+  return row(sq(w.status === "offen" ? "star" : w.status === "erledigt" ? "check" : "x", w.status === "offen" ? pc : w.status === "erledigt" ? "green" : "gray"),
+    `Wunsch Nr. ${w.nr} · ${esc(w.titel)}`, esc(w.status === "offen" ? letzte : w.ergebnis || w.status), S.length ? val(`${fertig}/${S.length}`) : (w.status === "offen" && w.prio ? chip(pt, w.prio === "hoch" ? "bad" : w.prio === "mittel" ? "warn" : "") : ""), sh("wunsch:" + w.id));
+}
+function viewWuensche(){
+  const W = D.wuensche?.offen || [], E = D.wuensche?.erledigt || [];
+  let h = kopf("Wünsche", `${W.length} offen · ${E.length} erledigt`, `<button class="btn pri" type="button" ${sh("wunsch-neu")}>${icon("plus")}Wunsch</button>`);
+  if (!W.length) h += empty("<b>Keine offenen Wünsche</b>Alles, was du haben willst, kommt hierher, immer mit Priorität.", "star");
+  for (const p of ["hoch", "mittel", "niedrig", ""]) { const L = W.filter(w => (w.prio || "") === p); if (L.length) h += gh(PRIO[p][0], L.length) + grp(more("w-" + p, L, 8, wunschZeile)); }
+  if (E.length) h += gh("Erledigt", E.length) + grp(more("w-fertig", E, 5, wunschZeile));
+  return h;
+}
+
+/* Berichte */
+function berichtZeile(b){
+  const o = offeneFragen(b);
+  return row(sq("message-square-text", o ? "green" : "gray"), `${b.gelesen ? "" : `<span class="dot run" style="margin-right:7px;vertical-align:1px"></span>`}Bericht Nr. ${b.nr} · ${esc(b.titel)}`, `${esc(b.von)} · ${esc(ago(Math.max(b.zeit, ...b.verlauf.map(m => m.zeit))))}${b.kurz ? " · " + esc(b.kurz) : ""}`,
+    o ? chip(o === 1 ? "1 Frage" : o + " Fragen", "run") : "", sh("bericht:" + b.id));
+}
+function viewBerichte(){
+  const L = D.berichte?.berichte || [], offen = L.filter(b => offeneFragen(b)), rest = L.filter(b => !offeneFragen(b));
+  return kopf("Berichte", `${fragenOffen()} Fragen offen · ${L.length} Berichte`)
+    + (L.length ? "" : empty("<b>Noch keine Berichte</b>Wenn dein Agent eine Entscheidung braucht, fragt er hier, mit Vorschlägen zum Antippen.", "message-square-text"))
+    + (offen.length ? gh("Mit offenen Fragen") + grp(offen.map(berichtZeile).join("")) : "")
+    + (rest.length ? gh("Alle") + grp(more("be-rest", rest, 10, berichtZeile)) : "");
+}
+
+/* Notizen */
+function notizZeile(n){ return row(sq("file-text", "indigo"), esc(n.titel), `${n.ordner ? esc(n.ordner) + " · " : ""}${esc(ago(n.zeit))}${n.vorschau ? " · " + esc(n.vorschau) : ""}`, "", sh("notiz:" + n.pfad)); }
+function viewNotizen(){
+  const N = D.notizen?.notizen || [];
+  const liste = UI.treffer ? (UI.treffer.length ? grp(UI.treffer.map(t => row(sq("search", "gray"), esc(t.titel), esc(t.ausschnitt), "", sh("notiz:" + t.pfad))).join("")) : empty("Nichts gefunden.", "search"))
+    : N.length ? grp(more("nz", N, 25, notizZeile)) : empty("<b>Noch keine Notizen</b>Notizen sind Markdown-Dateien. Du kannst sie auch mit Obsidian oder jedem Editor öffnen.", "notebook-pen");
+  return kopf("Notizen", `${N.length} Notizen in ${D.notizen?.ordner.length || 0} Ordnern`, `<button class="btn pri" type="button" ${sh("notiz-neu")}>${icon("plus")}Notiz</button>`)
+    + `<label class="suche">${icon("search")}<input type="search" id="nsuche" placeholder="Notizen durchsuchen" value="${esc(UI.q)}" autocomplete="off"></label>` + liste;
+}
+
+const VIEWS = {uebersicht: viewUebersicht, projekte: viewProjekte, wuensche: viewWuensche, berichte: viewBerichte, notizen: viewNotizen};
+function renderPage(){
+  if (!D.pos) { setHtml($("pages"), D.fehler ? empty(`<b>Zentrale nicht erreichbar</b>${esc(D.fehler)}`, "wifi-off") : ""); return; }
+  setHtml($("pages"), `<section class="page on">${VIEWS[PAGE]()}</section>`);
+}
+function renderAll(){ renderNav(); renderPage(); renderSheet(); }
+
+/* ---------- Blätter (Fenster beim Antippen) ---------- */
+let SHEET = null;
+const SHEETS = {};
+function openSheet(spec){ SHEET = spec; $("sheet")._h = null; renderSheet(); $("veil").classList.add("open"); document.body.classList.add("noscroll"); }
+function closeSheet(){ SHEET = null; $("veil").classList.remove("open"); document.body.classList.remove("noscroll"); }
+function renderSheet(){
+  if (!SHEET) return;
+  const i = SHEET.indexOf(":"), art = i < 0 ? SHEET : SHEET.slice(0, i), arg = i < 0 ? "" : SHEET.slice(i + 1);
+  const s = SHEETS[art] && SHEETS[art](arg);
+  if (!s) { closeSheet(); return; }
+  setHtml($("sheet"), `<div class="sh-head">${s.lead || ""}<div class="sh-t"><h2>${s.title}</h2>${s.sub ? `<p>${s.sub}</p>` : ""}</div><button class="x" type="button" data-act="zu" aria-label="Schließen">${icon("x")}</button></div><div class="sh-body">${s.body}</div>`);
+}
+
+SHEETS.projekt = id => {
+  const p = projekt(id); if (!p) return null;
+  const A = aufgabenVon(id), offen = A.filter(a => !a.erledigt), fertig = A.filter(a => a.erledigt);
+  return {lead: sq(p.symbol || "folder", p.farbe || "gray", "xl"), title: esc(p.name), sub: `${{aktiv: "Aktiv", ruht: "Ruht", archiv: "Archiv"}[p.status]} · geändert ${esc(ago(p.geaendert))}`,
+    body: `<div class="acts"><button class="btn" type="button" data-act="schritt" data-id="${esc(id)}">${icon("arrow-right")}Als Nächstes</button>${["aktiv", "ruht", "archiv"].filter(s => s !== p.status).map(s => `<button class="btn" type="button" data-act="pstatus" data-id="${esc(id)}" data-wert="${s}">${{aktiv: "Aktiv setzen", ruht: "Ruhen lassen", archiv: "Ins Archiv"}[s]}</button>`).join("")}</div>`
+      + gh2("Angaben") + grp(kv("Als Nächstes", esc(p.naechster_schritt || "–")) + kv("Beschreibung", esc(p.beschreibung)) + (p.orte || []).map(o => kv(esc(o.geraet || "Ort"), `<code>${esc(o.pfad)}</code>`)).join("") + (p.repos || []).map(r => kv("Repo", esc(r))).join(""))
+      + gh2(`Aufgaben (${offen.length} offen)`) + (A.length ? grp(offen.map(aufgabeZeile).join("") + more("pf-" + id, fertig, 0, aufgabeZeile).replace("Alle ", "Erledigte ")) : "")
+      + `<form class="form" data-form="aufgabe" data-projekt="${esc(id)}" style="margin-top:10px"><input class="inp" name="titel" placeholder="Neue Aufgabe" required><div class="zeile"><label>Fällig<input class="inp" type="date" name="faellig"></label><label>Für<input class="inp" name="fuer" value="besitzer"></label></div><button class="btn pri" type="submit">Hinzufügen</button></form>`};
+};
+SHEETS["projekt-neu"] = () => ({lead: sq("folder-plus", "orange", "xl"), title: "Neues Projekt", sub: "Ordnung: ein Ordner je Projekt, mit INDEX.md und Git",
+  body: `<form class="form" data-form="projekt"><label>Name<input class="inp" name="name" required></label><label>Beschreibung<textarea class="inp" name="beschreibung"></textarea></label><label>Ordner auf diesem Rechner<input class="inp" name="pfad" placeholder="z. B. C:\Users\Name\Projekte\Projektname"></label><label>Als Nächstes<input class="inp" name="naechster_schritt"></label><button class="btn pri" type="submit">Anlegen</button></form>`});
+
+SHEETS.wunsch = id => {
+  const w = wunschZu(id); if (!w) return null;
+  const S = (D.pos?.aufgaben || []).filter(a => a.wunsch === w.id), [pt, pc] = PRIO[w.prio || ""];
+  const knoepfe = w.status === "offen"
+    ? `<button class="btn pri" type="button" data-act="werledigt" data-id="${esc(w.id)}">${icon("check")}Erledigt</button><button class="btn" type="button" data-act="wverwerfen" data-id="${esc(w.id)}">Verwerfen</button>`
+    : `<button class="btn" type="button" data-act="woffen" data-id="${esc(w.id)}">${icon("rotate-ccw")}Wieder öffnen</button>`;
+  return {lead: sq(w.status === "erledigt" ? "check" : "star", w.status === "erledigt" ? "green" : pc, "xl"), title: `Wunsch Nr. ${w.nr}`, sub: `${esc(w.titel)} · von ${esc(wer(w.von))} · ${esc(ago(w.erstellt))}`,
+    body: `<div class="acts">${knoepfe}</div>`
+      + gh2("Priorität") + `<div class="seg">${["hoch", "mittel", "niedrig"].map(p => `<button type="button" data-act="wprio" data-id="${esc(w.id)}" data-wert="${p}" class="${w.prio === p ? "on" : ""}">${PRIO[p][0]}</button>`).join("")}</div>`
+      + (w.text ? `<div class="papier">${md(w.text)}</div>` : "")
+      + (w.ergebnis ? gh2(w.status === "erledigt" ? "Ergebnis" : "Begründung") + `<div class="papier">${esc(w.ergebnis)}</div>` : "")
+      + (S.length ? gh2(`Schritte (${S.filter(a => a.erledigt).length} von ${S.length})`) + grp(S.map(aufgabeZeile).join("")) : "")
+      + gh2(`Notizen (${w.notizen.length})`) + (w.notizen.length ? `<div class="chat">${w.notizen.map(n => `<div class="bl ${n.von === "besitzer" ? "ich" : "ag"}"><small>${esc(wer(n.von))} · ${esc(ago(n.zeit))}</small>${esc(n.text)}</div>`).join("")}</div>` : "")
+      + `<form class="antwort" data-form="wnotiz" data-id="${esc(w.id)}"><input class="inp" name="text" placeholder="Notiz schreiben" required><button class="btn pri" type="submit">${icon("arrow-up")}</button></form>`};
+};
+SHEETS["wunsch-neu"] = () => ({lead: sq("star", "yellow", "xl"), title: "Neuer Wunsch", sub: "Was soll dein Agent für dich tun?",
+  body: `<form class="form" data-form="wunsch"><label>Was<input class="inp" name="titel" required></label><label>Genauer (optional)<textarea class="inp" name="text"></textarea></label><div class="zeile"><label>Priorität<select class="inp" name="prio"><option value="hoch">Hoch</option><option value="mittel" selected>Mittel</option><option value="niedrig">Niedrig</option></select></label><label>Gruppe (optional)<input class="inp" name="gruppe"></label></div><button class="btn pri" type="submit">Eintragen</button></form>`});
+
+SHEETS.bericht = id => {
+  const b = (D.berichte?.berichte || []).find(x => x.id === id); if (!b) return null;
+  if (!b.gelesen && !b._gemeldet) { b._gemeldet = 1; api(`/api/berichte/${b.id}/gelesen`, {ja: true}).catch(() => {}); }
+  const naechste = b.fragen.find(f => !f.antwort);
+  const blasen = [];
+  b.fragen.forEach((f, i) => {
+    if (f !== naechste && !f.antwort) return;
+    blasen.push(`<div class="bl ag"><small>Frage ${i + 1} von ${b.fragen.length}</small>${esc(f.text)}</div>`);
+    if (f.antwort) blasen.push(`<div class="bl ich">${esc(f.antwort.text)}</div>`);
+  });
+  for (const m of b.verlauf.filter(m => !m.frage)) blasen.push(`<div class="bl ${m.von === "besitzer" ? "ich" : "ag"}"><small>${esc(wer(m.von))} · ${esc(ago(m.zeit))}</small>${esc(m.text)}</div>`);
+  const vor = naechste && naechste.vorschlaege.length ? `<div class="vor">${naechste.vorschlaege.map(v => `<button class="btn sm" type="button" data-act="vorschlag" data-id="${esc(b.id)}" data-frage="${esc(naechste.id)}" data-wert="${esc(v)}">${esc(v)}</button>`).join("")}</div>` : "";
+  return {lead: sq("message-square-text", "green", "xl"), title: `Bericht Nr. ${b.nr}`, sub: `${esc(b.titel)} · von ${esc(b.von)} · ${esc(ago(b.zeit))}`,
+    body: (b.kurz ? `<div class="papier">${esc(b.kurz)}</div>` : "")
+      + (b.fragen.length || b.verlauf.length ? gh2(naechste ? `Noch ${offeneFragen(b)} von ${b.fragen.length} Fragen offen` : "Antworten") + `<div class="chat">${blasen.join("")}</div>${vor}` : "")
+      + `<form class="antwort" data-form="bnachricht" data-id="${esc(b.id)}" data-frage="${esc(naechste ? naechste.id : "")}"><input class="inp" name="text" placeholder="${naechste ? "Antwort schreiben" : "Nachricht an " + esc(b.von)}" required><button class="btn pri" type="submit">${icon("arrow-up")}</button></form>`
+      + (b.text ? gh2("Ganzer Bericht") + `<div class="papier">${md(b.text)}</div>` : "")};
+};
+
+const NZ = {pfad: "", n: null, edit: false, laden: false};
+SHEETS.notiz = pfad => {
+  if (NZ.pfad !== pfad) { Object.assign(NZ, {pfad, n: null, edit: false}); notizLaden(pfad); }
+  const n = NZ.n;
+  if (!n) return {lead: sq("file-text", "indigo", "xl"), title: "Notiz", sub: esc(pfad), body: note("Wird geladen …")};
+  return {lead: sq("file-text", "indigo", "xl"), title: esc(n.titel), sub: `${esc(n.pfad)} · ${esc(ago(n.zeit))}`,
+    body: NZ.edit
+      ? `<form class="form" data-form="nspeichern"><textarea class="inp lang" name="text">${esc(n.text)}</textarea><div class="btns"><button class="btn pri" type="submit">Speichern</button><button class="btn" type="button" data-act="nabbrechen">Abbrechen</button></div></form>`
+      : `<div class="acts"><button class="btn" type="button" data-act="nbearbeiten">${icon("pencil")}Bearbeiten</button><button class="btn danger" type="button" data-act="nweg">${icon("trash-2")}Papierkorb</button></div><div class="papier">${md(n.text)}</div>`};
+};
+async function notizLaden(pfad){
+  try { NZ.n = await api("/api/notizen/notiz?pfad=" + encodeURIComponent(pfad)); } catch(e) { NZ.n = {titel: "Fehler", pfad, zeit: 0, text: e.message}; }
+  $("sheet")._h = null; renderSheet();
+}
+SHEETS["notiz-neu"] = () => ({lead: sq("notebook-pen", "indigo", "xl"), title: "Neue Notiz", sub: "Wird als Markdown-Datei gespeichert",
+  body: `<form class="form" data-form="notiz"><div class="zeile"><label>Titel<input class="inp" name="titel" required></label><label>Ordner (optional)<input class="inp" name="ordner" list="ordnerliste"></label></div><datalist id="ordnerliste">${(D.notizen?.ordner || []).map(o => `<option value="${esc(o)}">`).join("")}</datalist><label>Text<textarea class="inp lang" name="text"></textarea></label><button class="btn pri" type="submit">Anlegen</button></form>`});
+
+/* ---------- Klicks und Formulare ---------- */
+document.addEventListener("click", async e => {
+  const t = e.target.closest("[data-sheet],[data-nav],[data-more],[data-sicht],[data-act]");
+  if (!t) { if (e.target === $("veil")) closeSheet(); return; }
+  if (t.dataset.sheet) { e.preventDefault(); return openSheet(t.dataset.sheet); }
+  if (t.dataset.nav) { location.hash = t.dataset.nav; return; }
+  if (t.dataset.more) { OPEN.has(t.dataset.more) ? OPEN.delete(t.dataset.more) : OPEN.add(t.dataset.more); $("sheet")._h = null; return renderAll(); }
+  if (t.dataset.sicht) { UI.projektSicht = t.dataset.sicht; return renderPage(); }
+  const id = t.dataset.id, w = t.dataset.wert;
+  switch (t.dataset.act) {
+    case "zu": return closeSheet();
+    case "abmelden": e.preventDefault(); return abmelden();
+    case "abhaken": { const a = (D.pos?.aufgaben || []).find(x => x.id === id); if (a) await post(`/api/pos/aufgaben/${id}`, {erledigt: !a.erledigt}); return; }
+    case "schritt": { const p = projekt(id), v = await eingeben("Als Nächstes", "Der nächste Schritt in diesem Projekt.", p?.naechster_schritt || ""); if (v !== null) await post(`/api/pos/projekte/${id}`, {naechster_schritt: v}); return; }
+    case "pstatus": return post(`/api/pos/projekte/${id}`, {status: w});
+    case "wprio": return post(`/api/wuensche/${id}`, {prio: w});
+    case "werledigt": { const v = await eingeben("Erledigt", "Ein Satz zum Ergebnis."); if (v) await post(`/api/wuensche/${id}`, {status: "erledigt", ergebnis: v}); return; }
+    case "wverwerfen": { const v = await eingeben("Verwerfen", "Warum? (ein Satz)"); if (v) await post(`/api/wuensche/${id}`, {status: "verworfen", ergebnis: v}); return; }
+    case "woffen": return post(`/api/wuensche/${id}`, {status: "offen"});
+    case "vorschlag": return post(`/api/berichte/${id}/nachricht`, {text: w, frage: t.dataset.frage});
+    case "nbearbeiten": NZ.edit = true; $("sheet")._h = null; return renderSheet();
+    case "nabbrechen": NZ.edit = false; $("sheet")._h = null; return renderSheet();
+    case "nweg": if (await bestaetigen("In den Papierkorb?", "Die Notiz wird nicht gelöscht, sondern in den Papierkorb im Notizen-Ordner verschoben.", "Verschieben", true)) { if (await post("/api/notizen/papierkorb", {pfad: NZ.pfad})) { closeSheet(); toast("Im Papierkorb"); } } return;
+  }
+});
+document.addEventListener("submit", async e => {
+  const f = e.target.closest("form[data-form]"); if (!f) return;
+  e.preventDefault();
+  const v = Object.fromEntries(new FormData(f).entries()), art = f.dataset.form;
+  f.querySelectorAll("button").forEach(b => b.disabled = true);
+  let ok = null;
+  if (art === "login") return anmelden(v.schluessel);
+  if (art === "aufgabe") ok = await post("/api/pos/aufgaben", {titel: v.titel, faellig: v.faellig, fuer: v.fuer || "besitzer", projekt: f.dataset.projekt});
+  if (art === "projekt") { ok = await post("/api/pos/projekte", {name: v.name, beschreibung: v.beschreibung, naechster_schritt: v.naechster_schritt, orte: v.pfad ? [{geraet: "Dieser Rechner", pfad: v.pfad}] : []}); if (ok) return openSheet("projekt:" + ok.id); }
+  if (art === "wunsch") { ok = await post("/api/wuensche", v); if (ok) return openSheet("wunsch:" + ok.id); }
+  if (art === "wnotiz") ok = await post(`/api/wuensche/${f.dataset.id}/notizen`, {text: v.text});
+  if (art === "bnachricht") ok = await post(`/api/berichte/${f.dataset.id}/nachricht`, {text: v.text, frage: f.dataset.frage || undefined});
+  if (art === "notiz") { ok = await post("/api/notizen/neu", v); if (ok) return openSheet("notiz:" + ok.pfad); }
+  if (art === "nspeichern") { ok = await post("/api/notizen/speichern", {pfad: NZ.pfad, text: v.text, version: NZ.n.version}); if (ok) { NZ.n = ok; NZ.edit = false; toast("Gespeichert"); } }
+  f.querySelectorAll("button").forEach(b => b.disabled = false);
+  if (ok) { $("sheet")._h = null; renderSheet(); }
+});
+let suchT = 0;
+document.addEventListener("input", e => {
+  if (e.target.id !== "nsuche") return;
+  UI.q = e.target.value; clearTimeout(suchT);
+  suchT = setTimeout(async () => {
+    UI.treffer = UI.q.trim() ? (await api("/api/notizen/suche?q=" + encodeURIComponent(UI.q)).catch(() => ({treffer: []}))).treffer : null;
+    const el = $("pages"); el._h = null; el.innerHTML = `<section class="page on">${viewNotizen()}</section>`; el._h = null;
+    const i = $("nsuche"); i.focus(); i.setSelectionRange(i.value.length, i.value.length);
+  }, 250);
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && SHEET && !$("dlg").classList.contains("open")) closeSheet(); });
+
+/* ---------- Anmelden und Seiten wechseln ---------- */
+function zeigeLogin(fehler){
+  $("app").hidden = true; $("login").hidden = false;
+  $("login").innerHTML = `${sq("key-round", "blue", "xl")}<h1>Zentrale</h1><p>Gib den Schlüssel ein, den <code>py start.py</code> beim ersten Start angezeigt hat. Der Browser merkt ihn sich.</p>
+    <form data-form="login"><input class="inp" type="password" name="schluessel" placeholder="Schlüssel" autocomplete="current-password" required><button class="btn pri" type="submit">Anmelden</button></form>${fehler ? note(esc(fehler)) : ""}`;
+}
+async function anmelden(s){
+  KEY = (s || "").trim();
+  try { const d = await api("/api/ich"); if (!d.besitzer) throw new Error("Das ist der Schlüssel eines Agenten. Hier bitte den Schlüssel des Besitzers."); }
+  catch(e) { KEY = ""; return zeigeLogin(e.message); }
+  try { localStorage.setItem("zentrale-schluessel", KEY); } catch(e) {}
+  start();
+}
+function abmelden(){ KEY = ""; try { localStorage.removeItem("zentrale-schluessel"); } catch(e) {} closeSheet(); zeigeLogin(); }
+function route(){ const h = location.hash.slice(1); PAGE = VIEWS[h] ? h : "uebersicht"; closeSheet(); renderAll(); scrollTo(0, 0); }
+let timer = 0;
+function start(){
+  $("login").hidden = true; $("app").hidden = false;
+  route(); laden(); clearInterval(timer);
+  timer = setInterval(() => { if (!document.hidden) laden(); }, 10000);
+}
+addEventListener("hashchange", route);
+document.addEventListener("visibilitychange", () => { if (!document.hidden && KEY) laden(); });
+addEventListener("error", e => { window.__fehler = (window.__fehler || "") + e.message + " "; });
+KEY ? start() : zeigeLogin();
+</script>
+</body>
+</html>

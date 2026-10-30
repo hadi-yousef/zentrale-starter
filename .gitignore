@@ -1,0 +1,17 @@
+# Eigene Daten der Zentrale (Einträge, Notizen, Schlüssel-Prüfsummen, Log)
+daten/
+# Aufräumen: Protokoll und Ergebnisse enthalten eigene Pfade
+aufraeumen/protokoll.jsonl
+aufraeumen/protokoll.jsonl.sperre
+aufraeumen/INVENTUR.md
+aufraeumen/PLAN.md
+aufraeumen/*.json
+# Schlüssel nie ins Repo
+*.key
+.env
+# Reste
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+desktop.ini

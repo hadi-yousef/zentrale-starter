@@ -1,0 +1,4 @@
+# Zeilenenden im Repo immer LF; Git passt sie beim Auschecken an. Bilder sind binär.
+* text=auto eol=lf
+*.png binary
+*.svg text eol=lf
