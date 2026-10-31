@@ -18,7 +18,7 @@ Größere Änderungen nur nach Entwurf als Bild und OK des Besitzers (`REGELN.md
 | ![](bilder/06-projekte.png) | **Projekte** | Aktiv, ruht, Archiv; je Projekt „Als Nächstes“. |
 | ![](bilder/07-notizen.png) | **Notizen** | Oben die festen Ordner (Besitzer, Geräte, Projekte, Aufräumen, Anleitungen, Übergaben), darunter das zuletzt Geänderte. |
 | ![](bilder/12-notizen-ordner.png) | Ordner geöffnet | „‹ Alle Notizen“ führt zurück. |
-| ![](bilder/08-papierkorb.png) | **Papierkorb** | Was die Agenten weggeräumt haben, mit Herkunft, Grund und Größe. |
-| ![](bilder/09-papierkorb-blatt.png) | Eintrag geöffnet | „Zurücklegen“ und „Endgültig löschen“ (nur der Besitzer). |
+| ![](bilder/08-papierkorb.png) | **Papierkorb** | Oben die Summe. Je Papierkorb (C:\Papierkorb, Notizen) ein Abschnitt mit „Alles leeren“, in jeder Zeile „Löschen“, unten der Windows-Papierkorb mit „Leeren“. Löschen kann nur der Besitzer. |
+| ![](bilder/09-papierkorb-blatt.png) | Name angetippt | Herkunft, Grund, Schritt im Protokoll, „Zurücklegen“. |
 | ![](bilder/10-uebersicht-dunkel.png) | dunkel | Folgt der Einstellung von Windows. |
 | ![](bilder/11-handy-agenten.png) | Handy | Leiste unten statt links. |

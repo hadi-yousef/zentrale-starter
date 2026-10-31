@@ -111,6 +111,10 @@ button.tile:hover{transform:translateY(-1px);box-shadow:var(--shadow2)}
 .gh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;font:600 20px/1.2 var(--disp);letter-spacing:-.012em;margin:30px 2px 10px}
 .gh:first-child{margin-top:4px}
 .gh span{font:400 14px var(--font);color:var(--ink2);letter-spacing:0}
+.gh .btn{margin-left:auto;align-self:center}
+.trhead{display:flex;flex-direction:row;align-items:center;gap:16px;margin-bottom:14px}
+.trhead .t{flex:1}.trhead .big{font-size:28px}.trhead .muted{color:var(--ink2);font-size:13.5px}
+.row>button.t{display:block;text-align:left;min-width:0}
 .gh2{font-size:13px;font-weight:400;color:var(--ink2);margin:18px 16px 7px}
 .grp{background:var(--grp);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
 .row{display:flex;align-items:center;gap:12px;width:100%;padding:9px 14px;min-height:52px;position:relative;text-align:left;color:var(--ink)}
@@ -579,19 +583,29 @@ function viewNotizen(){
 function gr(b){ b = +b || 0; for (const e of ["Byte", "KB", "MB", "GB", "TB"]) { if (b < 1024 || e === "TB") return e === "Byte" ? `${b} Byte` : `${b.toFixed(1).replace(".", ",")} ${e}`; b /= 1024; } }
 const pkZeit = e => e.zeit ? new Date(e.zeit).getTime() / 1000 : e.zeit_s;
 const pkOrt = p => /[\\/]/.test(p || "") ? String(p).replace(/[\\/][^\\/]*$/, "") : "";
-function pkZeile(e){
-  return row(sq(e.typ === "ordner" ? "folder" : "file", e.da ? "gray" : "red"), esc(e.name), (e.da ? "aus " + esc(pkOrt(e.von)) : "fehlt im Papierkorb") + (e.grund ? " · " + esc(e.grund) : ""), val(esc(gr(e.bytes))), sh("pk:" + e.nr));
+/* Wie die Papierkorb-Seite im Vorbild: oben die Summe, je Papierkorb ein Abschnitt mit „Alles leeren“, in jeder Zeile
+   „Löschen“, dazu der Windows-Papierkorb. Antippen des Namens öffnet das Blatt mit „Zurücklegen“. */
+function pkKnopf(daten, groesse, text){ return `<button class="btn sm danger" type="button" data-act="pkleeren" ${daten} data-groesse="${esc(groesse)}">${text}</button>`; }
+function pkZeile(e, notiz){
+  const sub = notiz ? ["Notiz aus " + (pkOrt(e.von) || "Notizen"), "hineingelegt " + ago(e.zeit_s)] : [e.da ? "aus " + pkOrt(e.von) : "fehlt im Papierkorb", "hineingelegt " + ago(pkZeit(e))];
+  const blatt = notiz ? "pkn:" + e.pfad : "pk:" + e.nr, daten = notiz ? `data-notiz="${esc(e.pfad)}"` : `data-nr="${e.nr}"`;
+  return `<div class="row">${sq(notiz ? "file-text" : e.typ === "ordner" ? "folder" : "file", notiz ? "indigo" : e.da ? "gray" : "red")}<button type="button" class="t" ${sh(blatt)}><b>${esc(e.name)}</b><span>${esc(sub.join(", "))}</span></button>${val(esc(gr(e.bytes)))}${pkKnopf(daten, gr(e.bytes), "Löschen")}</div>`;
 }
-function pkNotizZeile(n){ return row(sq("file-text", "indigo"), esc(n.name), "Notiz aus " + esc(pkOrt(n.von) || "Notizen") + " · " + esc(ago(n.zeit_s)), "", sh("pkn:" + n.pfad)); }
+function pkSektion(o){
+  const E = o.eintraege || [], n = E.length;
+  return `<h2 class="gh">${esc(o.titel)}<span>${esc(gr(o.bytes))}${n ? `, ${n} ${n === 1 ? "Eintrag" : "Einträge"}` : ", leer"}</span>${n ? pkKnopf(`data-alles="${esc(o.key)}"`, gr(o.bytes), `${icon("trash-2")}Alles leeren`) : ""}</h2>`
+    + (n ? grp(more("pk-" + o.key, E, 10, e => pkZeile(e, o.notizen))) : `<p class="note" style="margin-top:0">Leer. Ordner: <code>${esc(o.pfad)}</code></p>`)
+    + (n ? note(`Ordner: <code>${esc(o.pfad)}</code>`) : "");
+}
 function viewPapierkorb(){
   const K = D.papierkorb;
   if (!K) return kopf("Papierkorb", "") + empty("<b>Papierkorb nicht verfügbar</b>Die Zentrale läuft noch mit einer alten Fassung. Bitte neu starten.", "trash-2");
-  const E = K.eintraege, N = K.notizen;
-  return kopf("Papierkorb", `${E.length + N.length} Einträge · ${esc(gr(K.bytes))}`)
-    + (E.length ? gh("Aus dem Aufräumen", E.length) + grp(more("pk", E, 10, pkZeile)) : "")
-    + (N.length ? gh("Notizen", N.length) + grp(more("pkn", N, 6, pkNotizZeile)) : "")
-    + (!E.length && !N.length ? empty("<b>Der Papierkorb ist leer</b>Was weg soll, verschieben die Agenten hierher. Gelöscht wird nichts.", "trash-2") : "")
-    + note("Die Agenten löschen nie, sie verschieben nur hierher (auf derselben Platte, z. B. C:\\Papierkorb). Zurücklegen geht immer. Endgültig löschen kannst nur du.");
+  const O = K.orte || [], win = K.windows_bytes;
+  return kopf("Papierkorb", "")
+    + `<div class="tile trhead">${sq("trash-2", "gray", "xl")}<div class="t"><div class="big">${esc(gr(K.bytes)).replace(/ (\w+)$/, "<small>$1</small>")}</div><span class="muted">in ${O.length} ${O.length === 1 ? "Papierkorb" : "Papierkörben"}${win != null ? " und im Windows-Papierkorb" : ""}</span></div></div>`
+    + O.map(pkSektion).join("")
+    + (win != null ? gh("Windows", esc(gr(win))) + grp(`<div class="row">${sq("trash-2", "blue")}<span class="t"><b>Windows-Papierkorb</b><span>was im Explorer gelöscht wurde</span></span>${val(esc(gr(win)))}${win ? pkKnopf(`data-windows="1"`, gr(win), "Leeren") : ""}</div>`) : "")
+    + note("Was weg soll, landet erst hier: Die Agenten verschieben nur, auf derselben Platte. Endgültig löschen kannst nur du. Auf jeder Platte gibt es genau einen Papierkorb (z. B. C:\\Papierkorb).");
 }
 const VIEWS = {uebersicht: viewUebersicht, agenten: viewAgenten, projekte: viewProjekte, wuensche: viewWuensche, berichte: viewBerichte, notizen: viewNotizen, papierkorb: viewPapierkorb};
 function renderPage(){
@@ -729,6 +743,13 @@ document.addEventListener("click", async e => {
     case "woffen": return post(`/api/wuensche/${id}`, {status: "offen"});
     case "pkzurueck": if (await post("/api/papierkorb/zurueck", {nr: +id})) { closeSheet(); toast("Zurückgelegt"); } return;
     case "pknzurueck": if (await post("/api/papierkorb/zurueck", {notiz: id})) { closeSheet(); toast("Zurückgelegt"); } return;
+    case "pkleeren": {
+      const d = t.dataset, alles = !!d.alles, win = !!d.windows, name = t.closest(".row")?.querySelector("b")?.textContent || "";
+      if (!(await bestaetigen(alles ? "Diesen Papierkorb endgültig leeren?" : win ? "Den Windows-Papierkorb endgültig leeren?" : `„${name}“ endgültig löschen?`,
+        `Das sind ${d.groesse}. Das lässt sich nicht rückgängig machen.`, alles || win ? "Endgültig leeren" : "Endgültig löschen", true))) return;
+      t.disabled = true;
+      if (await post("/api/papierkorb/loeschen", alles ? {alles: d.alles} : win ? {windows: true} : d.notiz ? {notiz: d.notiz} : {nr: +d.nr})) toast(alles || win ? "Geleert" : "Gelöscht"); else t.disabled = false;
+      return; }
     case "pkweg": case "pknweg":
       if (await bestaetigen("Endgültig löschen?", "Das lässt sich nicht rückgängig machen.", "Löschen", true) && await post("/api/papierkorb/loeschen", t.dataset.act === "pkweg" ? {nr: +id} : {notiz: id})) { closeSheet(); toast("Gelöscht"); }
       return;

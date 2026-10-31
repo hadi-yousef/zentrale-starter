@@ -1,17 +1,22 @@
-"""Zentrale: Papierkorb (Seite „Papierkorb“). Was die Agenten weggeräumt haben, an einem Ort.
+r"""Zentrale: Papierkorb (Seite „Papierkorb“). Was die Agenten weggeräumt haben, an einem Ort.
 
 Zwei Quellen, beide auf derselben Platte wie vorher, gelöscht wurde nichts:
   - Aufräumen: Schritte mit art „papierkorb“ aus aufraeumen/protokoll.jsonl (verschoben mit verschieben.py --papierkorb),
-    die noch nicht zurückgeholt und nicht endgültig gelöscht sind. Sie liegen in <Laufwerk>:\\Papierkorb\\<datum>\\….
+    die noch nicht zurückgeholt und nicht endgültig gelöscht sind. Sie liegen in <Laufwerk>:\Papierkorb\<datum>\….
   - Notizen: Dateien im versteckten Ordner .papierkorb/<datum>/… im Notizen-Ordner.
 
+Wie in der Zentrale des Vorbilds: je Papierkorb (C:\Papierkorb, D:\Papierkorb, Notizen) ein Abschnitt mit Größe und
+„Alles leeren“, dazu der Windows-Papierkorb (was im Explorer gelöscht wurde) mit Größe und „Leeren“.
 Zurücklegen dürfen Agenten und der Besitzer. **Endgültig löschen darf nur der Besitzer** (Schlüssel „besitzer“),
 das prüft app.py, und auch hier nur, was wirklich in einem Ordner „Papierkorb“ bzw. „.papierkorb“ liegt.
 """
 import os
 import shutil
+import string
+import subprocess
 import sys
 import threading
+import time
 from pathlib import Path
 
 import hub
@@ -37,6 +42,57 @@ def _im_papierkorb(p, name="Papierkorb"):
     return any(x.name.lower() == name.lower() for x in p.parents)
 
 
+def _wurzel(p):
+    r"""Der Ordner „Papierkorb“, in dem p liegt (z. B. C:\Papierkorb)."""
+    for x in Path(p).absolute().parents:
+        if x.name.lower() == "papierkorb":
+            return x
+    return Path(p).absolute().parent
+
+
+def _bekannte_wurzeln():
+    """Papierkörbe, die es gibt, auch wenn das Protokoll noch nichts darin kennt."""
+    if os.environ.get("AUFRAEUMEN_PAPIERKORB"):
+        W = [Path(os.environ["AUFRAEUMEN_PAPIERKORB"]).expanduser().absolute()]
+    elif os.name == "nt":
+        W = [Path(f"{b}:\\Papierkorb") for b in string.ascii_uppercase]
+    else:
+        W = [Path.home() / "Papierkorb"]
+    return [w for w in W if w.is_dir()]
+
+
+_system = {"t": 0, "bytes": None}
+
+
+def _windows_papierkorb():
+    r"""Größe des Windows-Papierkorbs dieses Benutzers über alle Laufwerke (X:\$Recycle.Bin\<SID>). Nur Windows,
+    höchstens einmal pro Minute gemessen. None, wenn es nicht geht."""
+    if os.name != "nt":
+        return None
+    if time.time() - _system["t"] < 60:
+        return _system["bytes"]
+    n = None
+    try:
+        sid = subprocess.run(["whoami", "/user", "/fo", "csv", "/nh"], capture_output=True, text=True, timeout=10,
+                             creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0)).stdout.strip().split(",")[-1].strip('"')
+        if sid.startswith("S-1-"):
+            n = 0
+            for b in string.ascii_uppercase:
+                d = Path(f"{b}:\\$Recycle.Bin") / sid
+                if d.is_dir():
+                    for wurzel, _, dateien in os.walk(d):
+                        for f in dateien:
+                            if not f.startswith("$I"):   # $I… sind nur die kleinen Begleitdateien
+                                try:
+                                    n += os.lstat(os.path.join(wurzel, f)).st_size
+                                except OSError:
+                                    pass
+    except (OSError, subprocess.SubprocessError):
+        n = None
+    _system.update(t=time.time(), bytes=n)
+    return n
+
+
 def liste():
     E = []
     for e in reversed(_schritte()):
@@ -59,7 +115,16 @@ def liste():
                 N.append({"art": "notiz", "pfad": rel, "name": Path(alt or rel).stem, "von": alt, "tag": tag, "bytes": st.st_size,
                           "zeit_s": int(st.st_mtime)})
     N.sort(key=lambda x: -x["zeit_s"])
-    return {"eintraege": E, "notizen": N, "bytes": sum(x["bytes"] for x in E if x["da"]) + sum(x["bytes"] for x in N)}
+    orte = {}
+    for w in _bekannte_wurzeln():
+        orte[str(w)] = []
+    for e in E:
+        orte.setdefault(str(_wurzel(e["nach"])), []).append(e)
+    O = [{"key": w, "titel": w, "pfad": w, "eintraege": L, "bytes": sum(x["bytes"] for x in L if x["da"])} for w, L in sorted(orte.items())]
+    O.append({"key": "notizen", "titel": "Notizen", "pfad": str(notizen.PAPIERKORB), "notizen": True, "eintraege": N, "bytes": sum(x["bytes"] for x in N)})
+    win = _windows_papierkorb()
+    return {"orte": O, "windows_bytes": win, "eintraege": E, "notizen": N,
+            "bytes": sum(o["bytes"] for o in O) + (win or 0)}
 
 
 def _schritt(nr):
@@ -122,7 +187,33 @@ def zuruecklegen(b):
 
 
 def loeschen(b):
-    """Endgültig löschen (nur der Besitzer, siehe app.py). Kommt ins Protokoll."""
+    """Endgültig löschen (nur der Besitzer, siehe app.py). b: {nr} | {notiz} | {alles: <key eines Abschnitts>} | {windows: true}."""
+    if b.get("windows"):
+        if os.name != "nt":
+            raise ValueError("Den Windows-Papierkorb gibt es nur unter Windows.")
+        r = subprocess.run(["powershell", "-NoProfile", "-Command", "Clear-RecycleBin -Force -ErrorAction Stop"], capture_output=True,
+                           text=True, timeout=300, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+        _system["t"] = 0
+        if r.returncode:
+            raise ValueError("Der Windows-Papierkorb ließ sich nicht leeren: " + (r.stderr.strip()[:200] or "unbekannter Fehler"))
+        return {"ok": True}
+    if b.get("alles"):
+        ort = next((o for o in liste()["orte"] if o["key"] == b["alles"]), None)
+        if not ort:
+            raise ValueError("Diesen Papierkorb gibt es nicht.")
+        fehler = []
+        for e in ort["eintraege"]:
+            try:
+                _loeschen_eins({"notiz": e["pfad"]} if ort.get("notizen") else {"nr": e["nr"]})
+            except (ValueError, OSError) as x:
+                fehler.append(f"{e['name']}: {x}")
+        if fehler:
+            raise ValueError("Nicht alles ging: " + "; ".join(fehler)[:400])
+        return {"ok": True}
+    return _loeschen_eins(b)
+
+
+def _loeschen_eins(b):
     with _sperre:
         if b.get("notiz"):
             p, _ = _notiz(b["notiz"])
