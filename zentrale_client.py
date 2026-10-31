@@ -162,13 +162,22 @@ FASSUNG = "2026-11-01"   # gleich wie hub.FASSUNG; weicht die laufende Zentrale 
 
 def pruefen(z):
     """Warnt, wenn die laufende Zentrale älter ist oder aus einem anderen Ordner kommt als dieser Client.
-    Dann arbeitet der Agent sonst an der falschen (alten) Zentrale weiter."""
+    Dann arbeitet der Agent sonst an der falschen (alten) Zentrale weiter.
+    Warnt auch, wenn REGELN.md nicht (oder alt) in der Anleitung von Claude Code oder Codex steht."""
+    hier = Path(__file__).resolve().parent
+    w = []
+    try:
+        from regeln_verteilen import veraltet
+        alt = veraltet()
+    except Exception:   # fehlt das Skript oder klemmt eine Datei, soll der Client trotzdem gehen
+        alt = []
+    if alt:
+        w.append("Die Regeln fehlen oder sind alt in " + ", ".join(str(p) for p in alt) + ". Dann gelten sie nicht in "
+                 f"jedem Projekt: `{PY} \"{hier / 'regeln_verteilen.py'}\"` aufrufen, danach einen neuen Thread starten.")
     try:
         d = z.get("/api/ich", timeout=3)
     except Fehler:
-        return
-    hier = Path(__file__).resolve().parent
-    w = []
+        d = {"fassung": FASSUNG}   # Zentrale nicht erreichbar: dazu meldet sich der eigentliche Befehl selbst
     if d.get("fassung") != FASSUNG:
         w.append(f"Die laufende Zentrale hat Fassung {d.get('fassung') or 'alt (ohne Fassung)'}, dieser Ordner {FASSUNG}. "
                  f"Sie wurde nach dem Update nicht neu gestartet: `{PY} start.py` beenden und neu starten.")

@@ -35,6 +35,9 @@ py start.py
    ```
    Sie landen in `%USERPROFILE%\.config\zentrale-starter\`. Die Agenten nutzen sie mit `--agent claude` bzw. `--agent codex`.
 4. Öffne den Ordner in T3 Code und sag deinem Agenten: **„Lies AGENTS.md und fang mit Phase 0 an.“**
+   In Phase 0 trägt er `REGELN.md` mit `py regeln_verteilen.py` in die Anleitung von Claude Code und Codex ein. Dann
+   gelten deine Regeln in jedem Projekt: Die Agenten sagen offen, wenn ein Weg falsch ist, und suchen vor dem Bauen
+   nach fertigem Open Source.
 
 Autostart nach der Anmeldung: `docs\AUTOSTART.md`. **Mac und Linux:** `python3` statt `py`, sonst gleich.
 
