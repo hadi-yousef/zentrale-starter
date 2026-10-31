@@ -112,6 +112,46 @@ def zuletzt(p, tiefe=2, ohne=()):
     return neu
 
 
+def zuletzt_baum(p):
+    """Jüngste Änderung im ganzen Baum (jede Datei und jeder Ordner). Lässt sich etwas nicht lesen, gilt der Baum als
+    frisch: lieber stehen lassen als etwas Neues entfernen."""
+    try:
+        neu = p.lstat().st_mtime
+    except OSError:
+        return time.time()
+    if ist_link(p) or not stat.S_ISDIR(p.lstat().st_mode):
+        return neu
+    kaputt = []
+    for d, dirs, files in os.walk(p, onerror=kaputt.append):
+        for x in dirs + files:
+            try:
+                neu = max(neu, os.lstat(os.path.join(d, x)).st_mtime)
+            except OSError:
+                return time.time()
+    return time.time() if kaputt else neu
+
+
+def in_grenze(p, basis):
+    """Liegt p wirklich unter basis, ohne Verknüpfung auf dem Weg dorthin (auch basis selbst darf keine sein)?
+    Gilt für die Auswahl und noch einmal direkt vor dem Entfernen."""
+    try:
+        p, basis = Path(p).absolute(), Path(basis).absolute()
+        rel = p.relative_to(basis)
+    except ValueError:
+        return False
+    if not rel.parts:
+        return False
+    x = basis
+    for teil in rel.parts:
+        x = x / teil
+        if ist_link(x):
+            return False
+    try:
+        return p.resolve() == basis.resolve() / rel
+    except OSError:
+        return False
+
+
 def projekt_zuletzt(p):
     """Wann im Projekt zuletzt etwas geändert wurde, ohne die neu erzeugbaren Ordner."""
     return zuletzt(p, 3, ohne=VENV_NAMEN | CACHE_NAMEN | {"node_modules", ".git", "build", "dist"})
@@ -189,7 +229,8 @@ class Orte:
             self.temp = Path(tempfile.gettempdir())
 
     def wurzeln(self):
-        W = [self.heim / n for n in WURZEL_NAMEN if (self.heim / n).is_dir()]
+        # eine Verknüpfung als Wurzel (z. B. ~/Projects → externe Platte) würde den Bereich erweitern: auslassen
+        W = [self.heim / n for n in WURZEL_NAMEN if not ist_link(self.heim / n) and (self.heim / n).is_dir()]
         if WIN or self.test:   # unter Windows liegen Projekte oft direkt im Benutzerordner
             try:
                 W += [k for k in self.heim.iterdir() if not ist_link(k) and k.is_dir() and not k.name.startswith(".") and
@@ -246,7 +287,7 @@ def suchen(orte, tage, prozesse):
     F, gesehen = [], set()
 
     def fund(p, grund, wie):
-        if p in gesehen:
+        if p in gesehen or not in_grenze(p, wurzel):
             return
         gesehen.add(p)
         F.append({"pfad": p, "grund": grund, "wie": wie, "bytes": messen(p), "wurzel": wurzel})
@@ -332,8 +373,9 @@ def temp_alt(orte, tage):
     for k in E:
         if k.name.lower() in ("putzen.log",) or "putz-test" in k.name.lower():
             continue
-        if not ist_link(k) and zuletzt(k, 1) < grenze:
-            F.append({"pfad": k, "grund": "Temp", "wie": "von selbst", "bytes": messen(k), "temp": True})
+        # ganzer Baum: eine frisch geänderte Datei tief drin hält den Ordner (die Ordnerzeit wandert nicht immer mit)
+        if not ist_link(k) and in_grenze(k, orte.temp) and zuletzt_baum(k) < grenze:
+            F.append({"pfad": k, "grund": "Temp", "wie": "von selbst", "bytes": messen(k), "temp": True, "wurzel": orte.temp})
     return F
 
 
@@ -484,6 +526,10 @@ def main():
                         err = "" if r.returncode == 0 else (r.stderr.strip()[:200] or "uv ging nicht")
                     except subprocess.TimeoutExpired:
                         err = "uv brauchte zu lange (wartet auf ein anderes uv), morgen wieder"
+                elif f.get("wurzel") and not in_grenze(p, f["wurzel"]):
+                    err = "liegt nicht mehr sicher im Suchbereich (Verknüpfung?), bleibt"
+                elif f.get("temp") and zuletzt_baum(p) >= time.time() - a.tage * 86400:
+                    err = "inzwischen geändert, bleibt"
                 else:
                     err = entfernen(p)
                 if err and not f.get("temp"):

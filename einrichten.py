@@ -371,6 +371,21 @@ def update():
     import time
     def git(*a):
         return subprocess.run(["git", "-C", str(HIER), *a], capture_output=True, text=True, encoding="utf-8", errors="replace")
+
+    def zweig_anlegen(commit):
+        """Sicherungszweig mit neuem Namen auf genau diesen Commit. Klappt das nicht nachweislich, bricht das Update ab."""
+        soll = git("rev-parse", "--verify", "-q", commit + "^{commit}").stdout.strip()
+        basis = "sicherung-vor-update-" + time.strftime("%Y%m%d-%H%M%S")
+        name, n = basis, 2
+        while git("rev-parse", "--verify", "-q", "refs/heads/" + name).returncode == 0:   # gibt es schon: nie wiederverwenden
+            name, n = f"{basis}-{n}", n + 1
+        r = git("branch", name, soll or commit)
+        ist = git("rev-parse", "--verify", "-q", "refs/heads/" + name).stdout.strip()
+        if r.returncode or not soll or ist != soll:
+            print((r.stdout + r.stderr).strip())
+            sys.exit("Der Sicherungszweig ließ sich nicht sicher anlegen. Nichts geändert.")
+        return name
+
     if not (HIER / ".git").exists():
         sys.exit("Dieser Ordner ist kein Git-Klon. Update: neu klonen (README.md), dann nach docs/EINRICHTEN.md einrichten.")
     ordner_daten, vorher = daten_zaehlen()
@@ -387,8 +402,7 @@ def update():
               if z.strip() and z.split(" ", 1)[-1] not in oben]
     sicherung = ""
     if offen or eigene:
-        sicherung = "sicherung-vor-update-" + time.strftime("%Y%m%d-%H%M")
-        print(f"Eigene Änderungen gefunden ({len(offen)} Dateien geändert, {len(eigene)} eigene Commits). Sichere sie in Zweig {sicherung}:")
+        print(f"Eigene Änderungen gefunden ({len(offen)} Dateien geändert, {len(eigene)} eigene Commits). Sichere sie in einem Zweig:")
         for z in (offen + eigene)[:20]:
             print("   " + z)
         if offen:
@@ -398,17 +412,23 @@ def update():
                 env = dict(os.environ, GIT_INDEX_FILE=str(Path(tmp) / "index"), GIT_AUTHOR_NAME="Zentrale",
                            GIT_AUTHOR_EMAIL="zentrale@localhost", GIT_COMMITTER_NAME="Zentrale", GIT_COMMITTER_EMAIL="zentrale@localhost")
                 g = lambda *a: subprocess.run(["git", "-C", str(HIER), *a], capture_output=True, text=True, env=env)
-                g("read-tree", "HEAD")
-                g("add", "-A")
-                baum = g("write-tree").stdout.strip()
-                stand = g("commit-tree", baum, "-p", "HEAD", "-m", f"Sicherung vor Update ({len(offen)} geänderte Dateien)").stdout.strip()
+                stand = ""
+                # jeder Schritt muss klappen, sonst wird nichts zurückgesetzt
+                if g("read-tree", "HEAD").returncode == 0 and g("add", "-A").returncode == 0:
+                    w = g("write-tree")
+                    baum = w.stdout.strip() if w.returncode == 0 else ""
+                    if baum:
+                        c = g("commit-tree", baum, "-p", "HEAD", "-m", f"Sicherung vor Update ({len(offen)} geänderte Dateien)")
+                        stand = c.stdout.strip() if c.returncode == 0 else ""
+                # Gegenprobe: enthält der Schnappschuss den Ordner so, wie er jetzt ist?
+                if stand and g("diff", "--quiet", stand).returncode != 0:
+                    stand = ""
             if not stand:
                 sys.exit("Sichern hat nicht geklappt. Nichts geändert.")
-            git("branch", sicherung, stand)
+            sicherung = zweig_anlegen(stand)
         else:
-            git("branch", sicherung, "HEAD")
-        if not git("rev-parse", "--verify", "-q", sicherung).stdout.strip():
-            sys.exit("Sicherungszweig fehlt. Nichts geändert.")
+            sicherung = zweig_anlegen("HEAD")
+        print(f"Gesichert in Zweig {sicherung}.")
 
     # 2. Neue Fassung holen
     r = git("fetch", "origin")
@@ -422,8 +442,7 @@ def update():
         wie = "vorgespult"
     else:
         if not sicherung:   # Geschichte neu geschrieben: der alte Stand bekommt trotzdem einen Zweig
-            sicherung = "sicherung-vor-update-" + time.strftime("%Y%m%d-%H%M")
-            git("branch", sicherung, "HEAD")
+            sicherung = zweig_anlegen("HEAD")
         r = git("reset", "--hard", ziel)
         wie = "auf den neuen Stand gesetzt (" + ("eigene Änderungen liegen in der Sicherung" if offen else "die Geschichte wurde neu geschrieben") + ")"
     if r.returncode:

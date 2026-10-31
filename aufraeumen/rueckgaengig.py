@@ -62,7 +62,10 @@ def main():
     ap.add_argument("--trotzdem", action="store_true", help="auch wenn Größe oder Anzahl bei Ordnern anders ist")
     a = ap.parse_args()
 
-    O = offen(P.lesen())
+    try:
+        O = offen(P.lesen())
+    except P.Kaputt as e:
+        sys.exit(str(e))
     if a.liste or not (a.nr or a.ab or a.alles):
         if not O:
             return print("Nichts zurückzuschieben.")

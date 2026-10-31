@@ -550,7 +550,7 @@ def _buchung_bauen(d, von, b, quelle, bereich=None):
     if not text:
         raise ValueError("Text fehlt (wofür war das Geld?).")
     gp = _schoen(b.get("gegenpartei")) or gegenpartei_aus_text(text)
-    x = {"id": secrets.token_hex(3), "nr": 0, "bereich": _bereich(b.get("bereich") or bereich), "datum": _datum_feld(b.get("datum") or heute().isoformat()),
+    x = {"id": hub.neue_id(d["buchungen"]), "nr": 0, "bereich": _bereich(b.get("bereich") or bereich), "datum": _datum_feld(b.get("datum") or heute().isoformat()),
          "betrag_cent": betrag, "text": text, "gegenpartei": gp, "kategorie": "", "kategorie_quelle": "auto",
          "quelle": quelle, "konto": _text(b.get("konto"), 60), "import_id": "", "eingang": None, "notiz": _text(b.get("notiz"), 1000),
          "von": von, "zeit": _jetzt(), "entfernt": None}
@@ -561,14 +561,36 @@ def _buchung_bauen(d, von, b, quelle, bereich=None):
     return x
 
 
+def _gleicher_vorgang(b, x):
+    """Passt eine Hand-Buchung b zur Buchung x aus dem Auszug? Konto, Gegenpartei und Kategorie dürfen sich nicht widersprechen."""
+    if b.get("konto") and x.get("konto") and schluessel(b["konto"]) != schluessel(x["konto"]):
+        return False
+    gb, gx = schluessel(b.get("gegenpartei")), schluessel(x.get("gegenpartei"))
+    # Die Gegenpartei wird oft aus dem Satz abgeleitet („35 € Tanken“ → „Tanken“). Nur eine echt angegebene zählt.
+    echt = gb and gb.split()[0] not in schluessel(b.get("text"))
+    if echt and gx and gb.split()[0] not in gx and gx.split()[0] not in gb:
+        return False
+    kb, kx = b.get("kategorie"), x.get("kategorie")
+    if kb and kx and kb != kx and "sonstiges" not in (kb, kx):
+        return False
+    return True
+
+
 def _abgleichen(d, x):
     """Kam eine Hand-Buchung jetzt im Kontoauszug? Dann zusammenführen statt doppelt zählen (gleicher Betrag, ±3 Tage)."""
     tag = date.fromisoformat(x["datum"])
-    kand = [b for b in _sichtbar(d["buchungen"], x["bereich"]) if b["quelle"] in ("bote", "hand") and not b.get("import_id") and b["betrag_cent"] == x["betrag_cent"]
+    nahe = [b for b in _sichtbar(d["buchungen"], x["bereich"]) if b["quelle"] in ("bote", "hand") and not b.get("import_id") and b["betrag_cent"] == x["betrag_cent"]
             and abs((date.fromisoformat(b["datum"]) - tag).days) <= 3]
-    if not kand:
+    kand = [b for b in nahe if _gleicher_vorgang(b, x)]
+    # Nur zusammenführen, wenn genau eine Buchung passt (Prüfung 31.10.2026, F-01): Gleicher Betrag allein heißt nicht
+    # gleicher Einkauf (20 € Essen bar und 20 € Tanken mit Karte). Ist es unsicher, gibt es zwei Buchungen mit Hinweis,
+    # damit der Besitzer eine echte Doppelbuchung sieht und selbst entfernen kann.
+    if len(kand) != 1:
+        if nahe:
+            x["notiz"] = (x["notiz"] + " " if x["notiz"] else "") + \
+                "Vielleicht dieselbe wie Buchung Nr. " + ", ".join(str(b["nr"]) for b in nahe[:3]) + " (gleicher Betrag). Bitte prüfen."
         return None
-    b = min(kand, key=lambda b: abs((date.fromisoformat(b["datum"]) - tag).days))
+    b = kand[0]
     b["notiz"] = b["notiz"] or f"Eingetragen als „{b['text']}“"
     for k in ("datum", "text", "konto", "import_id", "eingang"):
         if x.get(k):
@@ -597,8 +619,11 @@ def _einfuegen(d, von, roh, quelle, bereich, konto="", eingang=None):
         zaehler[basis] = zaehler.get(basis, 0) + 1   # zweimal derselbe Einkauf am selben Tag zählt zweimal
         x["import_id"] = basis + (f"#{zaehler[basis]}" if zaehler[basis] > 1 else "")
         x["eingang"] = eingang
-        if r.get("waehrung") and r["waehrung"] not in ("EUR", "€"):
-            x["notiz"] = (x["notiz"] + " " if x["notiz"] else "") + f"Währung {r['waehrung']}, nicht umgerechnet."
+        if r.get("waehrung") and str(r["waehrung"]).strip().upper() not in ("EUR", "EURO", "€"):
+            # Prüfung 31.10.2026, F-04: Fremdwährung nicht als Euro zählen. Nicht übernehmen, sondern melden.
+            erg["fehler"].append(f"Zeile {i + 1}: {r['waehrung']} {eur(x['betrag_cent'])[:-2].strip()} ({x['text'][:40]}) nicht übernommen: "
+                                 "Fremdwährung. Bitte in Euro eintragen (Betrag laut Kontoauszug).")
+            continue
         if x["import_id"] in bekannt:
             erg["doppelt"] += 1
             continue
@@ -852,7 +877,7 @@ def hochladen(von, b):
             return {"art": art, "eingang": alt, "schon_da": True}
         if len(d["eingang"]) >= 5000:
             raise ValueError("Zu viele Dateien im Eingang.")
-        e = {"nr": _nr(d["eingang"]), "id": secrets.token_hex(3), "name": name, "datei": "", "art": art, "bereich": bereich,
+        e = {"nr": _nr(d["eingang"]), "id": hub.neue_id(d["eingang"]), "name": name, "datei": "", "art": art, "bereich": bereich,
              "konto": _text(b.get("konto"), 60), "bytes": len(roh), "sha256": sha, "von": von, "zeit": _jetzt(), "status": "wartet",
              "erledigt": None, "erledigt_von": "", "ergebnis": "", "buchungen": 0}
         e["datei"] = f"{e['nr']}.{endung}"
@@ -947,7 +972,7 @@ def _konto_setzen(d, von, b, quelle):
     else:
         if b.get("entfernen"):
             raise ValueError("Dieses Konto gibt es nicht.")
-        k = {"id": secrets.token_hex(3), "bereich": bereich, "name": name}
+        k = {"id": hub.neue_id(d["konten"]), "bereich": bereich, "name": name}
         d["konten"].append(k)
     k.update(stand_cent=stand, datum=datum, quelle=quelle, von=von, zeit=_jetzt())
     if isinstance(b.get("auch"), list):
@@ -1043,7 +1068,7 @@ def vertrag_neu(von, b):
         d = _lesen()
         if len(d["vertraege"]) >= 2000:
             raise ValueError("Zu viele Verträge gespeichert.")
-        v = {"id": secrets.token_hex(3), "nr": _nr(d["vertraege"]), "bereich": "privat", "name": "", "betrag_cent": 0, "rhythmus": "monat",
+        v = {"id": hub.neue_id(d["vertraege"]), "nr": _nr(d["vertraege"]), "bereich": "privat", "name": "", "betrag_cent": 0, "rhythmus": "monat",
              "kategorie": "abos", "beginn": "", "kuendbar_bis": "", "kuendigungsfrist": "", "naechste_zahlung": "", "notiz": "", "status": "aktiv",
              "hinweis": "", "gegenpartei": "", "von": von, "zeit": _jetzt(), "geaendert": _jetzt(), "entfernt": None}
         if "name" not in b:
@@ -1151,7 +1176,7 @@ def ziel_neu(von, b):
         d = _lesen()
         if len(d["ziele"]) >= 500:
             raise ValueError("Zu viele Sparziele gespeichert.")
-        z = {"id": secrets.token_hex(3), "nr": _nr(d["ziele"]), "bereich": _bereich(b.get("bereich")), "name": _text(b.get("name"), 80, True, "Name"),
+        z = {"id": hub.neue_id(d["ziele"]), "nr": _nr(d["ziele"]), "bereich": _bereich(b.get("bereich")), "name": _text(b.get("name"), 80, True, "Name"),
              "ziel_cent": _cent_feld(b, "ziel", pflicht=True, positiv=True), "stand_cent": _cent_feld(b, "stand", positiv=True) or 0,
              "bis": _datum_feld(b.get("bis"), pflicht=False), "notiz": _text(b.get("notiz"), 500), "verlauf": [], "von": von, "zeit": _jetzt(), "entfernt": None}
         if not z["ziel_cent"]:
@@ -1200,7 +1225,7 @@ def tipp_neu(von, b):
         d = _lesen()
         if len(d["tipps"]) >= 3000:
             d["tipps"] = [t for t in d["tipps"] if not t["erledigt"]] + [t for t in d["tipps"] if t["erledigt"]][-1000:]
-        t = {"id": secrets.token_hex(3), "nr": _nr(d["tipps"]), "bereich": _bereich(b.get("bereich")), "text": _text(b.get("text"), 1000, True),
+        t = {"id": hub.neue_id(d["tipps"]), "nr": _nr(d["tipps"]), "bereich": _bereich(b.get("bereich")), "text": _text(b.get("text"), 1000, True),
              "art": "agent", "von": von, "zeit": _jetzt(), "erledigt": None}
         d["tipps"].append(t)
         _schreiben(d)
@@ -1420,13 +1445,22 @@ def rechnung_neu(von, b, dateien=None):
     with _sperre:
         d = _lesen()
         nr = _text(b.get("rechnungsnr"), 60)
-        r = next((r for r in d["rechnungen"] if nr and r.get("rechnungsnr") == nr and not r.get("entfernt")), None)
+        # Gleiche Rechnung = gleiche Nummer UND gleicher Bereich UND gleicher Aussteller (Prüfung 31.10.2026, F-02).
+        # Rechnungsnummern sind nur je Aussteller eindeutig; „2026-001“ gibt es bei vielen Firmen.
+        gleich = [r for r in d["rechnungen"] if nr and r.get("rechnungsnr") == nr and not r.get("entfernt")]
+        if "name" in b or "gegenpartei" in b or "bereich" in b:
+            wer = schluessel(b.get("gegenpartei") or b.get("name"))
+            bereich = _bereich(b["bereich"]) if b.get("bereich") else None
+            gleich = [r for r in gleich if (not bereich or r["bereich"] == bereich) and (not wer or schluessel(r["gegenpartei"] or r["name"]) == wer)]
+        if len(gleich) > 1:
+            raise ValueError(f"Rechnungsnummer {nr} passt zu mehreren Rechnungen. Bitte mit der Rechnungs-Nummer der Zentrale ändern.")
+        r = gleich[0] if gleich else None
         if not r:
             if len(d["rechnungen"]) >= 5000:
                 raise ValueError("Zu viele Rechnungen gespeichert.")
             if "name" not in b or _cent_feld(b, "betrag") is None:
                 raise ValueError("Name und Betrag fehlen.")
-            r = {"id": secrets.token_hex(3), "nr": _nr(d["rechnungen"]), "bereich": "privat", "name": "", "betrag_cent": 0, "faellig": "",
+            r = {"id": hub.neue_id(d["rechnungen"]), "nr": _nr(d["rechnungen"]), "bereich": "privat", "name": "", "betrag_cent": 0, "faellig": "",
                  "rechnungsnr": "", "gegenpartei": "", "link": "", "notiz": "", "dateien": [], "bei_lohn": True, "status": "offen",
                  "bezahlt": None, "bezahlt_von": "", "buchung": None, "von": von, "zeit": _jetzt(), "geaendert": _jetzt(), "entfernt": None}
             d["rechnungen"].append(r)
@@ -1453,14 +1487,17 @@ def _nach_buchungen(d, neu):
     gezahlt, lohn = [], None
     for x in neu:
         if x["betrag_cent"] < 0:
+            # Nur gleicher Bereich (Privat/Firma) und nur, wenn genau eine offene Rechnung passt (Prüfung 31.10.2026, F-03)
+            passend = []
             for r in R:
                 w = schluessel(r["gegenpartei"] or r["name"]).split()
                 ab = date.fromtimestamp(r["zeit"]) - timedelta(days=3)
-                if (r["status"] == "offen" and -x["betrag_cent"] == r["betrag_cent"] and w and w[0] in schluessel(x["gegenpartei"] + " " + x["text"])
-                        and x["datum"] >= ab.isoformat()):
-                    r.update(status="bezahlt", bezahlt=_jetzt(), bezahlt_von="zentrale", buchung=x["nr"])
-                    gezahlt.append(r)
-                    break
+                if (r["status"] == "offen" and r["bereich"] == x["bereich"] and -x["betrag_cent"] == r["betrag_cent"] and w
+                        and w[0] in schluessel(x["gegenpartei"] + " " + x["text"]) and x["datum"] >= ab.isoformat()):
+                    passend.append(r)
+            if len(passend) == 1:
+                passend[0].update(status="bezahlt", bezahlt=_jetzt(), bezahlt_von="zentrale", buchung=x["nr"])
+                gezahlt.append(passend[0])
         elif (x["kategorie"] == "einnahmen" and x["bereich"] == "privat" and x["datum"] >= (heute() - timedelta(days=10)).isoformat()
               and (x["betrag_cent"] >= 150000 or (x["betrag_cent"] >= 30000 and _LOHN.search(x["text"])))):
             lohn = x
@@ -1546,6 +1583,13 @@ def _export_spaeter():
         threading.Timer(5, _exportieren).start()
 
 
+def _zelle(t):
+    """Text für eine CSV-Zelle, die Excel und Numbers nie als Formel lesen (Prüfung 31.10.2026, S-05): Beginnt er mit
+    = + - @ oder einem Steuerzeichen, kommt ein Hochkomma davor. Beträge laufen nicht hier durch und bleiben Zahlen."""
+    t = str(t or "")
+    return "'" + t if t[:1] in ("=", "+", "-", "@", "\t", "\r", "\n") or t.lstrip()[:1] in ("=", "+", "-", "@") else t
+
+
 def _cent_text(c):
     return f"{c / 100:.2f}".replace(".", ",")
 
@@ -1585,8 +1629,8 @@ def _exportieren():
             w = csv.writer(f, delimiter=";", lineterminator="\r\n")
             w.writerow(["Nr", "Datum", "Betrag €", "Text", "Gegenpartei", "Kategorie", "Konto", "Quelle", "Notiz"])
             for b in B:
-                w.writerow([b["nr"], b["datum"], _cent_text(b["betrag_cent"]), b["text"], b["gegenpartei"], KAT.get(b["kategorie"], ("", b["kategorie"]))[1],
-                            b["konto"], b["quelle"], b["notiz"]])
+                w.writerow([b["nr"], b["datum"], _cent_text(b["betrag_cent"]), _zelle(b["text"]), _zelle(b["gegenpartei"]),
+                            _zelle(KAT.get(b["kategorie"], ("", b["kategorie"]))[1]), _zelle(b["konto"]), b["quelle"], _zelle(b["notiz"])])
             (ziel / ".Haushaltsbuch.csv.tmp").write_text(f.getvalue(), encoding="utf-8-sig")
             (ziel / ".Haushaltsbuch.csv.tmp").replace(ziel / "Haushaltsbuch.csv")
             t = [f"# Finanzen {bereich.capitalize()}", "", f"Stand: {time.strftime('%d.%m.%Y %H:%M')}. Wird von der Zentrale geschrieben, Änderungen hier gehen verloren.", ""]

@@ -21,12 +21,28 @@ WINDOWS = os.name == "nt"
 PY = "py" if WINDOWS else "python3"
 
 
+class Kaputt(ValueError):
+    """Das Protokoll lässt sich nicht lesen (z. B. eine halb geschriebene letzte Zeile)."""
+
+
 def lesen():
     try:
         zeilen = PROTOKOLL.read_text(encoding="utf-8").splitlines()
     except FileNotFoundError:
         return []
-    return [json.loads(z) for z in zeilen if z.strip()]
+    alle = []
+    for i, z in enumerate(zeilen, 1):
+        if not z.strip():
+            continue
+        try:
+            e = json.loads(z)
+        except ValueError:
+            e = None
+        if not isinstance(e, dict) or not isinstance(e.get("nr"), int):
+            raise Kaputt(f"Das Protokoll {PROTOKOLL} ist in Zeile {i} kaputt. Es wurde nichts verändert. "
+                         f"Bitte die Zeile ansehen und von Hand reparieren (vorher eine Kopie der Datei machen).")
+        alle.append(e)
+    return alle
 
 
 @contextmanager
@@ -50,6 +66,11 @@ def sperre():
     else:
         raise SystemExit(f"Ein anderer Schritt läuft gerade (Sperre {datei}). Bitte warten.")
     try:
+        # erst prüfen, ob sich das Protokoll lesen lässt, dann ändern: sonst wäre etwas verschoben, ohne Weg zurück
+        try:
+            lesen()
+        except Kaputt as e:
+            raise SystemExit(str(e))
         yield
     finally:
         try:

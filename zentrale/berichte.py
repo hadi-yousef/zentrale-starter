@@ -96,13 +96,13 @@ def neu(von, b):
         t = _text(f.get("text"), 1000)
         vor = [_text(v, 120) for v in (f.get("vorschlaege") or [])[:6] if _text(v, 120)]
         for teil in (_aufteilen(t) if t else []):
-            fragen.append({"id": secrets.token_hex(3), "text": teil, "antwort": None, "vorschlaege": vor})
+            fragen.append({"id": hub.neue_id(fragen), "text": teil, "antwort": None, "vorschlaege": vor})
     fragen = fragen[:80]
     with _sperre:
         d = _lesen()
         if len(d["berichte"]) >= 5000:
             raise ValueError("Zu viele Berichte gespeichert.")
-        x = {"id": secrets.token_hex(3), "nr": max([b.get("nr") or 0 for b in d["berichte"]] + [0]) + 1,
+        x = {"id": hub.neue_id(d["berichte"]), "nr": max([b.get("nr") or 0 for b in d["berichte"]] + [0]) + 1,
              "titel": _text(b.get("titel"), 200, True), "kurz": _text(b.get("kurz"), 1000), "text": _text(b.get("text"), 200_000),
              "von": von, "sitzung": _text(b.get("sitzung"), 120), "projekt": _text(b.get("projekt"), 80), "wunsch": _text(b.get("wunsch"), 6),
              "zeit": int(time.time()), "gelesen": False, "fragen": fragen, "verlauf": []}
@@ -118,7 +118,7 @@ def nachricht(von, bid, b):
         x = _finden(d, bid)
         if von not in (B, x["von"]):
             raise PermissionError("Hier schreiben nur der Besitzer und der Agent, der den Bericht angelegt hat.")
-        m = {"id": secrets.token_hex(3), "von": von, "text": _text(b.get("text"), 8000, True), "zeit": int(time.time()), "frage": None, "abgeholt": None}
+        m = {"id": hub.neue_id(*[y["verlauf"] for y in d["berichte"]]), "von": von, "text": _text(b.get("text"), 8000, True), "zeit": int(time.time()), "frage": None, "abgeholt": None}
         fid = str(b.get("frage") or "")
         if fid and von == B:
             f = next((f for f in x["fragen"] if f["id"] == fid), None)

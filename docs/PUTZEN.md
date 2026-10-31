@@ -12,14 +12,14 @@ Aufräumen“ in `REGELN.md`). Alles andere bleibt Sache des Plans aus Phase 3 u
 | `__pycache__`, `.pytest_cache`, `.mypy_cache`, `.ruff_cache` | 7 Tage unberührt | von selbst |
 | `build\`, `dist\`, `*.egg-info` neben `pyproject.toml`/`setup.py`, nur eindeutige Bau-Reste | 7 Tage unberührt | neu bauen |
 | Zwischenspeicher von uv, pip, npm | größer als 2 GB | von selbst beim nächsten Installieren |
-| Einträge in `%TEMP%` | älter als 7 Tage, gesperrte bleiben | – |
+| Einträge in `%TEMP%` | alles darin älter als 7 Tage (auch tief drin), gesperrte bleiben | – |
 
 **Nur gemeldet, nie entfernt:** mehrere `uv`-Programme auf dem Rechner und von uv installierte Python-Versionen.
 Welche bleiben, entscheidet der Besitzer. Danach `uv python uninstall <version>` bzw. das überzählige `uv.exe` in den
 Papierkorb, beides nur nach seinem Ja.
 
 **Nie angefasst:** Downloads, Dokumente, Bilder, Repos (`.git`), Daten der Zentrale, OneDrive, Python in Apps,
-Verknüpfungen, alles außerhalb des Benutzerordners außer `%TEMP%`. Läuft etwas aus einem Projekt (z. B. ein Server aus
+Verknüpfungen (auch ein verknüpfter Ordner wie `Projects` → externe Platte), alles außerhalb des Benutzerordners außer `%TEMP%`. Läuft etwas aus einem Projekt (z. B. ein Server aus
 seiner `.venv`), bleibt das Projekt. Läuft uv gerade dauerhaft (z. B. ein Werkzeug über `uv tool run`), wird nur
 Ungenutztes aus seinem Zwischenspeicher entfernt (`uv cache prune`). Administratorrechte braucht es nicht.
 

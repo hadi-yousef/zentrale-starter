@@ -658,7 +658,7 @@ async function post(pfad, body){
 }
 
 /* ---------- Daten ---------- */
-const FASSUNG = "2026-11-03";   // gleich wie hub.FASSUNG
+const FASSUNG = "2026-11-04";   // gleich wie hub.FASSUNG
 const D = {pos: null, wuensche: null, berichte: null, notizen: null, agenten: null, laeufe: null, papierkorb: null, ich: null, fehler: ""};
 async function laden(){
   if (!KEY) return;
@@ -1270,7 +1270,7 @@ function renderSheet(){
   const s = SHEETS[art] && SHEETS[art](arg);
   if (!s) { closeSheet(); return; }
   $("sheet").toggleAttribute("data-pv", art.startsWith("fi"));
-  setHtml($("sheet"), `<div class="sh-head">${s.lead || ""}<div class="sh-t"><h2>${s.title}</h2>${s.sub ? `<p>${s.sub}</p>` : ""}</div><button class="x" type="button" data-act="zu" aria-label="Schließen">${icon("x")}</button></div><div class="sh-body">${s.actions ? `<div class="acts">${s.actions}</div>` : ""}${s.body}</div>`);
+  setHtml($("sheet"), `<div class="sh-head">${s.lead || ""}<div class="sh-t"><h2>${esc(s.title)}</h2>${s.sub ? `<p>${esc(s.sub)}</p>` : ""}</div><button class="x" type="button" data-act="zu" aria-label="Schließen">${icon("x")}</button></div><div class="sh-body">${s.actions ? `<div class="acts">${s.actions}</div>` : ""}${s.body}</div>`);
 }
 
 SHEETS.hltodo = () => {
@@ -1286,7 +1286,7 @@ SHEETS.geraet = id => {
   const lw = (i.laufwerke || []).map(l => { const p = l.frei == null ? 0 : pct(l.gesamt - l.frei, l.gesamt);
     return `<div class="lwz"><div class="k">${esc([l.lw, l.name && l.name !== l.lw ? l.name : ""].filter(Boolean).join(" "))}<span>${l.art === "netz" ? "Netzlaufwerk, " : ""}${gr(l.frei)} frei von ${gr(l.gesamt)}${l.papierkorb ? `, ${gr(l.papierkorb)} im Papierkorb` : ""}</span></div>
       <div class="stack"><i style="width:${p.toFixed(1)}%;background:var(--${p >= 90 ? "red" : l.art === "netz" ? "gray" : "blue"})"></i></div></div>`; }).join("");
-  return {lead: circ(hlIcon(g), "xxl", g.online), title: esc(g.name), sub: `${esc(hlSys(g))} · ${esc(hlStatus(g))}`,
+  return {lead: circ(hlIcon(g), "xxl", g.online), title: g.name, sub: `${hlSys(g)} · ${hlStatus(g)}`,
     actions: g.online ? undefined : `<button class="btn" type="button" data-act="hlvergessen" data-id="${esc(g.id)}">${icon("trash-2")}Vergessen</button>`,
     body: g.warnungen.map(w => `<p class="hint${w.stufe === "info" ? " run" : ""}">${icon(w.stufe === "info" ? "info" : "triangle-alert")}<span><b>${esc(w.titel)}</b> · ${esc(w.text)}</span></p>`).join("")
       + `<div class="rings">${ringB(i.cpu, "blue", nf(i.cpu), "%", "Prozessor")}${ringB(ram, "green", nf(ram), "%", "Arbeitsspeicher")}${i.temp != null ? ringB(i.temp, "orange", nf(i.temp), "°C", "Temperatur") : ""}${a && a.prozent != null ? ringB(a.prozent, a.prozent < 20 ? "red" : "green", nf(a.prozent), "%", "Akku") : ""}</div>`
@@ -1306,7 +1306,7 @@ SHEETS.geraet = id => {
 SHEETS.projekt = id => {
   const p = projekt(id); if (!p) return null;
   const A = aufgabenVon(id), offen = A.filter(a => !a.erledigt).sort(posSort), fertig = A.filter(a => a.erledigt);
-  return {lead: sq(posSym(p.symbol), p.farbe || "gray", "xl"), title: esc(p.name), sub: `${{aktiv: "Aktiv", ruht: "Ruht", archiv: "Archiv"}[p.status]} · geändert ${esc(ago(p.geaendert))}`,
+  return {lead: sq(posSym(p.symbol), p.farbe || "gray", "xl"), title: p.name, sub: `${{aktiv: "Aktiv", ruht: "Ruht", archiv: "Archiv"}[p.status]} · geändert ${ago(p.geaendert)}`,
     body: `<div class="acts"><button class="btn" type="button" data-act="schritt" data-id="${esc(id)}">${icon("arrow-right")}Als Nächstes</button>${["aktiv", "ruht", "archiv"].filter(s => s !== p.status).map(s => `<button class="btn" type="button" data-act="pstatus" data-id="${esc(id)}" data-wert="${s}">${{aktiv: "Aktiv setzen", ruht: "Ruhen lassen", archiv: "Ins Archiv"}[s]}</button>`).join("")}</div>`
       + gh2("Angaben") + grp(kv("Als Nächstes", esc(p.naechster_schritt || "–")) + kv("Beschreibung", esc(p.beschreibung)) + (p.orte || []).map(o => kv(esc(o.geraet || "Ort"), `<code>${esc(o.pfad)}</code>`)).join("") + (p.repos || []).map(r => kv("Repo", esc(r))).join(""))
       + gh2(`Aufgaben (${offen.length} offen)`) + (A.length ? grp(offen.map(a => posZeile(a, false)).join("") + more("pf-" + id, fertig, 0, a => posZeile(a, false)).replace("Alle ", "Erledigte ")) : "")
@@ -1324,7 +1324,7 @@ SHEETS.wunsch = id => {
   const schritte = gh2(S.length ? `Schritte, ${F.f} von ${F.n} erledigt` : "Schritte") + `<div class="grp">${S.length ? `<div style="padding:12px 16px 4px"><span class="posbar"><i style="width:${F.pc}%;background:var(--orange)"></i></span></div>` : ""}${O.map(a => posZeile(a)).join("")}`
     + (w.status === "offen" ? `<form class="posform inrow" data-form="wschritt" data-id="${esc(w.id)}"><input class="inp" name="titel" placeholder="Schritt hinzufügen …" autocomplete="off" maxlength="200" aria-label="Schritt hinzufügen" required><button class="btn pri sm">Eintragen</button></form>` : "") + `</div>`;
   const gruppen = [...new Set(wAlle().map(x => x.gruppe).filter(Boolean))].sort((a, b) => a.localeCompare(b, "de"));
-  return {lead: `<span class="wk xl ${w.status === "erledigt" ? "ok" : w.status === "verworfen" ? "weg" : ""}">${w.status === "erledigt" ? icon("check") : w.status === "verworfen" ? icon("x") : ""}</span>`, title: esc(w.titel), sub: esc(st),
+  return {lead: `<span class="wk xl ${w.status === "erledigt" ? "ok" : w.status === "verworfen" ? "weg" : ""}">${w.status === "erledigt" ? icon("check") : w.status === "verworfen" ? icon("x") : ""}</span>`, title: w.titel, sub: st,
     actions: (w.status === "offen" ? `<button class="btn pri" type="button" data-act="werledigt" data-id="${esc(w.id)}">${icon("check")}Erledigt</button><button class="btn" type="button" data-act="wverwerfen" data-id="${esc(w.id)}">Verwerfen</button>`
       : `<button class="btn" type="button" data-act="woffen" data-id="${esc(w.id)}">${icon("rotate-ccw")}Wieder öffnen</button>`) + `<button class="btn" type="button" data-act="wtitel" data-id="${esc(w.id)}">${icon("pencil")}Titel ändern</button>`,
     body: (WE.titel === w.id ? `<form class="grp posform" data-form="wtitel" data-id="${esc(w.id)}" style="margin-bottom:12px"><input class="inp" name="text" value="${esc(w.titel)}" maxlength="200" aria-label="Titel" required><button class="btn pri sm">Speichern</button></form>` : "")
@@ -1340,19 +1340,19 @@ SHEETS.wunsch = id => {
 SHEETS.agent = id => {
   const a = agAlle().find(x => x.id === id); if (!a) return null;
   const [zt] = agZustand(a);
-  return {lead: ava(id, "xl"), title: esc(id), sub: `${esc(zt)} · zuletzt da ${esc(ago(a.zuletzt))}`,
+  return {lead: ava(id, "xl"), title: id, sub: `${zt} · zuletzt da ${ago(a.zuletzt)}`,
     body: (a.aktiv.length ? a.aktiv.map(x => gh2(esc(lTitel(x)) + (x.still ? " (still)" : "")) + laufAngaben(x)).join("") : `<div class="papier">Macht gerade nichts.</div>`)
       + gh2(`Fertig gemeldet (${a.fertig.length})`) + (a.fertig.length ? grp(more("af-" + id, a.fertig, 6, laufZeile)) : `<div class="papier">Noch nichts.</div>`)};
 };
 SHEETS.lauf = key => {
   const L = D.laeufe || {aktiv: [], fertig: []}, x = [...L.aktiv, ...L.fertig].find(y => lKey(y) === key); if (!x) return null;
   const [ic, c, st] = x.ende ? LSTAT[x.status] || LSTAT.fertig : ["loader", "blue", x.still ? "still" : "läuft"];
-  return {lead: sq(ic, c, "xl"), title: esc(lTitel(x)), sub: `${esc(st)} · ${esc(x.agent)}` + (x.ende ? ` · ${esc(ago(x.ende))}` : ""),
+  return {lead: sq(ic, c, "xl"), title: lTitel(x), sub: `${st} · ${x.agent}` + (x.ende ? ` · ${ago(x.ende)}` : ""),
     body: laufAngaben(x) + (x.ergebnis ? gh2(x.status === "fehler" ? "Was schiefging" : "Ergebnis") + `<div class="papier">${esc(x.ergebnis)}</div>` : "")};
 };
 SHEETS.pk = nr => {
   const e = (D.papierkorb?.eintraege || []).find(x => String(x.nr) === nr); if (!e) return null;
-  return {lead: sq(e.typ === "ordner" ? "folder" : "file", "gray", "xl"), title: esc(e.name), sub: `im Papierkorb seit ${esc(ago(pkZeit(e)))} · ${esc(gr(e.bytes))}`,
+  return {lead: sq(e.typ === "ordner" ? "folder" : "file", "gray", "xl"), title: e.name, sub: `im Papierkorb seit ${ago(pkZeit(e))} · ${gr(e.bytes)}`,
     body: `<div class="acts"><button class="btn pri" type="button" data-act="pkzurueck" data-id="${esc(nr)}">${icon("rotate-ccw")}Zurücklegen</button><button class="btn rot" type="button" data-act="pkweg" data-id="${esc(nr)}">${icon("trash-2")}Endgültig löschen</button></div>`
       + gh2("Angaben") + grp(kv("Vorher", `<code>${esc(e.von)}</code>`) + kv("Jetzt", `<code>${esc(e.nach)}</code>`) + kv("Größe", esc(gr(e.bytes)) + (e.typ === "ordner" ? `, ${e.dateien} Dateien` : ""))
         + kv("Warum", esc(e.grund)) + kv("Wann", esc(new Date(pkZeit(e) * 1000).toLocaleString("de-DE", {dateStyle: "short", timeStyle: "short"}))) + kv("Schritt im Protokoll", "Nr. " + e.nr))
@@ -1360,7 +1360,7 @@ SHEETS.pk = nr => {
 };
 SHEETS.pkn = pfad => {
   const n = (D.papierkorb?.notizen || []).find(x => x.pfad === pfad); if (!n) return null;
-  return {lead: sq("file-text", "indigo", "xl"), title: esc(n.name), sub: `Notiz · im Papierkorb seit ${esc(n.tag)}`,
+  return {lead: sq("file-text", "indigo", "xl"), title: n.name, sub: `Notiz · im Papierkorb seit ${n.tag}`,
     body: `<div class="acts"><button class="btn pri" type="button" data-act="pknzurueck" data-id="${esc(pfad)}">${icon("rotate-ccw")}Zurücklegen</button><button class="btn rot" type="button" data-act="pknweg" data-id="${esc(pfad)}">${icon("trash-2")}Endgültig löschen</button></div>`
       + gh2("Angaben") + grp(kv("Vorher", `<code>${esc(n.von)}</code>`) + kv("Größe", esc(gr(n.bytes))))};
 };
@@ -1368,19 +1368,19 @@ SHEETS.pkn = pfad => {
 SHEETS.bericht = id => {
   const b = beInfo(id); if (!b) return null;
   BER.sel = id; beGelesen(b);
-  return {lead: beAv(b, true), title: esc(beTitel(b)), sub: `${esc(beUnter(b))} · ${esc(beDatum(b.zeit))}`,
+  return {lead: beAv(b, true), title: beTitel(b), sub: `${beUnter(b)} · ${beDatum(b.zeit)}`,
     body: (offeneFragen(b) ? `<div class="acts">${beErledigtKnopf(b)}</div>` : "") + `<div class="bec">${beChat(b)}</div>`};
 };
 SHEETS.berichttext = id => {
   const b = beInfo(id); if (!b) return null;
-  return {lead: beAv(b, true), title: esc(beTitel(b)), sub: `${esc(beUnter(b))} · ${esc(beDatum(b.zeit))}`,
+  return {lead: beAv(b, true), title: beTitel(b), sub: `${beUnter(b)} · ${beDatum(b.zeit)}`,
     body: `<div class="acts"><button class="btn" type="button" data-act="betextzurueck" data-id="${esc(b.id)}">${icon("arrow-left")}Zurück zu den Fragen</button></div><div class="papier">${md(b.text)}</div>`};
 };
 
 SHEETS.wxnotiz = () => {
-  if (WX.edit) { const n = wxInfo(WX.edit.pfad); return {lead: sq("notebook-pen", "yellow", "xxl"), title: WX.edit.neu ? "Neue Notiz" : n ? esc(n.titel) : "Notiz", sub: WX.edit.neu ? esc(wxOrt(WX.edit.ordner)) : "bearbeiten", body: wxEditorHtml()}; }
+  if (WX.edit) { const n = wxInfo(WX.edit.pfad); return {lead: sq("notebook-pen", "yellow", "xxl"), title: WX.edit.neu ? "Neue Notiz" : n ? n.titel : "Notiz", sub: WX.edit.neu ? wxOrt(WX.edit.ordner) : "bearbeiten", body: wxEditorHtml()}; }
   const n = wxInfo(WX.pfad), d = n && WX.notiz && WX.notiz.pfad === n.pfad ? WX.notiz : null; if (!n) return null;
-  return {lead: sq("notebook-pen", "yellow", "xxl"), title: esc(n.titel), sub: `${esc(wxOrt(n.ordner))} · geändert ${esc(wxDatum(n.zeit))}`, actions: wxKnoepfe(true),
+  return {lead: sq("notebook-pen", "yellow", "xxl"), title: n.titel, sub: `${wxOrt(n.ordner)} · geändert ${wxDatum(n.zeit)}`, actions: wxKnoepfe(true),
     body: `<div class="grp wxblatt">${d ? md(d.text) : `<p class="muted">Wird geladen …</p>`}</div>`};
 };
 
@@ -1593,7 +1593,7 @@ SHEETS.firechnungen = () => {
     actions: `<button class="btn pri" type="button" ${sh("firechnung:neu")}>${icon("plus")}Neue Rechnung</button>`,
     body: (u.rechnungen.length ? grp(u.rechnungen.map(fiRZeile).join("")) : empty("Keine offenen Rechnungen.", "circle-check"))};
 };
-SHEETS.fiordner = () => ({lead: sq("folder", "blue", "xxl"), title: "Finanz-Ordner", sub: esc((FIN.daten || {}).ordner || ""),
+SHEETS.fiordner = () => ({lead: sq("folder", "blue", "xxl"), title: "Finanz-Ordner", sub: (FIN.daten || {}).ordner || "",
   body: grp(row(sq("folder", "blue"), "Privat und Firma", "je ein Ordner", "") + row(sq("file-text", "blue"), "Kontoauszüge, Belege, Rechnungen", "je Jahr ein Unterordner, Dateiname beginnt mit dem Datum", "") +
     row(sq("file-spreadsheet", "green"), "Haushaltsbuch.csv", "alle Buchungen, öffnet in Excel", "") + row(sq("file-text", "gray"), "Übersicht.md", "Kontostand, offene Rechnungen, Verträge, Sparziele", "")) +
     note("Alles, was du hochlädst, legt die Zentrale hier ab. Haushaltsbuch und Übersicht schreibt sie nach jeder Änderung neu. Der Ordner liegt auf diesem Rechner und gehört in deine Sicherung.")});

@@ -33,9 +33,15 @@ def _sicher(rel):
     if not rel or len(rel) > 400 or any(not t or t.startswith(".") or t == ".." or VERBOTEN.search(t) for t in teile) or not rel.lower().endswith(".md"):
         raise ValueError("Ungültiger Pfad")
     p = (WURZEL / rel).resolve()
-    if WURZEL.resolve() not in p.parents:
+    if not _drin(p):
         raise ValueError("Ungültiger Pfad")
     return rel, p
+
+
+def _drin(p, ordner_ok=False):
+    """Liegt p nach Auflösen aller Verknüpfungen in der Wurzel? (Verknüpfungen nach außen zählen nicht.)"""
+    w, p = WURZEL.resolve(), Path(p).resolve()
+    return w in p.parents or (ordner_ok and p == w)
 
 
 # Unter Windows verboten: diese Zeichen, Steuerzeichen, Namen wie CON oder NUL, Punkt oder Leerzeichen am Ende
@@ -98,6 +104,8 @@ def liste():
             if f.startswith(".") or not f.lower().endswith(".md"):
                 continue
             p = Path(d) / f
+            if not _drin(p):   # Verknüpfung nach außen: nicht zeigen (wie lesen())
+                continue
             try:
                 st = p.stat()
             except OSError:
@@ -149,18 +157,27 @@ def speichern(rel, text, version):
 def neu(ordner, titel, text=""):
     ordner = _ordner_sicher(ordner)
     name = _dateiname(titel)
+    inhalt = str(text or "").replace("\r\n", "\n")
+    if not inhalt.lstrip().startswith("# "):
+        inhalt = f"# {str(titel or name).strip()}\n\n{inhalt}"
+    if len(inhalt.encode()) > MAX_TEXT:
+        raise ValueError("Die Notiz ist zu groß (höchstens 512 KB).")
     with _sperre:
+        WURZEL.mkdir(parents=True, exist_ok=True)
         d = WURZEL / ordner if ordner else WURZEL
+        # vor dem Anlegen prüfen: führt ein Teil des Ordners über eine Verknüpfung nach außen, wird nichts geschrieben
+        if not _drin(d, ordner_ok=True):
+            raise ValueError("Ungültiger Ordner (führt aus dem Notizen-Ordner heraus)")
         d.mkdir(parents=True, exist_ok=True)
+        if not _drin(d, ordner_ok=True):
+            raise ValueError("Ungültiger Ordner (führt aus dem Notizen-Ordner heraus)")
         p, n = d / f"{name}.md", 2
-        while p.exists():
+        while os.path.lexists(p):
             p, n = d / f"{name} {n}.md", n + 1
-        inhalt = str(text or "").replace("\r\n", "\n")
-        if not inhalt.lstrip().startswith("# "):
-            inhalt = f"# {str(titel or name).strip()}\n\n{inhalt}"
-        if len(inhalt.encode()) > MAX_TEXT:
-            raise ValueError("Die Notiz ist zu groß (höchstens 512 KB).")
-        p.write_bytes(inhalt.encode("utf-8"))
+        # O_EXCL: schreibt nie durch eine (auch kaputte) Verknüpfung und nie über eine Datei, die gerade entstanden ist
+        fd = os.open(p, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_BINARY", 0) | getattr(os, "O_NOFOLLOW", 0), 0o644)
+        with os.fdopen(fd, "wb") as f:
+            f.write(inhalt.encode("utf-8"))
     return lesen(str(p.relative_to(WURZEL)).replace(os.sep, "/"))
 
 
@@ -235,8 +252,9 @@ def suche(q, n=50):
     T = []
     for info in liste()["notizen"]:
         try:
-            text = (WURZEL / info["pfad"]).read_text(encoding="utf-8", errors="replace")
-        except OSError:
+            _, p = _sicher(info["pfad"])   # dieselbe Grenze wie beim Lesen
+            text = p.read_text(encoding="utf-8", errors="replace")
+        except (OSError, ValueError):
             continue
         klein, tit = text.lower(), info["titel"].lower()
         if not all(w in klein or w in tit or w in info["pfad"].lower() for w in woerter):
@@ -257,6 +275,8 @@ def in_papierkorb(rel, von):
         raise ValueError("Diese Notiz gibt es nicht (mehr).")
     with _sperre:
         ziel = PAPIERKORB / time.strftime("%Y-%m-%d") / rel
+        if not _drin(ziel.parent, ordner_ok=True):
+            raise ValueError("Der Papierkorb der Notizen führt aus dem Notizen-Ordner heraus.")
         ziel.parent.mkdir(parents=True, exist_ok=True)
         n = 2
         while ziel.exists():

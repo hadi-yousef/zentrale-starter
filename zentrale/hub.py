@@ -21,7 +21,7 @@ STATE_DIR = Path(os.environ.get("ZENTRALE_DATEN") or Path(__file__).resolve().pa
 SCHLUESSEL = STATE_DIR / "schluessel.json"
 BESITZER = "besitzer"
 MAX_BODY = 64 * 1024
-FASSUNG = "2026-11-03"   # bei jedem Update hochsetzen, auch FASSUNG in index.src.html; der Client und die Seite vergleichen
+FASSUNG = "2026-11-04"   # bei jedem Update hochsetzen, auch FASSUNG in index.src.html; der Client und die Seite vergleichen
 ORDNER = Path(__file__).resolve().parent.parent   # der Ordner dieser Zentrale (zentrale-starter)
 ORDNER_ID = hashlib.sha256(str(ORDNER).lower().encode("utf-8")).hexdigest()[:12]   # Kennung ohne Pfad, für /api/lebt
 HEIMNETZ = False   # setzt start.py: hört die Zentrale auch auf andere Geräte im Heimnetz?
@@ -145,3 +145,14 @@ def agenten():
 
 
 _gesehen.update(_json_laden(STATE_DIR / "agenten.json", {}))
+
+
+def neue_id(*listen):
+    """Kurze Kennung (6 Hex-Zeichen), die es in den übergebenen Listen noch nicht gibt (Prüfung 31.10.2026, R-01):
+    16,7 Mio. Möglichkeiten reichen nur mit dieser Prüfung, ohne sie stoßen bei einigen tausend Einträgen zwei zusammen.
+    Aufrufen, während die Sperre des Moduls gehalten wird."""
+    vorhanden = {x.get("id") for l in listen for x in (l or []) if isinstance(x, dict)}
+    while True:
+        i = secrets.token_hex(3)
+        if i not in vorhanden:
+            return i

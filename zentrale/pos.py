@@ -96,7 +96,7 @@ def projekt_neu(von, b):
         if len(d["projekte"]) >= 500:
             raise ValueError("Zu viele Projekte.")
         jetzt = int(time.time())
-        p = {"id": secrets.token_hex(3), "name": "", "beschreibung": "", "naechster_schritt": "", "status": "aktiv", "farbe": "gray",
+        p = {"id": hub.neue_id(d["projekte"]), "name": "", "beschreibung": "", "naechster_schritt": "", "status": "aktiv", "farbe": "gray",
              "symbol": "folder", "orte": [], "repos": [], "von": von, "erstellt": jetzt, "geaendert": jetzt}
         _felder_projekt(p, {"farbe": FARBEN[len(d["projekte"]) % len(FARBEN)], **b})
         if not p["name"]:
@@ -150,7 +150,7 @@ def aufgabe_neu(von, b):
         f = str(b.get("faellig") or "")
         if f and not DATUM.match(f):
             raise ValueError("Fällig bitte als JJJJ-MM-TT.")
-        a = {"id": secrets.token_hex(3), "titel": _text(b.get("titel"), 200, True), "notiz": _text(b.get("notiz"), 2000), "projekt": pid or None,
+        a = {"id": hub.neue_id(d["aufgaben"]), "titel": _text(b.get("titel"), 200, True), "notiz": _text(b.get("notiz"), 2000), "projekt": pid or None,
              "faellig": f or None, "fuer": _text(b.get("fuer") or von, 40), "wunsch": _wunsch(b.get("wunsch")), "von": von,
              "erstellt": int(time.time()), "erledigt": None, "erledigt_von": ""}
         d["aufgaben"].append(a)
@@ -166,6 +166,13 @@ def aufgabe_aendern(von, aid, b):
         a = next((x for x in d["aufgaben"] if x["id"] == aid and not x.get("entfernt")), None) if ID.match(aid or "") else None
         if not a:
             raise ValueError("Diese Aufgabe gibt es nicht.")
+        # Abhaken (Prüfung 31.10.2026, S-03): der Besitzer, der zuständige Agent („fuer“) und wer die Aufgabe angelegt hat.
+        # So kann ein Agent eine Aufgabe, die er für den Besitzer angelegt hat, schließen, wenn der Besitzer sie im Chat
+        # erledigt hat (wie bericht-erledigt). Aufgaben, die der Besitzer oder ein anderer angelegt hat, schließt kein fremder
+        # Agent. Geprüft vor jeder Änderung, damit nichts halb passiert.
+        if "erledigt" in b and von != hub.BESITZER and von not in (a.get("fuer"), a.get("von")):
+            raise PermissionError(f"Diese Aufgabe hat {a.get('von') or 'jemand anderes'} für {a.get('fuer') or hub.BESITZER} angelegt. "
+                                  "Abhaken dürfen nur der Besitzer, der Zuständige und wer sie angelegt hat. Sag dem Besitzer Bescheid.")
         if "titel" in b:
             a["titel"] = _text(b["titel"], 200, True)
         if "notiz" in b:

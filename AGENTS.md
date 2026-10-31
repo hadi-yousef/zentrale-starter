@@ -160,6 +160,10 @@ Auf dem Rechner ist **zu wenig Platz für eine volle Sicherung**. Deshalb:
   ```
   Das Skript prüft den Platz, kopiert nur, was fehlt, lässt Reste weg und prüft jede Datei mit SHA-256. Ist der Stick
   FAT32 und eine Datei größer als 4 GB, bricht es vorher ab (Stick braucht exFAT; formatieren tut nur der Besitzer).
+  Heißen zwei Quellen gleich (zwei Ordner `Documents`), bricht es vor dem Kopieren ab: dann jede mit eigenem Ziel.
+  Am Ende liegt am Ziel `_sicherung.json` (jede Datei mit Prüfsumme, Ausgelassenes mit Grund). Endet es mit
+  **UNVOLLSTÄNDIG**, ist die Sicherung nicht fertig: dem Besitzer sagen, was fehlt, und nichts darauf aufbauen
+  (kein Aufräumen, kein Platte-Löschen).
   Hochladen in eine Cloud ist „Daten nach außen“: nur mit ausdrücklichem OK, nur in den Ordner, den er nennt.
 - Passwort-Manager, Browser-Passwörter, `.ssh` und ähnliches fasst du nicht an. Sag dem Besitzer, dass er sie selbst sichern soll.
 
@@ -390,6 +394,7 @@ Dritte oder Repos kopieren; sie liegen nur in `daten\` (Ablage `daten\finanzen`)
 | `aufraeumen\` | `inventur.py` (lesen), `sichern.py` (kopieren mit Prüfung), `verschieben.py`, `rueckgaengig.py`, Protokoll |
 | `aufraeumen\putzen.py` | Putzrunde: entfernt nur, was sich neu erzeugt (uv, pip, npm, alte `.venv`/`node_modules`, Temp), erst Probe (`docs/PUTZEN.md`) |
 | `regeln_verteilen.py` | schreibt `REGELN.md` in die Anleitung von Claude Code und Codex (gilt dann in jedem Projekt) |
+| `tests\` | Tests für Sicherung, Putzrunde, Verschieben, Notizen, Rechte, Finanzen, Update: `py -I -m unittest discover -s tests` |
 | `vorlagen\INDEX.md` | Vorlage für den Wegweiser je Projekt |
 | `vorlagen\claude-agents\recherche.md` | Agent `recherche` für Claude Code: sucht vor dem Bauen nach fertigem Open Source |
 | `docs\AUTOSTART.md` | Autostart: Windows, kurz Mac und Linux |

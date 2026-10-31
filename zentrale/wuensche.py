@@ -82,7 +82,7 @@ def neu(von, b):
         d = _lesen()
         if len(d["wuensche"]) >= 5000:
             raise ValueError("Zu viele Wünsche gespeichert.")
-        w = {"id": secrets.token_hex(3), "nr": max([x.get("nr") or 0 for x in d["wuensche"]] + [0]) + 1,
+        w = {"id": hub.neue_id(d["wuensche"]), "nr": max([x.get("nr") or 0 for x in d["wuensche"]] + [0]) + 1,
              "titel": _text(b.get("titel"), 200, True), "text": _text(b.get("text"), 3000), "von": von,
              "erstellt": int(time.time()), "status": "offen", "erledigt": None, "erledigt_von": "", "ergebnis": "",
              "prio": _prio(b.get("prio"), pflicht=True), "gruppe": _text(b.get("gruppe"), 40), "notizen": []}
@@ -121,7 +121,7 @@ def notiz(von, wid, b):
         w = _finden(d, wid)
         if len(w["notizen"]) >= 300:
             raise ValueError("Zu viele Notizen an diesem Wunsch.")
-        w["notizen"].append({"id": secrets.token_hex(3), "text": _text(b.get("text"), 4000, True), "von": von, "zeit": int(time.time())})
+        w["notizen"].append({"id": hub.neue_id(*[x.get("notizen") for x in d["wuensche"]]), "text": _text(b.get("text"), 4000, True), "von": von, "zeit": int(time.time())})
         _schreiben(d)
     return w
 

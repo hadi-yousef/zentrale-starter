@@ -422,7 +422,7 @@ def groesse(b):
         b /= 1024
 
 
-FASSUNG = "2026-11-03"   # gleich wie hub.FASSUNG; weicht die laufende Zentrale ab, kommt eine Warnung
+FASSUNG = "2026-11-04"   # gleich wie hub.FASSUNG; weicht die laufende Zentrale ab, kommt eine Warnung
 
 
 def pruefen(z):
