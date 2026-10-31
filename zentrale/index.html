@@ -713,7 +713,7 @@ function renderNav(){
   setHtml($("side"), `<div class="slogo">${sq("circle-dot", "blue")}Zentrale</div>` + sichtbar().map(p => { const h = (p.gruppe || "") !== g0 ? `<h4>${esc(p.gruppe)}</h4>` : ""; g0 = p.gruppe || "";
     const st = hlNavPunkt(p.id);
     return h + `<a href="#${p.id}" class="${p.id === PAGE ? "on" : ""}">${sq(p.icon, p.farbe)}${esc(p.title)}${p.id === "uebersicht" && f ? `<span class="badge">${f}</span>` : st ? `<span class="dot ${st}"></span>` : `<span class="n">${p.id === "berichte" ? (f ? `${f} ${f === 1 ? "Frage" : "Fragen"}` : "") : zaehler(p.id)}</span>`}</a>`; }).join("")
-    + `<div class="grow"></div><div class="wer">Angemeldet als Besitzer · <a href="#" data-act="abmelden">Abmelden</a><br>Fassung ${esc(FASSUNG)}</div>`);
+    + `<div class="grow"></div><div class="wer">Angemeldet als Besitzer · <a href="#" data-act="abmelden">Abmelden</a><br>Fassung ${esc(FASSUNG)}<br><a href="https://github.com/hadi-yousef/zentrale-starter" target="_blank" rel="noopener">Zentrale Starter</a> von Hadi Yousef · Apache-2.0</div>`);
   setHtml($("tabbar"), sichtbar().map(p => `<a href="#${p.id}" class="${p.id === PAGE ? "on" : ""}">${icon(p.icon)}${esc(p.title)}${p.id === "uebersicht" && f ? `<span class="badge">${f}</span>` : ""}</a>`).join(""));
 }
 function kopf(titel, sub, knopf){ return `<div class="hd"><div class="hdt"><h1>${esc(titel)}</h1>${sub ? `<p>${sub}</p>` : ""}</div>${knopf || ""}</div>`; }

@@ -61,4 +61,10 @@ Autostart nach der Anmeldung: `docs\AUTOSTART.md`. **Mac und Linux:** `python3` 
 
 ## Lizenz
 
-MIT, siehe `LICENSE`. Die Symbole sind von [Lucide](https://lucide.dev) (ISC-Lizenz, siehe `zentrale\vendor\lucide-icons\LICENSE`).
+**Apache License 2.0**, siehe `LICENSE`. © 2026 **Hadi Yousef** ([github.com/hadi-yousef](https://github.com/hadi-yousef)).
+
+Du darfst den Starter frei nutzen, ändern und weitergeben, auch in eigenen Projekten. Bedingung: Gib die Datei `NOTICE` mit
+und nenne **Hadi Yousef** als Urheber, dort, wo solche Hinweise üblich sind (README, Über-Seite, Fußzeile der Oberfläche).
+Fassungen bis einschließlich Commit `562a008` standen unter MIT.
+
+Die Symbole sind von [Lucide](https://lucide.dev) (ISC-Lizenz, siehe `zentrale\vendor\lucide-icons\LICENSE`).
