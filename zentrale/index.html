@@ -54,8 +54,9 @@ svg.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke
 .side{display:none}
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;justify-content:space-around;padding:7px 4px calc(8px + env(safe-area-inset-bottom));
   background:color-mix(in srgb,var(--card) 82%,transparent);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid var(--sep)}
-.tabbar>a{position:relative;flex:1;max-width:96px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:500;color:var(--ink2)}
+.tabbar>a{position:relative;flex:1 0 54px;max-width:96px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:500;color:var(--ink2)}
 .tabbar .i{width:25px;height:25px;stroke-width:1.8}
+.tabbar{overflow-x:auto;scrollbar-width:none;justify-content:flex-start}.tabbar::-webkit-scrollbar{display:none}.tabbar>a{white-space:nowrap;font-size:10px}
 .tabbar .on{color:var(--blue)}
 .tabbar .badge{position:absolute;top:-5px;left:calc(50% + 4px)}
 body{padding-bottom:calc(64px + env(safe-area-inset-bottom))}
@@ -405,9 +406,58 @@ button.card:hover{transform:translateY(-1px);box-shadow:var(--shadow2)}
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:90;background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:12px;font-size:14px;box-shadow:var(--shadow2);opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.on{opacity:1}
 @media (min-width:1000px){.toast{bottom:28px;margin-left:125px}}
+
+/* Finanzen wie im Vorbild, dazu Sichtschutz (pv) für Beträge */
+.fiauge{width:34px;height:34px;padding:0;border-radius:50%;justify-content:center;flex:none}.fiauge.pvauf{color:var(--blue)}
+.seg.small>button{padding:5px 12px;font-size:13px}
+.st{display:inline-flex;align-items:center;gap:6px;color:var(--ink2);font-size:13.5px;white-space:nowrap}
+.ring{width:96px;height:96px;display:block}
+.ring text{font:600 21px var(--round);fill:var(--ink)}
+.ring .u{font:500 11px var(--font);fill:var(--ink2)}
+.hint{display:flex;gap:10px;align-items:flex-start;background:color-mix(in srgb,var(--orange) 12%,var(--grp));border-radius:12px;padding:11px 14px;font-size:13.5px;margin:12px 0}
+.hint .i{color:var(--orange);margin-top:1px}
+.hint.run{background:color-mix(in srgb,var(--blue) 10%,var(--grp))}.hint.run .i{color:var(--blue)}
+.maein{display:flex;gap:10px;align-items:center;padding:8px 8px 8px 14px;margin-bottom:10px}.maein .inp{flex:1;background:none;font-size:16px;min-width:0}.maein>svg{width:20px;height:20px;color:var(--orange);flex:none}
+.fikopf{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}.fikopf .grow{flex:1}.fikopf .fiauge{margin:0;align-self:center}.fikopf .seg{margin:0}.fikopf .seg>button svg{width:15px;height:15px}
+.fik4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:12px}
+.fikz{padding:14px 16px;gap:4px}.fikz b{font:600 23px/1.15 var(--round);font-variant-numeric:tabular-nums;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fikz>span{color:var(--ink2);font-size:13px}
+.fiplus{color:color-mix(in srgb,var(--green) 72%,var(--ink))!important}.fiminus{color:var(--ink)}
+.fitipp{display:flex;gap:12px;align-items:flex-start;background:color-mix(in srgb,var(--yellow) 14%,var(--card));border-radius:18px;padding:14px 16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.fitipp.ruhig{background:var(--card)}.fitipp .t{flex:1;min-width:0}.fitipp b{display:block;font-size:14.5px;margin-bottom:3px}.fitipp p{font-size:14.5px;line-height:1.45;color:var(--ink)}.fitipp p small{color:var(--ink2);font-size:12.5px}
+.fitipp .k{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.figr{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:12px;margin-bottom:12px;align-items:start}.figr .tile,.fiziele{min-width:0}
+.th .fiadd{margin-left:auto;width:30px;height:30px;padding:0;border-radius:50%}
+.fibars{display:flex;align-items:stretch;gap:8px;height:160px}
+.fibars>button{flex:1;display:flex;flex-direction:column;gap:6px;border-radius:10px;padding:4px 2px 2px;min-width:0}.fibars>button:hover{background:var(--hover)}
+.fibars .p{flex:1;display:flex;align-items:flex-end;justify-content:center;gap:3px}.fibars .p i{flex:1;max-width:20px;min-height:2px;border-radius:4px 4px 1px 1px}
+.fibars .m{font-size:12px;color:var(--ink2);text-align:center}.fibars>button.on .m{color:var(--ink);font-weight:650}
+i.fein{background:var(--green)}i.faus{background:var(--orange)}
+.filegende{display:flex;gap:14px;font-size:12.5px;color:var(--ink2);margin-top:10px}.filegende span{display:inline-flex;align-items:center;gap:6px}.filegende i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.tile .row.fir{padding-left:0;padding-right:0;min-height:46px}.tile .row.fir+.row::before{left:42px}.tile .row.fir.noi+.row::before{left:0}
+.fiemo{width:30px;height:30px;border-radius:50%;background:var(--fill);display:grid;place-items:center;font-size:16px;line-height:1;flex:none}.fiemo.xl{width:54px;height:54px;font-size:28px}
+.fibetrag{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap;font-size:15px;color:var(--ink)}
+.fiziel .t>span.posbar{display:block;height:6px;margin:6px 0 5px}
+.fimonat{display:flex;align-items:center;gap:8px;margin:0 0 12px}.fimonat b{font:700 20px var(--disp);letter-spacing:-.01em;min-width:150px;text-align:center}.fimonat .x{align-self:center}.fimonat .x:disabled{opacity:.35}
+.fimonat .fisumme{margin-left:auto;color:var(--ink2);font-size:14px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.fidrop{display:flex;align-items:center;gap:14px;flex-wrap:wrap;border:1.5px dashed color-mix(in srgb,var(--ink2) 45%,transparent);border-radius:18px;padding:14px 16px;margin-bottom:12px;transition:background .15s,border-color .15s}
+.fidrop .t{flex:1 1 220px;min-width:0}.fidrop .t b{display:block;font-size:15px}.fidrop .t span{color:var(--ink2);font-size:13px}.fidrop.ueber{border-color:var(--blue);background:color-mix(in srgb,var(--blue) 9%,transparent)}
+.fidrop .k{display:flex;gap:8px;flex-wrap:wrap}.fidrop label.btn{cursor:pointer}
+.fibig{font:700 34px/1.1 var(--round);font-variant-numeric:tabular-nums;letter-spacing:-.015em;margin:0 4px 6px}
+.fikatwahl{display:flex;flex-wrap:wrap;gap:6px;padding:12px}
+.fiform{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:14px}.fiform label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--ink2)}.fiform label.ganz{grid-column:1/-1}.fiform .inp{color:var(--ink);width:100%}
+.fiform .k{grid-column:1/-1;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}.fiform .seg{justify-self:start}
+.fiziring{display:flex;align-items:center;gap:18px;padding:14px 16px}.fiziring .ring{width:92px;height:92px}.fiziring b{display:block;font:600 24px var(--round);font-variant-numeric:tabular-nums}.fiziring span{display:block;color:var(--ink2);font-size:13.5px}
+.fistand{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:12px 14px}.fistand .inp{flex:1 1 120px;min-width:0}
+@media (max-width:760px){.fik4{grid-template-columns:repeat(2,minmax(0,1fr))}.figr{grid-template-columns:minmax(0,1fr)}.fikz b{font-size:20px}.fimonat b{min-width:0;font-size:18px}}
+.filegende .fitipphin{margin-left:auto}
+@media (max-width:600px){.fiform{grid-template-columns:minmax(0,1fr)}.filegende .fitipphin{display:none}.fikopf .seg>button svg{display:none}.fibars{height:130px}}
+.pv{transition:color .2s,text-shadow .2s}
+body.pv-zu .pv{color:transparent!important;text-shadow:0 0 9px color-mix(in srgb,var(--ink) 75%,transparent);-webkit-user-select:none;user-select:none}
+body.pv-zu .pv .pv{text-shadow:none}
+body.pv-zu .sheet[data-pv] .inp:not(:focus):not(:placeholder-shown),body.pv-zu .sheet[data-pv] textarea:not(:focus){color:transparent;text-shadow:0 0 8px var(--ink)}
 </style>
 </head>
-<body>
+<body class="pv-zu">
 <div id="login" class="login" hidden></div>
 <div id="app" hidden>
   <nav class="side" id="side" aria-label="Bereiche"></nav>
@@ -419,7 +469,7 @@ button.card:hover{transform:translateY(-1px);box-shadow:var(--shadow2)}
 <div class="toast" id="toast"></div>
 <script>
 "use strict";
-const ICONS = {"arrow-left": "<path d=\"m12 19-7-7 7-7\" /> <path d=\"M19 12H5\" />", "arrow-right": "<path d=\"M5 12h14\" /> <path d=\"m12 5 7 7-7 7\" />", "arrow-right-left": "<path d=\"m16 3 4 4-4 4\" /> <path d=\"M20 7H4\" /> <path d=\"m8 21-4-4 4-4\" /> <path d=\"M4 17h16\" />", "arrow-up": "<path d=\"m5 12 7-7 7 7\" /> <path d=\"M12 19V5\" />", "badge": "<path d=\"M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z\" />", "book-open": "<path d=\"M12 5v16\" /> <path d=\"M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z\" />", "bot": "<path d=\"M12 8V4H8\" /> <rect width=\"16\" height=\"12\" x=\"4\" y=\"8\" rx=\"2\" /> <path d=\"M2 14h2\" /> <path d=\"M20 14h2\" /> <path d=\"M15 13v2\" /> <path d=\"M9 13v2\" />", "briefcase": "<path d=\"M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16\" /> <rect width=\"20\" height=\"14\" x=\"2\" y=\"6\" rx=\"2\" />", "broom": "<path d=\"M13.5 10.5 22 2\" /> <path d=\"M14.734 13.841a2 2 0 00-.314-2.42L12.58 9.58a2 2 0 00-2.421-.314l-7.657 4.461A1 1 0 002.3 15.3l6.403 6.403a1 1 0 001.571-.204z\" /> <path d=\"m5 18 2-2\" /> <path d=\"m7.699 10.7 5.602 5.601\" />", "calendar-days": "<path d=\"M8 2v3\" /> <path d=\"M16 2v3\" /> <rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" /> <path d=\"M3 9h18\" /> <path d=\"M8 13h.01\" /> <path d=\"M12 13h.01\" /> <path d=\"M16 13h.01\" /> <path d=\"M8 17h.01\" /> <path d=\"M12 17h.01\" /> <path d=\"M16 17h.01\" />", "camera": "<path d=\"M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z\" /> <circle cx=\"12\" cy=\"13\" r=\"3\" />", "car": "<path d=\"M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2\" /> <circle cx=\"7\" cy=\"17\" r=\"2\" /> <path d=\"M9 17h6\" /> <circle cx=\"17\" cy=\"17\" r=\"2\" />", "check": "<path d=\"M20 6 9 17l-5-5\" />", "check-check": "<path d=\"M18 6 7 17l-5-5\" /> <path d=\"m22 10-7.5 7.5L13 16\" />", "chevron-down": "<path d=\"m6 9 6 6 6-6\" />", "chevron-right": "<path d=\"m9 18 6-6-6-6\" />", "circle-check": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"m16 9-5.5 5.5L8 12\" />", "circle-dot": "<circle cx=\"12\" cy=\"12\" r=\"1\" /> <circle cx=\"12\" cy=\"12\" r=\"10\" />", "clock": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"M12 6v6l4 2\" />", "code": "<path d=\"m16 18 6-6-6-6\" /> <path d=\"m8 6-6 6 6 6\" />", "cpu": "<path d=\"M12 20v2\" /> <path d=\"M12 2v2\" /> <path d=\"M17 20v2\" /> <path d=\"M17 2v2\" /> <path d=\"M2 12h2\" /> <path d=\"M2 17h2\" /> <path d=\"M2 7h2\" /> <path d=\"M20 12h2\" /> <path d=\"M20 17h2\" /> <path d=\"M20 7h2\" /> <path d=\"M7 20v2\" /> <path d=\"M7 2v2\" /> <rect x=\"4\" y=\"4\" width=\"16\" height=\"16\" rx=\"2\" /> <rect x=\"8\" y=\"8\" width=\"8\" height=\"8\" rx=\"1\" />", "file": "<path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\" /> <path d=\"M14 2v5a1 1 0 0 0 1 1h5\" />", "file-text": "<path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\" /> <path d=\"M14 2v5a1 1 0 0 0 1 1h5\" /> <path d=\"M10 9H8\" /> <path d=\"M16 13H8\" /> <path d=\"M16 17H8\" />", "film": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" /> <path d=\"M7 3v18\" /> <path d=\"M3 7.5h4\" /> <path d=\"M3 12h18\" /> <path d=\"M3 16.5h4\" /> <path d=\"M17 3v18\" /> <path d=\"M17 7.5h4\" /> <path d=\"M17 16.5h4\" />", "flask-conical": "<path d=\"M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2\" /> <path d=\"M6.453 15h11.094\" /> <path d=\"M8.5 2h7\" />", "folder": "<path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z\" />", "folder-plus": "<path d=\"M12 10v6\" /> <path d=\"M9 13h6\" /> <path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z\" />", "form": "<path d=\"M4 14h6\" /> <path d=\"M4 2h10\" /> <rect x=\"4\" y=\"18\" width=\"16\" height=\"4\" rx=\"1\" /> <rect x=\"4\" y=\"6\" width=\"16\" height=\"4\" rx=\"1\" />", "gamepad-2": "<line x1=\"6\" x2=\"10\" y1=\"11\" y2=\"11\" /> <line x1=\"8\" x2=\"8\" y1=\"9\" y2=\"13\" /> <line x1=\"15\" x2=\"15.01\" y1=\"12\" y2=\"12\" /> <line x1=\"18\" x2=\"18.01\" y1=\"10\" y2=\"10\" /> <path d=\"M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z\" />", "globe": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20\" /> <path d=\"M2 12h20\" />", "graduation-cap": "<path d=\"M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z\" /> <path d=\"M22 10v6\" /> <path d=\"M6 12.5V16a6 3 0 0 0 12 0v-3.5\" />", "group": "<path d=\"M3 7V5c0-1.1.9-2 2-2h2\" /> <path d=\"M17 3h2c1.1 0 2 .9 2 2v2\" /> <path d=\"M21 17v2c0 1.1-.9 2-2 2h-2\" /> <path d=\"M7 21H5c-1.1 0-2-.9-2-2v-2\" /> <rect width=\"7\" height=\"5\" x=\"7\" y=\"7\" rx=\"1\" /> <rect width=\"7\" height=\"5\" x=\"10\" y=\"12\" rx=\"1\" />", "hd": "<path d=\"M10 12H6\" /> <path d=\"M10 15V9\" /> <path d=\"M14 14.5a.5.5 0 0 0 .5.5h1a2.5 2.5 0 0 0 2.5-2.5v-1A2.5 2.5 0 0 0 15.5 9h-1a.5.5 0 0 0-.5.5z\" /> <path d=\"M6 15V9\" /> <rect x=\"2\" y=\"5\" width=\"20\" height=\"14\" rx=\"2\" />", "heart": "<path d=\"M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5\" />", "house": "<path d=\"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8\" /> <path d=\"M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\" />", "image": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" ry=\"2\" /> <circle cx=\"9\" cy=\"9\" r=\"2\" /> <path d=\"m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21\" />", "inbox": "<polyline points=\"22 12 16 12 14 15 10 15 8 12 2 12\" /> <path d=\"M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z\" />", "key-round": "<path d=\"M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z\" /> <circle cx=\"16.5\" cy=\"7.5\" r=\".5\" fill=\"currentColor\" />", "layout-dashboard": "<rect width=\"7\" height=\"9\" x=\"3\" y=\"3\" rx=\"1\" /> <rect width=\"7\" height=\"5\" x=\"14\" y=\"3\" rx=\"1\" /> <rect width=\"7\" height=\"9\" x=\"14\" y=\"12\" rx=\"1\" /> <rect width=\"7\" height=\"5\" x=\"3\" y=\"16\" rx=\"1\" />", "leaf": "<path d=\"M11 20a10 10 0 0010-10 25.9 25.9 0 00-1.04-7.281 1 1 0 00-1.755-.325C15.833 5.5 13 5.5 9.8 6.1A7 7 0 0011 20\" /> <path d=\"M2 21a5 5 0 012.911-4.544C7.613 15.212 8.351 15.24 11 13\" />", "list-checks": "<path d=\"M13 5h8\" /> <path d=\"M13 12h8\" /> <path d=\"M13 19h8\" /> <path d=\"m3 17 2 2 4-4\" /> <path d=\"m3 7 2 2 4-4\" />", "list-todo": "<path d=\"M13 5h8\" /> <path d=\"M13 12h8\" /> <path d=\"M13 19h8\" /> <path d=\"m3 17 2 2 4-4\" /> <rect x=\"3\" y=\"4\" width=\"6\" height=\"6\" rx=\"1\" />", "loader": "<path d=\"M12 2v4\" /> <path d=\"m16.2 7.8 2.9-2.9\" /> <path d=\"M18 12h4\" /> <path d=\"m16.2 16.2 2.9 2.9\" /> <path d=\"M12 18v4\" /> <path d=\"m4.9 19.1 2.9-2.9\" /> <path d=\"M2 12h4\" /> <path d=\"m4.9 4.9 2.9 2.9\" />", "message-circle-question": "<path d=\"M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719\" /> <path d=\"M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3\" /> <path d=\"M12 17h.01\" />", "message-square": "<path d=\"M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z\" />", "message-square-text": "<path d=\"M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z\" /> <path d=\"M7 11h10\" /> <path d=\"M7 15h6\" /> <path d=\"M7 7h8\" />", "mic": "<path d=\"M12 19v3\" /> <path d=\"M19 10v2a7 7 0 0 1-14 0v-2\" /> <rect x=\"9\" y=\"2\" width=\"6\" height=\"13\" rx=\"3\" />", "monitor": "<rect width=\"20\" height=\"14\" x=\"2\" y=\"3\" rx=\"2\" /> <line x1=\"8\" x2=\"16\" y1=\"21\" y2=\"21\" /> <line x1=\"12\" x2=\"12\" y1=\"17\" y2=\"21\" />", "music": "<path d=\"M21 16V3a1 1 0 0 0-1.28-.96l-10 2.917a1 1 0 0 0-.72.96V19\" /> <circle cx=\"18\" cy=\"16\" r=\"3\" /> <circle cx=\"6\" cy=\"19\" r=\"3\" />", "notebook-pen": "<path d=\"M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4\" /> <path d=\"M2 6h4\" /> <path d=\"M2 10h4\" /> <path d=\"M2 14h4\" /> <path d=\"M2 18h4\" /> <path d=\"M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z\" />", "palette": "<path d=\"M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z\" /> <circle cx=\"13.5\" cy=\"6.5\" r=\".5\" fill=\"currentColor\" /> <circle cx=\"17.5\" cy=\"10.5\" r=\".5\" fill=\"currentColor\" /> <circle cx=\"6.5\" cy=\"12.5\" r=\".5\" fill=\"currentColor\" /> <circle cx=\"8.5\" cy=\"7.5\" r=\".5\" fill=\"currentColor\" />", "panel-left-close": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" /> <path d=\"M9 3v18\" /> <path d=\"m16 15-3-3 3-3\" />", "panel-left-open": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" /> <path d=\"M9 3v18\" /> <path d=\"m14 9 3 3-3 3\" />", "pencil": "<path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\" /> <path d=\"m15 5 4 4\" />", "plus": "<path d=\"M5 12h14\" /> <path d=\"M12 5v14\" />", "printer": "<path d=\"M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2\" /> <path d=\"M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6\" /> <rect x=\"6\" y=\"14\" width=\"12\" height=\"8\" rx=\"1\" />", "rocket": "<path d=\"M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5\" /> <path d=\"M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09\" /> <path d=\"M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z\" /> <path d=\"M9 12H4s.55-3.03 2-4c1.62-1.08 5 .05 5 .05\" />", "rotate-ccw": "<path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\" /> <path d=\"M3 3v5h5\" />", "search": "<path d=\"m21 21-4.34-4.34\" /> <circle cx=\"11\" cy=\"11\" r=\"8\" />", "server": "<rect width=\"20\" height=\"8\" x=\"2\" y=\"2\" rx=\"2\" ry=\"2\" /> <rect width=\"20\" height=\"8\" x=\"2\" y=\"14\" rx=\"2\" ry=\"2\" /> <line x1=\"6\" x2=\"6.01\" y1=\"6\" y2=\"6\" /> <line x1=\"6\" x2=\"6.01\" y1=\"18\" y2=\"18\" />", "sheet": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" ry=\"2\" /> <line x1=\"3\" x2=\"21\" y1=\"9\" y2=\"9\" /> <line x1=\"3\" x2=\"21\" y1=\"15\" y2=\"15\" /> <line x1=\"9\" x2=\"9\" y1=\"9\" y2=\"21\" /> <line x1=\"15\" x2=\"15\" y1=\"9\" y2=\"21\" />", "smartphone": "<rect width=\"14\" height=\"20\" x=\"5\" y=\"2\" rx=\"2\" ry=\"2\" /> <path d=\"M12 18h.01\" />", "sparkles": "<path d=\"M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z\" /> <path d=\"M20 2v4\" /> <path d=\"M22 4h-4\" /> <circle cx=\"4\" cy=\"20\" r=\"2\" />", "square-pen": "<path d=\"M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7\" /> <path d=\"M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z\" />", "sun": "<circle cx=\"12\" cy=\"12\" r=\"4\" /> <path d=\"M12 2v2\" /> <path d=\"M12 20v2\" /> <path d=\"m4.93 4.93 1.41 1.41\" /> <path d=\"m17.66 17.66 1.41 1.41\" /> <path d=\"M2 12h2\" /> <path d=\"M20 12h2\" /> <path d=\"m6.34 17.66-1.41 1.41\" /> <path d=\"m19.07 4.93-1.41 1.41\" />", "terminal": "<path d=\"M12 19h8\" /> <path d=\"m4 17 6-6-6-6\" />", "text": "<path d=\"M21 5H3\" /> <path d=\"M15 12H3\" /> <path d=\"M17 19H3\" />", "trash-2": "<path d=\"M10 11v6\" /> <path d=\"M14 11v6\" /> <path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6\" /> <path d=\"M3 6h18\" /> <path d=\"M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\" />", "triangle-alert": "<path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\" /> <path d=\"M12 9v4\" /> <path d=\"M12 17h.01\" />", "user-round": "<circle cx=\"12\" cy=\"8\" r=\"5\" /> <path d=\"M20 21a8 8 0 0 0-16 0\" />", "wifi-off": "<path d=\"M12 20h.01\" /> <path d=\"M8.5 16.429a5 5 0 0 1 7 0\" /> <path d=\"M5 12.859a10 10 0 0 1 5.17-2.69\" /> <path d=\"M19 12.859a10 10 0 0 0-2.007-1.523\" /> <path d=\"M2 8.82a15 15 0 0 1 4.177-2.643\" /> <path d=\"M22 8.82a15 15 0 0 0-11.288-3.764\" /> <path d=\"m2 2 20 20\" />", "wrench": "<path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z\" />", "x": "<path d=\"M18 6 6 18\" /> <path d=\"m6 6 12 12\" />", "zap": "<path d=\"M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z\" />"};
+const ICONS = {"alarm-clock": "<circle cx=\"12\" cy=\"13\" r=\"8\" /> <path d=\"M12 9v4l2 2\" /> <path d=\"M5 3 2 6\" /> <path d=\"m22 6-3-3\" /> <path d=\"M6.38 18.7 4 21\" /> <path d=\"M17.64 18.67 20 21\" />", "arrow-left": "<path d=\"m12 19-7-7 7-7\" /> <path d=\"M19 12H5\" />", "arrow-right": "<path d=\"M5 12h14\" /> <path d=\"m12 5 7 7-7 7\" />", "arrow-right-left": "<path d=\"m16 3 4 4-4 4\" /> <path d=\"M20 7H4\" /> <path d=\"m8 21-4-4 4-4\" /> <path d=\"M4 17h16\" />", "arrow-up": "<path d=\"m5 12 7-7 7 7\" /> <path d=\"M12 19V5\" />", "badge": "<path d=\"M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z\" />", "ban": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"M4.929 4.929 19.07 19.071\" />", "book-open": "<path d=\"M12 5v16\" /> <path d=\"M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z\" />", "bot": "<path d=\"M12 8V4H8\" /> <rect width=\"16\" height=\"12\" x=\"4\" y=\"8\" rx=\"2\" /> <path d=\"M2 14h2\" /> <path d=\"M20 14h2\" /> <path d=\"M15 13v2\" /> <path d=\"M9 13v2\" />", "briefcase": "<path d=\"M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16\" /> <rect width=\"20\" height=\"14\" x=\"2\" y=\"6\" rx=\"2\" />", "broom": "<path d=\"M13.5 10.5 22 2\" /> <path d=\"M14.734 13.841a2 2 0 00-.314-2.42L12.58 9.58a2 2 0 00-2.421-.314l-7.657 4.461A1 1 0 002.3 15.3l6.403 6.403a1 1 0 001.571-.204z\" /> <path d=\"m5 18 2-2\" /> <path d=\"m7.699 10.7 5.602 5.601\" />", "calendar-days": "<path d=\"M8 2v3\" /> <path d=\"M16 2v3\" /> <rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" /> <path d=\"M3 9h18\" /> <path d=\"M8 13h.01\" /> <path d=\"M12 13h.01\" /> <path d=\"M16 13h.01\" /> <path d=\"M8 17h.01\" /> <path d=\"M12 17h.01\" /> <path d=\"M16 17h.01\" />", "camera": "<path d=\"M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z\" /> <circle cx=\"12\" cy=\"13\" r=\"3\" />", "car": "<path d=\"M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2\" /> <circle cx=\"7\" cy=\"17\" r=\"2\" /> <path d=\"M9 17h6\" /> <circle cx=\"17\" cy=\"17\" r=\"2\" />", "chart-column": "<path d=\"M3 3v16a2 2 0 0 0 2 2h16\" /> <path d=\"M18 17V9\" /> <path d=\"M13 17V5\" /> <path d=\"M8 17v-3\" />", "check": "<path d=\"M20 6 9 17l-5-5\" />", "check-check": "<path d=\"M18 6 7 17l-5-5\" /> <path d=\"m22 10-7.5 7.5L13 16\" />", "chevron-down": "<path d=\"m6 9 6 6 6-6\" />", "chevron-left": "<path d=\"m15 18-6-6 6-6\" />", "chevron-right": "<path d=\"m9 18 6-6-6-6\" />", "circle-alert": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <line x1=\"12\" x2=\"12\" y1=\"8\" y2=\"12\" /> <line x1=\"12\" x2=\"12.01\" y1=\"16\" y2=\"16\" />", "circle-check": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"m16 9-5.5 5.5L8 12\" />", "circle-dot": "<circle cx=\"12\" cy=\"12\" r=\"1\" /> <circle cx=\"12\" cy=\"12\" r=\"10\" />", "clock": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"M12 6v6l4 2\" />", "code": "<path d=\"m16 18 6-6-6-6\" /> <path d=\"m8 6-6 6 6 6\" />", "cpu": "<path d=\"M12 20v2\" /> <path d=\"M12 2v2\" /> <path d=\"M17 20v2\" /> <path d=\"M17 2v2\" /> <path d=\"M2 12h2\" /> <path d=\"M2 17h2\" /> <path d=\"M2 7h2\" /> <path d=\"M20 12h2\" /> <path d=\"M20 17h2\" /> <path d=\"M20 7h2\" /> <path d=\"M7 20v2\" /> <path d=\"M7 2v2\" /> <rect x=\"4\" y=\"4\" width=\"16\" height=\"16\" rx=\"2\" /> <rect x=\"8\" y=\"8\" width=\"8\" height=\"8\" rx=\"1\" />", "external-link": "<path d=\"M15 3h6v6\" /> <path d=\"M10 14 21 3\" /> <path d=\"M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6\" />", "eye": "<path d=\"M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0\" /> <circle cx=\"12\" cy=\"12\" r=\"3\" />", "eye-off": "<path d=\"M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49\" /> <path d=\"M14.084 14.158a3 3 0 0 1-4.242-4.242\" /> <path d=\"M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143\" /> <path d=\"m2 2 20 20\" />", "file": "<path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\" /> <path d=\"M14 2v5a1 1 0 0 0 1 1h5\" />", "file-spreadsheet": "<path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\" /> <path d=\"M14 2v5a1 1 0 0 0 1 1h5\" /> <path d=\"M8 13h2\" /> <path d=\"M14 13h2\" /> <path d=\"M8 17h2\" /> <path d=\"M14 17h2\" />", "file-text": "<path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\" /> <path d=\"M14 2v5a1 1 0 0 0 1 1h5\" /> <path d=\"M10 9H8\" /> <path d=\"M16 13H8\" /> <path d=\"M16 17H8\" />", "file-up": "<path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\" /> <path d=\"M14 2v5a1 1 0 0 0 1 1h5\" /> <path d=\"M12 12v6\" /> <path d=\"m15 15-3-3-3 3\" />", "film": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" /> <path d=\"M7 3v18\" /> <path d=\"M3 7.5h4\" /> <path d=\"M3 12h18\" /> <path d=\"M3 16.5h4\" /> <path d=\"M17 3v18\" /> <path d=\"M17 7.5h4\" /> <path d=\"M17 16.5h4\" />", "flask-conical": "<path d=\"M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2\" /> <path d=\"M6.453 15h11.094\" /> <path d=\"M8.5 2h7\" />", "folder": "<path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z\" />", "folder-plus": "<path d=\"M12 10v6\" /> <path d=\"M9 13h6\" /> <path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z\" />", "form": "<path d=\"M4 14h6\" /> <path d=\"M4 2h10\" /> <rect x=\"4\" y=\"18\" width=\"16\" height=\"4\" rx=\"1\" /> <rect x=\"4\" y=\"6\" width=\"16\" height=\"4\" rx=\"1\" />", "gamepad-2": "<line x1=\"6\" x2=\"10\" y1=\"11\" y2=\"11\" /> <line x1=\"8\" x2=\"8\" y1=\"9\" y2=\"13\" /> <line x1=\"15\" x2=\"15.01\" y1=\"12\" y2=\"12\" /> <line x1=\"18\" x2=\"18.01\" y1=\"10\" y2=\"10\" /> <path d=\"M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z\" />", "gauge": "<path d=\"m12 14 4-4\" /> <path d=\"M3.34 19a10 10 0 1 1 17.32 0\" />", "globe": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20\" /> <path d=\"M2 12h20\" />", "graduation-cap": "<path d=\"M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z\" /> <path d=\"M22 10v6\" /> <path d=\"M6 12.5V16a6 3 0 0 0 12 0v-3.5\" />", "group": "<path d=\"M3 7V5c0-1.1.9-2 2-2h2\" /> <path d=\"M17 3h2c1.1 0 2 .9 2 2v2\" /> <path d=\"M21 17v2c0 1.1-.9 2-2 2h-2\" /> <path d=\"M7 21H5c-1.1 0-2-.9-2-2v-2\" /> <rect width=\"7\" height=\"5\" x=\"7\" y=\"7\" rx=\"1\" /> <rect width=\"7\" height=\"5\" x=\"10\" y=\"12\" rx=\"1\" />", "hd": "<path d=\"M10 12H6\" /> <path d=\"M10 15V9\" /> <path d=\"M14 14.5a.5.5 0 0 0 .5.5h1a2.5 2.5 0 0 0 2.5-2.5v-1A2.5 2.5 0 0 0 15.5 9h-1a.5.5 0 0 0-.5.5z\" /> <path d=\"M6 15V9\" /> <rect x=\"2\" y=\"5\" width=\"20\" height=\"14\" rx=\"2\" />", "heart": "<path d=\"M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5\" />", "house": "<path d=\"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8\" /> <path d=\"M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\" />", "image": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" ry=\"2\" /> <circle cx=\"9\" cy=\"9\" r=\"2\" /> <path d=\"m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21\" />", "inbox": "<polyline points=\"22 12 16 12 14 15 10 15 8 12 2 12\" /> <path d=\"M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z\" />", "key-round": "<path d=\"M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z\" /> <circle cx=\"16.5\" cy=\"7.5\" r=\".5\" fill=\"currentColor\" />", "landmark": "<path d=\"M10 18v-7\" /> <path d=\"M11.119 2.205a2 2 0 0 1 1.762 0l7.84 3.846A.5.5 0 0 1 20.5 7h-17a.5.5 0 0 1-.22-.949z\" /> <path d=\"M14 18v-7\" /> <path d=\"M18 18v-7\" /> <path d=\"M3 22h18\" /> <path d=\"M6 18v-7\" />", "layout-dashboard": "<rect width=\"7\" height=\"9\" x=\"3\" y=\"3\" rx=\"1\" /> <rect width=\"7\" height=\"5\" x=\"14\" y=\"3\" rx=\"1\" /> <rect width=\"7\" height=\"9\" x=\"14\" y=\"12\" rx=\"1\" /> <rect width=\"7\" height=\"5\" x=\"3\" y=\"16\" rx=\"1\" />", "leaf": "<path d=\"M11 20a10 10 0 0010-10 25.9 25.9 0 00-1.04-7.281 1 1 0 00-1.755-.325C15.833 5.5 13 5.5 9.8 6.1A7 7 0 0011 20\" /> <path d=\"M2 21a5 5 0 012.911-4.544C7.613 15.212 8.351 15.24 11 13\" />", "lightbulb": "<path d=\"M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5\" /> <path d=\"M9 18h6\" /> <path d=\"M10 22h4\" />", "link": "<path d=\"M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71\" /> <path d=\"M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71\" />", "list-checks": "<path d=\"M13 5h8\" /> <path d=\"M13 12h8\" /> <path d=\"M13 19h8\" /> <path d=\"m3 17 2 2 4-4\" /> <path d=\"m3 7 2 2 4-4\" />", "list-todo": "<path d=\"M13 5h8\" /> <path d=\"M13 12h8\" /> <path d=\"M13 19h8\" /> <path d=\"m3 17 2 2 4-4\" /> <rect x=\"3\" y=\"4\" width=\"6\" height=\"6\" rx=\"1\" />", "loader": "<path d=\"M12 2v4\" /> <path d=\"m16.2 7.8 2.9-2.9\" /> <path d=\"M18 12h4\" /> <path d=\"m16.2 16.2 2.9 2.9\" /> <path d=\"M12 18v4\" /> <path d=\"m4.9 19.1 2.9-2.9\" /> <path d=\"M2 12h4\" /> <path d=\"m4.9 4.9 2.9 2.9\" />", "mail": "<path d=\"m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7\" /> <rect x=\"2\" y=\"4\" width=\"20\" height=\"16\" rx=\"2\" />", "message-circle-question": "<path d=\"M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719\" /> <path d=\"M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3\" /> <path d=\"M12 17h.01\" />", "message-square": "<path d=\"M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z\" />", "message-square-text": "<path d=\"M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z\" /> <path d=\"M7 11h10\" /> <path d=\"M7 15h6\" /> <path d=\"M7 7h8\" />", "mic": "<path d=\"M12 19v3\" /> <path d=\"M19 10v2a7 7 0 0 1-14 0v-2\" /> <rect x=\"9\" y=\"2\" width=\"6\" height=\"13\" rx=\"3\" />", "minus": "<path d=\"M5 12h14\" />", "monitor": "<rect width=\"20\" height=\"14\" x=\"2\" y=\"3\" rx=\"2\" /> <line x1=\"8\" x2=\"16\" y1=\"21\" y2=\"21\" /> <line x1=\"12\" x2=\"12\" y1=\"17\" y2=\"21\" />", "music": "<path d=\"M21 16V3a1 1 0 0 0-1.28-.96l-10 2.917a1 1 0 0 0-.72.96V19\" /> <circle cx=\"18\" cy=\"16\" r=\"3\" /> <circle cx=\"6\" cy=\"19\" r=\"3\" />", "notebook-pen": "<path d=\"M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4\" /> <path d=\"M2 6h4\" /> <path d=\"M2 10h4\" /> <path d=\"M2 14h4\" /> <path d=\"M2 18h4\" /> <path d=\"M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z\" />", "palette": "<path d=\"M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z\" /> <circle cx=\"13.5\" cy=\"6.5\" r=\".5\" fill=\"currentColor\" /> <circle cx=\"17.5\" cy=\"10.5\" r=\".5\" fill=\"currentColor\" /> <circle cx=\"6.5\" cy=\"12.5\" r=\".5\" fill=\"currentColor\" /> <circle cx=\"8.5\" cy=\"7.5\" r=\".5\" fill=\"currentColor\" />", "panel-left-close": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" /> <path d=\"M9 3v18\" /> <path d=\"m16 15-3-3 3-3\" />", "panel-left-open": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" /> <path d=\"M9 3v18\" /> <path d=\"m14 9 3 3-3 3\" />", "pencil": "<path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\" /> <path d=\"m15 5 4 4\" />", "piggy-bank": "<path d=\"M11 17h3v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-3a3.16 3.16 0 0 0 2-2h1a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1h-1a5 5 0 0 0-2-4V3a4 4 0 0 0-3.2 1.6l-.3.4H11a6 6 0 0 0-6 6v1a5 5 0 0 0 2 4v3a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1z\" /> <path d=\"M16 10h.01\" /> <path d=\"M2 8v1a2 2 0 0 0 2 2h1\" />", "plus": "<path d=\"M5 12h14\" /> <path d=\"M12 5v14\" />", "printer": "<path d=\"M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2\" /> <path d=\"M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6\" /> <rect x=\"6\" y=\"14\" width=\"12\" height=\"8\" rx=\"1\" />", "receipt-euro": "<path d=\"M15.828 14.829a4 4 0 0 1-5.656 0 4 4 0 0 1 0-5.657 4 4 0 0 1 5.656 0\" /> <path d=\"M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z\" /> <path d=\"M8 12h5\" />", "repeat": "<path d=\"m17 2 4 4-4 4\" /> <path d=\"M3 11v-1a4 4 0 0 1 4-4h14\" /> <path d=\"m7 22-4-4 4-4\" /> <path d=\"M21 13v1a4 4 0 0 1-4 4H3\" />", "rocket": "<path d=\"M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5\" /> <path d=\"M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09\" /> <path d=\"M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z\" /> <path d=\"M9 12H4s.55-3.03 2-4c1.62-1.08 5 .05 5 .05\" />", "rotate-ccw": "<path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\" /> <path d=\"M3 3v5h5\" />", "scan-search": "<path d=\"M3 7V5a2 2 0 0 1 2-2h2\" /> <path d=\"M17 3h2a2 2 0 0 1 2 2v2\" /> <path d=\"M21 17v2a2 2 0 0 1-2 2h-2\" /> <path d=\"M7 21H5a2 2 0 0 1-2-2v-2\" /> <circle cx=\"12\" cy=\"12\" r=\"3\" /> <path d=\"m16 16-1.9-1.9\" />", "search": "<path d=\"m21 21-4.34-4.34\" /> <circle cx=\"11\" cy=\"11\" r=\"8\" />", "server": "<rect width=\"20\" height=\"8\" x=\"2\" y=\"2\" rx=\"2\" ry=\"2\" /> <rect width=\"20\" height=\"8\" x=\"2\" y=\"14\" rx=\"2\" ry=\"2\" /> <line x1=\"6\" x2=\"6.01\" y1=\"6\" y2=\"6\" /> <line x1=\"6\" x2=\"6.01\" y1=\"18\" y2=\"18\" />", "sheet": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" ry=\"2\" /> <line x1=\"3\" x2=\"21\" y1=\"9\" y2=\"9\" /> <line x1=\"3\" x2=\"21\" y1=\"15\" y2=\"15\" /> <line x1=\"9\" x2=\"9\" y1=\"9\" y2=\"21\" /> <line x1=\"15\" x2=\"15\" y1=\"9\" y2=\"21\" />", "smartphone": "<rect width=\"14\" height=\"20\" x=\"5\" y=\"2\" rx=\"2\" ry=\"2\" /> <path d=\"M12 18h.01\" />", "sparkles": "<path d=\"M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z\" /> <path d=\"M20 2v4\" /> <path d=\"M22 4h-4\" /> <circle cx=\"4\" cy=\"20\" r=\"2\" />", "square-pen": "<path d=\"M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7\" /> <path d=\"M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z\" />", "sun": "<circle cx=\"12\" cy=\"12\" r=\"4\" /> <path d=\"M12 2v2\" /> <path d=\"M12 20v2\" /> <path d=\"m4.93 4.93 1.41 1.41\" /> <path d=\"m17.66 17.66 1.41 1.41\" /> <path d=\"M2 12h2\" /> <path d=\"M20 12h2\" /> <path d=\"m6.34 17.66-1.41 1.41\" /> <path d=\"m19.07 4.93-1.41 1.41\" />", "terminal": "<path d=\"M12 19h8\" /> <path d=\"m4 17 6-6-6-6\" />", "text": "<path d=\"M21 5H3\" /> <path d=\"M15 12H3\" /> <path d=\"M17 19H3\" />", "trash-2": "<path d=\"M10 11v6\" /> <path d=\"M14 11v6\" /> <path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6\" /> <path d=\"M3 6h18\" /> <path d=\"M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\" />", "triangle-alert": "<path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\" /> <path d=\"M12 9v4\" /> <path d=\"M12 17h.01\" />", "upload": "<path d=\"M12 3v12\" /> <path d=\"m17 8-5-5-5 5\" /> <path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\" />", "user-round": "<circle cx=\"12\" cy=\"8\" r=\"5\" /> <path d=\"M20 21a8 8 0 0 0-16 0\" />", "wallet": "<path d=\"M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1\" /> <path d=\"M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4\" />", "wifi-off": "<path d=\"M12 20h.01\" /> <path d=\"M8.5 16.429a5 5 0 0 1 7 0\" /> <path d=\"M5 12.859a10 10 0 0 1 5.17-2.69\" /> <path d=\"M19 12.859a10 10 0 0 0-2.007-1.523\" /> <path d=\"M2 8.82a15 15 0 0 1 4.177-2.643\" /> <path d=\"M22 8.82a15 15 0 0 0-11.288-3.764\" /> <path d=\"m2 2 20 20\" />", "wrench": "<path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z\" />", "x": "<path d=\"M18 6 6 18\" /> <path d=\"m6 6 12 12\" />", "zap": "<path d=\"M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z\" />"};
 
 /* ---------- Werkzeuge ---------- */
 const $ = id => document.getElementById(id);
@@ -445,11 +495,37 @@ function more(key, items, n, fn){
   const all = OPEN.has(key), list = all ? items : items.slice(0, n);
   return list.map(fn).join("") + (items.length > n ? `<button class="row noi more" type="button" data-more="${esc(key)}"><span class="t"><b>${all ? "Weniger anzeigen" : `Alle ${items.length} anzeigen`}</b></span></button>` : "");
 }
+/* Sichtschutz: pv() markiert Beträge, beim Zeichnen wird daraus <span class="pv">, verdeckt bis zum Tipp aufs Auge (Finanzen).
+   Die Marken überstehen esc(); in Attributen (title, value) werden sie entfernt. */
+const PV0 = "", PV1 = "", pv = s => PV0 + s + PV1, pvWeg = s => String(s).replace(/[]/g, "");
+const pvHtml = h => typeof h !== "string" || h.indexOf(PV0) < 0 ? h : h.replace(/<[^>]*>/g, t => pvWeg(t)).split(PV0).join('<span class="pv">').split(PV1).join("</span>");
+let pvUhr = 0;
+function pvSetzen(auf){
+  document.body.classList.toggle("pv-zu", !auf);
+  const t = auf ? "Beträge verbergen" : "Beträge zeigen";
+  document.querySelectorAll("[data-pvknopf]").forEach(b => { b.innerHTML = icon(auf ? "eye" : "eye-off"); b.classList.toggle("pvauf", auf); b.setAttribute("aria-pressed", String(auf)); b.title = t; b.setAttribute("aria-label", t); });
+  clearTimeout(pvUhr); if (auf) pvUhr = setTimeout(() => pvSetzen(false), 300000);
+}
+document.addEventListener("visibilitychange", () => { if (document.hidden) pvSetzen(false); });
+function ring(p, c, inner, r = 42, w = 9){
+  const C = 2 * Math.PI * r, L = Math.max(.5, Math.min(100, p || 0)) / 100 * C;
+  return `<svg viewBox="0 0 100 100" class="ring" aria-hidden="true"><circle cx="50" cy="50" r="${r}" fill="none" stroke="var(--fill)" stroke-width="${w}"/><circle cx="50" cy="50" r="${r}" fill="none" stroke="var(--${c})" stroke-width="${w}" stroke-linecap="round" stroke-dasharray="${L.toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 50 50)"/>${inner || ""}</svg>`;
+}
+const ringText = (v, u) => `<text x="50" y="57" text-anchor="middle">${esc(v)}${u ? `<tspan class="u" dx="2">${esc(u)}</tspan>` : ""}</text>`;
+const stt = (st, t) => `<span class="st"><span class="dot ${st || ""}"></span>${esc(t)}</span>`;
+const posHeute = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+/* Kündigungsfristen (aus finanzen.py): Abos, die bald gekündigt werden müssten; auf der Übersicht unter „Wartet auf dich“ */
+const frBald = () => (D.fristen || []).filter(v => v.tage <= 7).length;
+const frWann = v => v.tage === 0 ? "heute" : v.tage === 1 ? "morgen" : `in ${v.tage} Tagen`;
+const FR_RHY = {monat: "im Monat", quartal: "im Quartal", jahr: "im Jahr", woche: "in der Woche"};
+const frKarte = v => `<div class="hfrage"><button class="hfk" type="button" data-nav="finanzen"><span class="hfnr">⏰ Kündigen bis ${esc(fiTag(v.kuendbar_bis))} (${frWann(v)})</span>
+  <span class="hft"><b>${pv(esc(v.name))}</b>${v.testphase_bis ? `: Testphase bis ${esc(fiTagLang(v.testphase_bis))},` : ","} danach ${esc(fiEur(v.betrag_cent))} ${FR_RHY[v.rhythmus] || ""}.</span></button>
+  <div class="hfchips"><button class="bechip" type="button" data-frist="${esc(v.id)}|gekuendigt">Gekündigt</button><button class="bechip" type="button" data-frist="${esc(v.id)}|behalten">Behalten</button></div></div>`;
 function setHtml(el, html){
   if (!el || el._h === html) return;
   const ae = document.activeElement;
   if (ae && el.contains(ae) && /^(SELECT|INPUT|TEXTAREA)$/.test(ae.tagName)) return;
-  el.innerHTML = html; el._h = html;
+  el.innerHTML = pvHtml(html); el._h = html;
 }
 function ago(t){
   if (!t) return "noch nie";
@@ -536,6 +612,7 @@ async function laden(){
   try {
     const [pos, wuensche, berichte, notizen, agenten, laeufe, ich] = await Promise.all(["/api/pos", "/api/wuensche", "/api/berichte", "/api/notizen", "/api/agenten", "/api/laeufe", "/api/ich"].map(p => api(p)));
     const papierkorb = await api("/api/papierkorb").catch(() => null);   // fehlt bei einer alten Zentrale
+    D.fristen = (await api("/api/finanzen/fristen").catch(() => ({fristen: []}))).fristen;
     laeufe._geholt = Date.now()/1000;
     Object.assign(D, {pos, wuensche, berichte, notizen, agenten, laeufe, ich, papierkorb, fehler: ""});
   } catch(e) { D.fehler = e.message; }
@@ -555,6 +632,7 @@ const PAGES = [
   {id: "wuensche", title: "Wünsche", icon: "list-todo", farbe: "orange"},
   {id: "berichte", title: "Berichte", icon: "message-square-text", farbe: "green"},
   {id: "notizen", title: "Notizen", icon: "notebook-pen", farbe: "indigo"},
+  {id: "finanzen", title: "Finanzen", icon: "wallet", farbe: "green"},
   {id: "papierkorb", title: "Papierkorb", icon: "trash-2", farbe: "gray"},
 ];
 let PAGE = "uebersicht";
@@ -604,15 +682,15 @@ function posNeuForm(projektId){
 const fuerMich = () => (D.pos?.aufgaben || []).filter(a => !a.erledigt && a.fuer === "besitzer").sort(posSort);
 function ueWartet(){
   const kopf = th("message-circle-question", "orange", "Wartet auf dich", `<button class="lnk" type="button" data-nav="berichte">Alle Berichte</button>`);
-  const B = beAlle().filter(b => offeneFragen(b)).sort((a, b) => a.zeit - b.zeit);
-  if (!B.length) return `<div class="tile">${kopf}<p class="muted hruhig">${icon("circle-check")}Keine offenen Fragen. Neue Berichte kommen unter Berichte.</p></div>`;
-  return `<div class="tile">${kopf}${B.slice(0, 4).map(b => { const f = b.fragen.find(x => !x.antwort);
+  const B = beAlle().filter(b => offeneFragen(b)).sort((a, b) => a.zeit - b.zeit), F = (D.fristen || []).filter(v => v.tage <= 14).map(frKarte).join("");
+  if (!B.length) return `<div class="tile">${kopf}${F}${F ? "" : `<p class="muted hruhig">${icon("circle-check")}Keine offenen Fragen. Neue Berichte kommen unter Berichte.</p>`}</div>`;
+  return `<div class="tile">${kopf}${F}${B.slice(0, 4).map(b => { const f = b.fragen.find(x => !x.antwort);
     return `<div class="hfrage"><button class="hfk" type="button" data-act="beoeffnen" data-id="${esc(b.id)}"><span class="hfnr">Bericht Nr. ${b.nr}${b.projekt ? " · " + esc(b.projekt) : ""}</span><span class="hft">${esc(f.text)}</span></button>
       <div class="hfchips">${f.vorschlaege.map(v => `<button class="bechip" type="button" data-act="bechip" data-id="${esc(b.id)}" data-frage="${esc(f.id)}" data-wert="${esc(v)}">${esc(v)}</button>`).join("")}<button class="bechip hfeig" type="button" data-act="beoeffnen" data-id="${esc(b.id)}">${f.vorschlaege.length ? "Eigene Antwort" : "Antworten"}</button></div></div>`; }).join("")}
     ${B.length > 4 ? `<span class="foot"><button class="btn sm" type="button" data-nav="berichte">${B.length - 4} weitere in Berichte</button><span></span></span>` : ""}</div>`;
 }
 function viewUebersicht(){
-  const K = fuerMich(), h = new Date().getHours(), n = fragenOffen();
+  const K = fuerMich(), h = new Date().getHours(), n = fragenOffen() + frBald();
   const datum = new Date().toLocaleDateString("de-DE", {weekday: "long", day: "numeric", month: "long"});
   const tag = `<div class="tile">${th("calendar-days", "red", "Heute", `<button class="lnk" type="button" data-nav="projekte">Projekte</button>`)}
     <div class="posliste">${K.length ? K.slice(0, 6).map(a => posZeile(a)).join("") : `<p class="muted hleer">Für dich ist gerade nichts offen.</p>`}</div>
@@ -999,7 +1077,7 @@ function viewPapierkorb(){
     + (win != null ? gh("Windows", esc(gr(win))) + grp(`<div class="row">${sq("trash-2", "blue")}<span class="t"><b>Windows-Papierkorb</b><span>was im Explorer gelöscht wurde</span></span>${val(esc(gr(win)))}${win ? pkKnopf(`data-windows="1"`, gr(win), "Leeren") : ""}</div>`) : "")
     + note("Was weg soll, landet erst hier: Die Agenten verschieben nur, auf derselben Platte. Endgültig löschen kannst nur du. Auf jeder Platte gibt es genau einen Papierkorb (z. B. C:\\Papierkorb).");
 }
-const VIEWS = {uebersicht: viewUebersicht, agenten: viewAgenten, projekte: viewProjekte, wuensche: viewWuensche, berichte: viewBerichte, notizen: viewNotizen, papierkorb: viewPapierkorb};
+const VIEWS = {finanzen: () => kopf("Finanzen", "Haushaltsbuch, Abos und Verträge, Sparziele") + fiHtml(), uebersicht: viewUebersicht, agenten: viewAgenten, projekte: viewProjekte, wuensche: viewWuensche, berichte: viewBerichte, notizen: viewNotizen, papierkorb: viewPapierkorb};
 function renderPage(){
   if (!D.pos) { setHtml($("pages"), D.fehler ? empty(`<b>Zentrale nicht erreichbar</b>${esc(D.fehler)}`, "wifi-off") : ""); return; }
   const alt = D.ich && D.ich.fassung !== FASSUNG ? `<div class="alt">${icon("triangle-alert")}<span><b>Die Zentrale läuft noch mit der alten Fassung</b>Diese Seite ist neu (${esc(FASSUNG)}), die laufende Zentrale ${esc(D.ich.fassung || "alt")}. Sag deinem Agenten: „Zentrale neu starten“.</span></div>` : "";
@@ -1018,6 +1096,7 @@ function renderSheet(){
   const i = SHEET.indexOf(":"), art = i < 0 ? SHEET : SHEET.slice(0, i), arg = i < 0 ? "" : SHEET.slice(i + 1);
   const s = SHEETS[art] && SHEETS[art](arg);
   if (!s) { closeSheet(); return; }
+  $("sheet").toggleAttribute("data-pv", art.startsWith("fi"));
   setHtml($("sheet"), `<div class="sh-head">${s.lead || ""}<div class="sh-t"><h2>${s.title}</h2>${s.sub ? `<p>${s.sub}</p>` : ""}</div><button class="x" type="button" data-act="zu" aria-label="Schließen">${icon("x")}</button></div><div class="sh-body">${s.actions ? `<div class="acts">${s.actions}</div>` : ""}${s.body}</div>`);
 }
 
@@ -1101,6 +1180,350 @@ SHEETS.wxnotiz = () => {
   return {lead: sq("notebook-pen", "yellow", "xxl"), title: esc(n.titel), sub: `${esc(wxOrt(n.ordner))} · geändert ${esc(wxDatum(n.zeit))}`, actions: wxKnoepfe(true),
     body: `<div class="grp wxblatt">${d ? md(d.text) : `<p class="muted">Wird geladen …</p>`}</div>`};
 };
+
+
+/* ---------- Finanzen (finanzen.py): Überblick und Haushaltsbuch als Unterseite.
+   Privat und Firma getrennt, Beträge kommen in Cent. Alles hier ist ein eigener Block mit eigenen Ereignissen (data-fi…). ---------- */
+const FIN = {bereich: "privat", sicht: "ueberblick", monat: "", daten: null, buch: null, zeit: 0, fehler: "", laedt: 0, meldung: null, satz: "", neuArt: "aus", kontoWahl: "", tippsAlle: null, regelHinweis: null};
+try { const m = JSON.parse(localStorage.getItem("zentrale-finanzen") || "{}"); if (m.bereich === "firma") FIN.bereich = "firma"; if (m.sicht === "buch") FIN.sicht = "buch"; } catch(e) {}
+const fiMerke = () => { try { localStorage.setItem("zentrale-finanzen", JSON.stringify({bereich: FIN.bereich, sicht: FIN.sicht})); } catch(e) {} };
+async function fiLaden(){
+  if (!KEY) return;
+  FIN.zeit = Date.now(); const b = FIN.bereich, nr = ++FIN.laedt;
+  try {
+    const [u, h] = await Promise.all([api(`/api/finanzen?bereich=${b}`), api(`/api/finanzen/monat?bereich=${b}${FIN.monat ? "&monat=" + FIN.monat : ""}`)]);
+    if (nr !== FIN.laedt) return;
+    FIN.daten = u; FIN.buch = h; FIN.fehler = "";
+  } catch(e) { if (nr === FIN.laedt) FIN.fehler = e.message; }
+  renderPage(); renderSheet();
+}
+const fiEur = (c, plus) => { c = Math.round(+c || 0); return pv((c < 0 ? "−" : plus && c > 0 ? "+" : "") + (Math.abs(c) / 100).toLocaleString("de-DE", {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €"); };
+const fiFeld = c => pvWeg(fiEur(c)).replace(" €", "").replace("−", "-");
+const fiBetrag = (c, plus = true) => `<span class="fibetrag${c > 0 && plus ? " fiplus" : ""}">${fiEur(c, plus)}</span>`;
+const fiTag = d => d ? new Date(d + "T12:00").toLocaleDateString("de-DE", {day: "numeric", month: "short"}) : "";
+const fiTagLang = d => d ? new Date(d + "T12:00").toLocaleDateString("de-DE", {day: "numeric", month: "long", year: "numeric"}) : "";
+const fiEmo = (e, cls = "") => `<span class="fiemo ${cls}">${esc(e)}</span>`;
+const fiBer = b => b === "firma" ? "Firma" : "Privat";
+const FI_RHY = {monat: "Monat", quartal: "Quartal", jahr: "Jahr", woche: "Woche"};
+const FI_QUELLE = {csv: "Kontoauszug (CSV)", pdf: "Kontoauszug (PDF), vom Finanz-Agenten gelesen", bild: "Bild, vom Finanz-Agenten gelesen", hand: "von Hand", agent: "von einem Agenten"};
+const fiKats = () => FIN.daten ? FIN.daten.kategorien_liste : [];
+const fiKatOpt = (sel, leer) => (leer ? `<option value="">${esc(leer)}</option>` : "") + fiKats().map(k => `<option value="${k.key}"${k.key === sel ? " selected" : ""}>${k.emoji} ${esc(k.name)}</option>`).join("");
+const fiB = id => [...((FIN.buch || {}).buchungen || []), ...((FIN.daten || {}).neueste || [])].find(b => b.id === id);
+const fiV = id => ((FIN.daten || {}).vertraege || []).find(v => v.id === id);
+const fiZ = id => ((FIN.daten || {}).ziele || []).find(z => z.id === id);
+const fiR = id => ((FIN.daten || {}).rechnungen || []).find(r => r.id === id);
+const fiRZeile = r => row(sq("receipt-euro", r.ueberfaellig ? "red" : "orange"), pv(esc(r.name)) + (r.ueberfaellig ? " " + chip("überfällig", "warn") : ""),
+  esc([r.faellig ? `fällig ${fiTag(r.faellig)}` : "", r.rechnungsnr ? `Rechnung ${pv(r.rechnungsnr)}` : ""].filter(Boolean).join(" · ") || "offen"),
+  fiBetrag(r.betrag_cent, false), sh("firechnung:" + r.id), "fir");
+const fiPlusKnopf = spec => `<button class="btn fiadd" type="button" ${sh(spec)} aria-label="Neu anlegen">${icon("plus")}</button>`;
+function fiKopf(){
+  const seg = (attr, L, wert) => `<div class="seg small" role="group">${L.map(([k, t, ic]) => `<button type="button" class="${wert === k ? "on" : ""}" data-${attr}="${k}">${ic ? icon(ic) : ""}${t}</button>`).join("")}</div>`;
+  return `<div class="fikopf">${seg("fibereich", [["privat", "Privat"], ["firma", "Firma"]], FIN.bereich)}<span class="grow"></span><button class="btn fiauge${document.body.classList.contains("pv-zu") ? "" : " pvauf"}" type="button" data-pvknopf aria-pressed="${!document.body.classList.contains("pv-zu")}" title="Beträge zeigen" aria-label="Beträge zeigen">${icon(document.body.classList.contains("pv-zu") ? "eye-off" : "eye")}</button>${seg("fisicht", [["ueberblick", "Überblick", "gauge"], ["buch", "Haushaltsbuch", "book-open"]], FIN.sicht)}</div>`;
+}
+function fiHtml(){
+    if (Date.now() - FIN.zeit > 30000) fiLaden();
+  if (!FIN.daten || !FIN.buch) return fiKopf() + (FIN.fehler ? empty(`<b>Die Finanzen sind gerade nicht erreichbar.</b><br>${esc(FIN.fehler)}`, "wallet") : empty("Wird geladen …", "wallet"));
+  return fiKopf() + (FIN.sicht === "buch" ? fiBuch() : fiUeberblick());
+}
+const fiVZeile = (v, cls = "") => row(fiEmo(v.emoji), pv(esc(v.name)) + (v.hinweis ? " " + chip(v.hinweis, "warn") : "") + (v.status === "gekuendigt" ? " " + chip("gekündigt") : ""),
+  esc([v.rhythmus !== "monat" ? `${fiEur(v.betrag_cent)} je ${FI_RHY[v.rhythmus]}` : v.kategorie_name, v.naechste ? `nächste ${fiTag(v.naechste)}` : "", v.kuendbar_bis && v.status === "aktiv" ? `kündbar bis ${fiTag(v.kuendbar_bis)}` : ""].filter(Boolean).join(" · ")),
+  fiBetrag(v.monat_cent, false), sh("fivertrag:" + v.id), cls);
+const fiZZeile = z => { const p = Math.min(100, Math.round(100 * z.stand_cent / z.ziel_cent));
+  return `<button class="row noi fir fiziel" type="button" ${sh("fiziel:" + z.id)}><span class="t"><b>${pv(esc(z.name))}</b><span class="posbar"><i style="width:${p}%;background:var(--green)"></i></span><span>${fiEur(z.stand_cent)} von ${fiEur(z.ziel_cent)} · ${p} %${z.bis ? ` · bis ${fiTag(z.bis)}` : ""}</span></span>${CHEV}</button>`; };
+const fiBZeile = b => row(fiEmo(b.emoji), pv(esc(b.gegenpartei || b.text)), esc([fiTag(b.datum), b.kategorie_name, b.konto, ""].filter(Boolean).join(" · ")), fiBetrag(b.betrag_cent), sh("fibuchung:" + b.id));
+const fiVorZeile = v => `<div class="row">${fiEmo("🔁")}<span class="t"><b>${pv(esc(v.name))}</b><span>${esc(`${fiEur(v.betrag_cent)} je ${FI_RHY[v.rhythmus]}, ${v.monate} Monate, zuletzt ${fiTag(v.letzte)}`)}</span></span>
+  <button class="btn sm" type="button" data-fivorschlag="${esc(v.schluessel)}">Als Abo übernehmen</button><button class="btn sm" type="button" data-fivorschlagnein="${esc(v.schluessel)}" aria-label="Kein Abo" title="Kein Abo">${icon("x")}</button></div>`;
+function fiDrop(){
+  return `<div class="fidrop" id="fidrop">${sq("upload", "blue", "xl")}<div class="t"><b>Kontoauszug hineinziehen</b><span>CSV wird sofort eingelesen, PDF und Bilder liest dein Agent.</span></div>
+    <span class="k"><label class="btn sm">${icon("file-up")}Datei wählen<input type="file" id="fidatei" accept=".csv,.txt,.pdf,image/*" multiple hidden></label><button class="btn sm" type="button" ${sh("fibuchung:neu")}>${icon("pencil")}Von Hand</button></span></div>`;
+}
+const fiMeldung = () => FIN.meldung ? `<div class="hint${FIN.meldung.ok ? " run" : ""}">${icon(FIN.meldung.ok ? "circle-check" : "circle-alert")}<span>${esc(FIN.meldung.text)}</span></div>` : "";
+function fiUeberblick(){
+  const u = FIN.daten, W = u.werte, K = u.kontostand, mn = u.monat_name.split(" ")[0];
+  const kz = (wert, text, act, cls = "") => `<button class="tile fikz" type="button" ${act}><b class="${cls}">${wert}</b><span>${esc(text)}</span></button>`;
+  const zahlen = `<div class="fik4">` +
+    kz(K.konten.length ? fiEur(K.summe_cent) : "–", K.konten.length ? (K.konten.length === 1 ? `auf ${pv(K.konten[0].name)}` : `auf allen ${K.konten.length} Konten`) : "Kontostand eintragen", sh("fikonten")) +
+    kz(fiEur(W.einnahmen_cent, true), `Einnahmen ${mn}`, sh(`fikat:${u.monat}|einnahmen`), W.einnahmen_cent > 0 ? "fiplus" : "") +
+    kz(fiEur(-W.ausgaben_cent), `Ausgaben ${mn}`, sh(`fimonat:${u.monat}`)) +
+    kz(W.sparquote == null ? "–" : `${W.sparquote} %`, W.sparquote == null ? "gespart (noch ohne Einnahmen)" : `gespart, ${fiEur(W.gespart_cent)}`, sh(`fimonat:${u.monat}`)) + `</div>`;
+  const R = u.rechnungen || [];
+  const offen = R.length ? `<div class="tile firech" style="margin-bottom:12px">${th("receipt-euro", "red", `Offen zu zahlen · ${fiEur(u.rechnungen_cent)}`, fiPlusKnopf("firechnung:neu"))}${more("firechnungen", R, 3, fiRZeile)}
+    <p class="muted fitipphin">Kommt der Lohn, erinnert dich die Zentrale an diese Rechnungen (unter Berichte).</p></div>` : "";
+  const FF = u.fristen || [];
+  const frist = FF.length ? `<div class="tile" style="margin-bottom:12px">${th("alarm-clock", "orange", "Bald kündbar", "")}${FF.map(v => `<div class="row fir">${fiEmo("⏰")}<span class="t"><b>${pv(esc(v.name))}</b>
+      <span>${esc([`kündbar bis ${fiTag(v.kuendbar_bis)} (${frWann(v)})`, v.testphase_bis ? `Testphase bis ${fiTag(v.testphase_bis)}` : "", `${fiEur(v.betrag_cent)} ${FR_RHY[v.rhythmus] || ""}`].filter(Boolean).join(" · "))}</span></span>
+      <button class="btn sm" type="button" data-frist="${esc(v.id)}|gekuendigt">Gekündigt</button><button class="btn sm" type="button" data-frist="${esc(v.id)}|behalten">Behalten</button></div>`).join("")}
+    <p class="muted fitipphin">Steht auch auf der Übersicht unter „Wartet auf dich“.</p></div>` : "";
+  const T = u.tipps, t = T[0];
+  const tipp = t ? `<div class="fitipp">${sq("lightbulb", "yellow")}<div class="t"><b>Dein Berater</b><p>${pv(esc(t.text))}${t.art === "agent" ? ` <small>· ${esc(wer(t.von))}</small>` : ""}</p>
+      <span class="k"><button class="btn sm" type="button" data-fitipp="${esc(t.id)}">${icon("check")}Erledigt</button>${T.length > 1 ? `<button class="btn sm" type="button" ${sh("fitipps")}>Alle ${T.length} Tipps</button>` : ""}</span></div></div>`
+    : `<div class="fitipp ruhig">${sq("lightbulb", "gray")}<div class="t"><b>Dein Berater</b><p>${u.buchungen_gesamt ? "Gerade gibt es nichts zu beanstanden. Ich melde mich, wenn ein Abo ungenutzt ist, ein Vertrag bald kündbar wird oder ein Monat teurer wird."
+      : "Sobald Buchungen da sind, zeige ich dir hier, wo Geld verloren geht: ungenutzte Abos, doppelte Verträge, teure Monate."}</p>${u.tipps_erledigt ? `<span class="k"><button class="btn sm" type="button" ${sh("fitipps")}>Erledigte Tipps</button></span>` : ""}</div></div>`;
+  const V = u.verlauf, max = Math.max(1, ...V.map(v => Math.max(v.einnahmen_cent, v.ausgaben_cent))), hoehe = c => (Math.max(0, c) / max * 100).toFixed(1);
+  const bars = `<div class="tile">${th("chart-column", "blue", "Ein- und Ausgaben, 6 Monate", "")}<div class="fibars">${V.map(v => `<button type="button" data-fimonat="${v.monat}" class="${v.monat === u.monat ? "on" : ""}"
+      title="${esc(`${v.name}: Einnahmen ${fiEur(v.einnahmen_cent)}, Ausgaben ${fiEur(v.ausgaben_cent)}`)}" aria-label="${esc(`${v.name}: Einnahmen ${fiEur(v.einnahmen_cent)}, Ausgaben ${fiEur(v.ausgaben_cent)}`)}"><span class="p"><i class="fein" style="height:${hoehe(v.einnahmen_cent)}%"></i><i class="faus" style="height:${hoehe(v.ausgaben_cent)}%"></i></span><span class="m">${esc(v.name.slice(0, 3))}</span></button>`).join("")}</div>
+    <div class="filegende"><span><i class="fein"></i>Einnahmen</span><span><i class="faus"></i>Ausgaben</span><span class="fitipphin">Antippen öffnet den Monat</span></div></div>`;
+  const VA = u.vertraege.filter(v => v.status === "aktiv");
+  const vert = `<div class="tile">${th("repeat", "indigo", VA.length ? `Verträge und Abos · ${fiEur(u.vertraege_monat_cent)}/Monat` : "Verträge und Abos", fiPlusKnopf("fivertrag:neu"))}
+    ${VA.length ? VA.slice(0, 4).map(v => fiVZeile(v, "fir")).join("") : `<p class="muted">Noch keine Verträge. Tipp auf +, oder übernimm ein erkanntes Abo.</p>`}
+    ${u.vorschlaege.length ? row(sq("sparkles", "orange"), `${u.vorschlaege.length} ${u.vorschlaege.length === 1 ? "Abo" : "Abos"} erkannt`, esc(u.vorschlaege.map(v => v.name).join(", ")), "", sh("fivorschlaege"), "fir") : ""}
+    ${u.vertraege.length ? `<button class="row noi more fir" type="button" ${sh("fivertraege")}><span class="t"><b>Alle anzeigen</b></span>${CHEV}</button>` : ""}</div>`;
+  const Z = u.ziele;
+  const ziele = `<div class="tile fiziele" style="margin-bottom:12px">${th("piggy-bank", "green", "Sparziele", fiPlusKnopf("fiziel:neu"))}${Z.length ? more("fiziele", Z, 4, fiZZeile) : `<p class="muted">Noch kein Sparziel. Tipp auf +, zum Beispiel „Notgroschen, 5.000 €“.</p>`}</div>`;
+  const fuss = grp(row(sq("book-open", "orange"), "Haushaltsbuch", esc(u.buchungen_gesamt ? `${u.buchungen_gesamt} Buchungen, zuletzt ${fiTag(u.letzte)}` : "Noch keine Buchungen. Kontoauszug hineinziehen oder im Haushaltsbuch „35 € Tanken“ schreiben."), "", `data-fisicht="buch"`) +
+    (u.eingang_wartet ? row(sq("scan-search", "blue"), `${u.eingang_wartet} ${u.eingang_wartet === 1 ? "Datei wird" : "Dateien werden"} von deinem Agenten gelesen`, "PDF-Auszüge und Bilder", "", sh("fieingang")) : "") +
+    (R.length ? "" : row(sq("receipt-euro", "gray"), "Offene Rechnungen", "Keine. Tipp hier, um eine einzutragen.", "", sh("firechnung:neu"))) +
+    row(sq("folder", "blue"), "Finanz-Ordner", esc(`${u.ordner} · Auszüge, Belege, Rechnungen, Haushaltsbuch`), "", sh("fiordner")));
+  return zahlen + frist + offen + tipp + `<div class="figr">${bars}${vert}</div>` + ziele + (u.buchungen_gesamt ? "" : fiDrop() + fiMeldung()) + fuss +
+    note(`Alle Beträge ${FIN.bereich === "firma" ? "der Firma" : "privat"}, cent-genau. Oben umschalten zwischen Privat und Firma.`);
+}
+function fiEingangListe(h){
+  const E = (h.eingang || []).filter(e => e.status === "wartet");
+  return E.length ? `<div class="grp" style="margin-bottom:12px">${E.map(e => row(sq(e.art === "pdf" ? "file-text" : "image", "blue"), esc(e.name), "wird von deinem Agenten gelesen", stt("warn", "wartet"), sh("fieingang"))).join("")}</div>` : "";
+}
+function fiBuch(){
+  const h = FIN.buch, W = h.werte, jetzt = posHeute().slice(0, 7);
+  const kopf = `<div class="fimonat"><button class="x" type="button" data-fimonat="${h.vormonat}" aria-label="Vormonat">${icon("chevron-left")}</button><b>${esc(h.monat_name)}</b>
+    <button class="x" type="button" data-fimonat="${h.naechster}" aria-label="Nächster Monat"${h.naechster > jetzt ? " disabled" : ""}>${icon("chevron-right")}</button>
+    <span class="fisumme">${W.anzahl ? `${fiEur(W.einnahmen_cent, true)} · ${fiEur(-W.ausgaben_cent)}` : ""}</span></div>`;
+  const satz = `<form class="grp maein" id="fisatz">${icon("sparkles")}<input class="inp" name="text" value="${esc(FIN.satz)}" placeholder="„35 € Tanken“ oder „+1800 Lohn“" autocomplete="off" aria-label="Buchung als Satz"><button class="btn pri sm">Buchen</button></form>`;
+  const oben = kopf + satz + fiDrop() + fiMeldung() + fiEingangListe(h);
+  if (!h.buchungen_gesamt) return oben + empty("Noch keine Buchungen. Kontoauszug als CSV oder PDF hineinziehen oder oben „35 € Tanken“ schreiben.", "wallet");
+  const B = h.buchungen, sonder = ["einnahmen", "sparen", "umbuchung"].map(k => ({k, L: B.filter(b => b.kategorie === k)})).filter(x => x.L.length);
+  const katZ = k => row(fiEmo(k.emoji), esc(k.name), `${k.anzahl} ${k.anzahl === 1 ? "Buchung" : "Buchungen"}`, fiBetrag(k.summe_cent, false), sh(`fikat:${h.monat}|${k.key}`));
+  const sonderZ = x => { const kk = fiKats().find(k => k.key === x.k) || {}, s = x.L.reduce((n, b) => n + b.betrag_cent, 0);
+    return row(fiEmo(kk.emoji || "❓"), esc(kk.name || x.k), `${x.L.length} ${x.L.length === 1 ? "Buchung" : "Buchungen"}`, fiBetrag(s), sh(`fikat:${h.monat}|${x.k}`)); };
+  const kats = (h.kategorien.length ? gh("Ausgaben nach Kategorie", fiEur(W.ausgaben_cent)) + grp(more("fikats", h.kategorien, 6, katZ)) : "") +
+    (sonder.length ? `<div class="grp" style="margin-top:12px">${sonder.map(sonderZ).join("")}</div>` : "");
+  const liste = gh("Buchungen", B.length ? `${B.length}, neueste oben` : "") + (B.length ? grp(more("fibuch-" + h.monat, B, 12, fiBZeile)) : empty(`Im ${h.monat_name} gibt es keine Buchungen.`, "wallet"));
+  return oben + kats + liste + note("Antippen öffnet eine Buchung: Kategorie, Notiz und Bereich ändern. Änderst du eine Kategorie, merkt sich die Zentrale das für diesen Händler.");
+}
+async function fiHochladen(files){
+  if (!KEY) return;
+  if (FIN.sicht !== "buch") { FIN.sicht = "buch"; fiMerke(); }
+  for (const f of files) {
+    if (f.size > 10 * 1024 * 1024) { FIN.meldung = {ok: false, text: `${f.name} ist größer als 10 MB.`}; renderPage(); continue; }
+    FIN.meldung = {ok: true, text: `${f.name} wird hochgeladen …`}; renderPage();
+    const daten = await new Promise(res => { const r = new FileReader(); r.onload = () => res(String(r.result).split(",")[1] || ""); r.onerror = () => res(""); r.readAsDataURL(f); });
+    const r = await post("/api/finanzen/upload", {name: f.name, daten, bereich: FIN.bereich});
+    if (!r) { FIN.meldung = {ok: false, text: `${f.name} wurde nicht angenommen.`}; continue; }
+    const e = r.ergebnis;
+    FIN.meldung = r.art === "csv" ? {ok: true, text: `${f.name}: ${e.text}${e.kontostand != null ? `. Kontostand ${e.konto}: ${fiEur(e.kontostand)}` : ""}.`}
+      : {ok: true, text: r.schon_da ? `${f.name} liegt schon im Eingang.` : `${f.name} liegt im Eingang. Dein Agent hat eine Aufgabe bekommen, es auszulesen.`};
+  }
+  await fiLaden();
+}
+async function fiTippsLaden(){ FIN.tippsAlle = []; try { FIN.tippsAlle = (await api(`/api/finanzen/tipps?bereich=${FIN.bereich}&alle=1`)).tipps; } catch(e) {} $("sheet")._h = null; renderSheet(); }
+
+SHEETS.fibuchung = id => {
+  if (id === "neu") {
+    const art = FIN.neuArt;
+    return {lead: sq("pencil", "blue", "xxl"), title: "Buchung von Hand", sub: fiBer(FIN.bereich),
+      body: `<form class="grp fiform" id="fibuchneu"><input type="hidden" name="art" value="${art}"><span class="seg small" role="group" aria-label="Art" style="grid-column:1/-1"><button type="button" class="${art === "aus" ? "on" : ""}" data-fiart="aus">Ausgabe</button><button type="button" class="${art === "ein" ? "on" : ""}" data-fiart="ein">Einnahme</button></span>
+        <label>Betrag in €<input class="inp" name="betrag" inputmode="decimal" placeholder="35,00" required></label><label>Datum<input class="inp" type="date" name="datum" value="${posHeute()}"></label>
+        <label class="ganz">Wofür<input class="inp" name="text" placeholder="z. B. Tanken" maxlength="300" required></label>
+        <label>Kategorie<select class="inp" name="kategorie">${fiKatOpt("", "automatisch")}</select></label><label>Bereich<select class="inp" name="bereich"><option value="privat"${FIN.bereich === "privat" ? " selected" : ""}>Privat</option><option value="firma"${FIN.bereich === "firma" ? " selected" : ""}>Firma</option></select></label>
+        <label>Konto (optional)<input class="inp" name="konto" placeholder="z. B. Bargeld" maxlength="60"></label><label>Notiz (optional)<input class="inp" name="notiz" maxlength="1000"></label>
+        <span class="k"><span></span><button class="btn pri">Eintragen</button></span></form>` + note("Schneller geht es mit einem Satz im Haushaltsbuch: „35 € Tanken“.")};
+  }
+  const b = fiB(id); if (!b) return null;
+  const chips = fiKats().map(k => `<button class="bechip${k.key === b.kategorie ? " on" : ""}" type="button" data-fikatsetzen="${esc(b.id)}|${k.key}">${k.emoji} ${esc(k.name)}</button>`).join("");
+  const ber = ["privat", "firma"].map(x => `<button class="bechip${b.bereich === x ? " on" : ""}" type="button" data-fibuchbereich="${esc(b.id)}|${x}">${fiBer(x)}</button>`).join("");
+  const hinweis = FIN.regelHinweis && FIN.regelHinweis.id === b.id ? FIN.regelHinweis.text : `Änderst du die Kategorie, gilt sie künftig auch für ${b.gegenpartei || "diesen Text"}.`;
+  return {lead: fiEmo(b.emoji, "xl"), title: pv(b.gegenpartei || b.text), sub: `${fiTagLang(b.datum)} · Buchung Nr. ${b.nr}`,
+    body: `<div class="fibig${b.betrag_cent > 0 ? " fiplus" : ""}">${fiEur(b.betrag_cent, true)}</div>` +
+      gh2("Kategorie") + `<div class="grp fikatwahl">${chips}</div>` + note(esc(hinweis)) +
+      gh2("Bereich") + `<div class="grp fikatwahl">${ber}</div>` +
+      gh2("Notiz") + `<form class="grp wform" id="finotiz" data-id="${esc(b.id)}"><textarea class="inp ta" name="notiz" placeholder="z. B. wofür genau, wo die Rechnung liegt …" maxlength="1000" aria-label="Notiz">${esc(b.notiz)}</textarea><div class="wfb"><button class="btn pri">Notiz speichern</button></div></form>` +
+      (!b.import_id ? gh2("Ändern") + `<form class="grp fiform" id="fibuchedit" data-id="${esc(b.id)}"><label>Datum<input class="inp" type="date" name="datum" value="${esc(b.datum)}"></label><label>Betrag (Ausgabe mit −)<input class="inp" name="betrag" inputmode="decimal" value="${esc(fiFeld(b.betrag_cent))}"></label>
+        <label class="ganz">Text<input class="inp" name="text" value="${esc(b.text)}" maxlength="300"></label><span class="k"><span></span><button class="btn pri">Speichern</button></span></form>` : "") +
+      gh2("Angaben") + grp(kv("Text", esc(b.text)) + kv("Gegenpartei", esc(b.gegenpartei)) + kv("Konto", esc(b.konto)) + kv("Quelle", esc(FI_QUELLE[b.quelle] || b.quelle)) +
+        (b.eingang ? kv("Datei", `Eingang Nr. ${b.eingang}`) : "") + (b.abgeglichen ? kv("Abgleich", "im Kontoauszug wiedergefunden") : "") + kv("Eingetragen", esc(`${wer(b.von)}, ${ago(b.zeit)}`))) +
+      `<div class="acts" style="margin-top:16px"><button class="btn danger" type="button" data-fibuchweg="${esc(b.id)}">${icon("eye-off")}Ausblenden</button></div>` + note("Ausblenden löscht nichts. Die Buchung zählt dann nur nicht mehr mit.")};
+};
+SHEETS.fikat = arg => {
+  const [m, key] = arg.split("|"), k = fiKats().find(x => x.key === key) || {emoji: "❓", name: key}, h = FIN.buch;
+  if (!h || h.monat !== m) { if (FIN.monat !== m) { FIN.monat = m; fiLaden(); } return {lead: fiEmo(k.emoji, "xl"), title: k.name, sub: "wird geladen", body: empty("Wird geladen …", "wallet")}; }
+  const B = h.buchungen.filter(b => b.kategorie === key), summe = B.reduce((n, b) => n + b.betrag_cent, 0);
+  return {lead: fiEmo(k.emoji, "xl"), title: k.name, sub: `${h.monat_name} · ${B.length} ${B.length === 1 ? "Buchung" : "Buchungen"} · ${fiEur(summe, true)}`,
+    body: B.length ? grp(B.map(fiBZeile).join("")) : empty("In diesem Monat keine Buchungen in dieser Kategorie.", "wallet")};
+};
+SHEETS.fimonat = () => {
+  const u = FIN.daten; if (!u) return null;
+  const W = u.werte;
+  return {lead: sq("chart-column", "orange", "xxl"), title: u.monat_name, sub: `${W.anzahl} ${W.anzahl === 1 ? "Buchung" : "Buchungen"} · ${fiBer(u.bereich)}`,
+    body: grp(kv("Einnahmen", fiBetrag(W.einnahmen_cent)) + kv("Ausgaben", fiBetrag(-W.ausgaben_cent)) + (W.sparen_cent ? kv("Aufs Sparen gelegt", esc(fiEur(W.sparen_cent))) : "") +
+        kv("Übrig", fiBetrag(W.gespart_cent)) + kv("Sparquote", W.sparquote == null ? "–" : W.sparquote + " %")) +
+      gh2("Ausgaben nach Kategorie") + (u.kategorien.length ? grp(u.kategorien.map(k => row(fiEmo(k.emoji), esc(k.name), `${k.anzahl} ${k.anzahl === 1 ? "Buchung" : "Buchungen"}`, fiBetrag(k.summe_cent, false), sh(`fikat:${u.monat}|${k.key}`))).join("")) : empty("Noch keine Ausgaben in diesem Monat.", "wallet")) +
+      note("Sparquote heißt: so viel bleibt von den Einnahmen übrig. Umbuchungen zwischen eigenen Konten zählen nicht mit.") +
+      `<div class="acts" style="margin-top:14px"><button class="btn" type="button" data-fimonat="${u.monat}">${icon("book-open")}Im Haushaltsbuch öffnen</button></div>`};
+};
+SHEETS.fikonten = () => {
+  const u = FIN.daten; if (!u) return null;
+  const K = u.kontostand.konten, w = K.find(k => k.name === FIN.kontoWahl);
+  return {lead: sq("landmark", "blue", "xxl"), title: "Kontostand", sub: K.length ? `${fiEur(u.kontostand.summe_cent)} auf ${K.length === 1 ? "einem Konto" : K.length + " Konten"} · ${fiBer(u.bereich)}` : "noch nicht eingetragen",
+    body: (K.length ? grp(K.map(k => row(sq("landmark", k.name === FIN.kontoWahl ? "orange" : "blue"), esc(k.name), esc(`Stand vom ${fiTagLang(k.datum)}${k.quelle === "csv" || k.quelle === "auszug" ? ", aus dem Kontoauszug" : ""}`),
+        fiBetrag(k.stand_cent, false), `data-fikontowahl="${esc(k.name)}"`)).join("")) : "") +
+      gh2(w ? `${esc(w.name)} ändern` : "Konto eintragen") + `<form class="grp fiform" id="fikonto"><label>Konto<input class="inp" name="name" value="${esc(w ? w.name : "")}" placeholder="z. B. Girokonto, Bargeld" maxlength="60" required></label>
+        <label>Stand in €<input class="inp" name="stand" inputmode="decimal" value="${w ? esc(fiFeld(w.stand_cent)) : ""}" placeholder="4.820,15" required></label><label>Stand vom<input class="inp" type="date" name="datum" value="${posHeute()}"></label>
+        <span class="k">${w ? `<button class="btn danger" type="button" data-fikontoweg="${esc(w.id)}">${icon("eye-off")}Ausblenden</button>` : "<span></span>"}<button class="btn pri">Speichern</button></span></form>` +
+      note("Antippen wählt ein Konto zum Ändern. Liest die Zentrale einen Kontoauszug mit Saldo-Spalte ein, trägt sie den Stand selbst ein.")};
+};
+SHEETS.firechnung = id => {
+  const r = id === "neu" ? null : fiR(id); if (id !== "neu" && !r) return null;
+  const x = r || {name: "", faellig: "", rechnungsnr: "", link: "", notiz: ""};
+  const f = (k, l, wert, typ = "text", ganz = false, extra = "") => `<label${ganz ? ' class="ganz"' : ""}>${l}<input class="inp" name="${k}" type="${typ}" value="${esc(wert ?? "")}" ${extra}></label>`;
+  const form = `<form class="grp fiform" id="firechform" data-id="${r ? esc(r.id) : ""}">${f("name", "Wofür", x.name, "text", true, 'maxlength="80" required placeholder="z. B. Werkstatt"')}
+    ${f("betrag", "Betrag in €", r ? fiFeld(r.betrag_cent) : "", "text", false, 'inputmode="decimal" required placeholder="29,90"')}${f("faellig", "Fällig am", x.faellig, "date")}
+    ${f("rechnungsnr", "Rechnungsnummer", x.rechnungsnr, "text", false, 'maxlength="60"')}${f("link", "Zahl-Link", x.link, "url", false, 'maxlength="500" placeholder="https://…"')}
+    ${f("notiz", "Notiz", x.notiz, "text", true, 'maxlength="1000"')}
+    <span class="k">${r ? `<button class="btn danger" type="button" data-firweg="${esc(r.id)}">${icon("eye-off")}Ausblenden</button>` : "<span></span>"}<button class="btn pri">${r ? "Speichern" : "Eintragen"}</button></span></form>`;
+  if (!r) return {lead: sq("receipt-euro", "red", "xxl"), title: "Offene Rechnung", sub: fiBer(FIN.bereich), body: form + note("Kommt der Lohn, erinnert dich die Zentrale daran. Wird der Betrag abgebucht, hakt sie die Rechnung selbst ab.")};
+  return {lead: sq("receipt-euro", r.ueberfaellig ? "red" : "orange", "xxl"), title: pv(r.name), sub: `${fiEur(r.betrag_cent)} offen${r.faellig ? " · fällig " + fiTagLang(r.faellig) : ""}`,
+    actions: (r.link ? `<a class="btn pri" href="${esc(r.link)}" target="_blank" rel="noopener">${icon("external-link")}Jetzt bezahlen</a>` : "") + `<button class="btn" type="button" data-firbezahlt="${esc(r.id)}">${icon("check")}Bezahlt</button>`,
+    body: (r.dateien && r.dateien.length ? gh2("Im Finanz-Ordner") + grp(r.dateien.map(d => row(sq(/\.pdf$/i.test(d) ? "file-text" : "mail", "blue"), esc(d.split("/").pop()), esc(d.split("/").slice(0, -1).join("/")), "")).join("")) : "") +
+      gh2("Ändern") + form + note("„Bezahlt“ hakt die Rechnung ab. Wird der Betrag vom Konto abgebucht, macht die Zentrale das selbst.")};
+};
+SHEETS.firechnungen = () => {
+  const u = FIN.daten; if (!u) return null;
+  return {lead: sq("receipt-euro", "red", "xxl"), title: "Offen zu zahlen", sub: `${fiEur(u.rechnungen_cent)} · ${fiBer(u.bereich)}`,
+    actions: `<button class="btn pri" type="button" ${sh("firechnung:neu")}>${icon("plus")}Neue Rechnung</button>`,
+    body: (u.rechnungen.length ? grp(u.rechnungen.map(fiRZeile).join("")) : empty("Keine offenen Rechnungen.", "circle-check"))};
+};
+SHEETS.fiordner = () => ({lead: sq("folder", "blue", "xxl"), title: "Finanz-Ordner", sub: esc((FIN.daten || {}).ordner || ""),
+  body: grp(row(sq("folder", "blue"), "Privat und Firma", "je ein Ordner", "") + row(sq("file-text", "blue"), "Kontoauszüge, Belege, Rechnungen", "je Jahr ein Unterordner, Dateiname beginnt mit dem Datum", "") +
+    row(sq("file-spreadsheet", "green"), "Haushaltsbuch.csv", "alle Buchungen, öffnet in Excel", "") + row(sq("file-text", "gray"), "Übersicht.md", "Kontostand, offene Rechnungen, Verträge, Sparziele", "")) +
+    note("Alles, was du hochlädst, legt die Zentrale hier ab. Haushaltsbuch und Übersicht schreibt sie nach jeder Änderung neu. Der Ordner liegt auf diesem Rechner und gehört in deine Sicherung.")});
+SHEETS.fivertraege = () => {
+  const u = FIN.daten; if (!u) return null;
+  const A = u.vertraege.filter(v => v.status === "aktiv"), G = u.vertraege.filter(v => v.status !== "aktiv");
+  return {lead: sq("repeat", "indigo", "xxl"), title: "Verträge und Abos", sub: `${fiEur(u.vertraege_monat_cent)} im Monat · ${fiEur(u.vertraege_monat_cent * 12)} im Jahr`,
+    actions: `<button class="btn pri" type="button" ${sh("fivertrag:neu")}>${icon("plus")}Neuer Vertrag</button>`,
+    body: (A.length ? grp(A.map(v => fiVZeile(v)).join("")) : empty("Noch keine Verträge oder Abos.", "repeat")) +
+      (u.vorschlaege.length ? gh2(`Erkannt, ${u.vorschlaege.length}`) + grp(u.vorschlaege.map(fiVorZeile).join("")) : "") +
+      (G.length ? gh2(`Gekündigt, ${G.length}`) + grp(G.map(v => fiVZeile(v)).join("")) : "")};
+};
+SHEETS.fivorschlaege = () => {
+  const u = FIN.daten; if (!u || !u.vorschlaege.length) return null;
+  return {lead: sq("sparkles", "orange", "xxl"), title: "Erkannte Abos", sub: "Wiederkehrende Abbuchungen ohne Vertrag", body: grp(u.vorschlaege.map(fiVorZeile).join("")) +
+    note("Gleiche Gegenpartei, ähnlicher Betrag, in mindestens zwei Monaten. „Als Abo übernehmen“ legt einen Vertrag an, den du danach ergänzen kannst.")};
+};
+SHEETS.fivertrag = id => {
+  const v = id === "neu" ? null : fiV(id); if (id !== "neu" && !v) return null;
+  const x = v || {name: "", rhythmus: "monat", kategorie: "abos", naechste_zahlung: "", kuendbar_bis: "", kuendigungsfrist: "", hinweis: "", notiz: ""};
+  const f = (k, l, wert, typ = "text", ganz = false, extra = "") => `<label${ganz ? ' class="ganz"' : ""}>${l}<input class="inp" name="${k}" type="${typ}" value="${esc(wert ?? "")}" ${extra}></label>`;
+  const form = `<form class="grp fiform" id="fivertrag" data-id="${v ? esc(v.id) : ""}">${f("name", "Name", x.name, "text", true, 'maxlength="80" required placeholder="z. B. Streaming, Handy, Miete"')}
+    ${f("betrag", "Betrag in €", v ? fiFeld(v.betrag_cent) : "", "text", false, 'inputmode="decimal" required placeholder="13,99"')}
+    <label>Rhythmus<select class="inp" name="rhythmus">${Object.entries(FI_RHY).map(([k, t]) => `<option value="${k}"${x.rhythmus === k ? " selected" : ""}>je ${t}</option>`).join("")}</select></label>
+    <label>Kategorie<select class="inp" name="kategorie">${fiKatOpt(x.kategorie)}</select></label>${f("naechste_zahlung", "Nächste Zahlung", x.naechste_zahlung, "date")}
+    ${f("kuendbar_bis", "Kündbar bis", x.kuendbar_bis, "date")}${f("kuendigungsfrist", "Kündigungsfrist", x.kuendigungsfrist, "text", false, 'maxlength="120" placeholder="z. B. 1 Monat zum Monatsende"')}
+    ${f("hinweis", "Hinweis", x.hinweis, "text", false, 'list="fihinweise" maxlength="60" placeholder="z. B. ungenutzt"')}<datalist id="fihinweise"><option value="ungenutzt"><option value="zu teuer"><option value="prüfen"></datalist>
+    ${f("notiz", "Notiz", x.notiz, "text", true, 'maxlength="1000"')}
+    <span class="k">${v ? `<button class="btn danger" type="button" data-fivweg="${esc(v.id)}">${icon("eye-off")}Ausblenden</button>` : "<span></span>"}<button class="btn pri">${v ? "Speichern" : "Anlegen"}</button></span></form>`;
+  if (!v) return {lead: sq("repeat", "indigo", "xxl"), title: "Neuer Vertrag", sub: fiBer(FIN.bereich), body: form};
+  return {lead: fiEmo(v.emoji, "xl"), title: pv(v.name), sub: `${fiEur(v.monat_cent)} im Monat · ${fiEur(v.jahr_cent)} im Jahr${v.status === "gekuendigt" ? " · gekündigt" : ""}`,
+    actions: v.status === "aktiv" ? `<button class="btn" type="button" data-fivstatus="${esc(v.id)}|gekuendigt">${icon("ban")}Gekündigt</button>` + (v.hinweis === "ungenutzt" ? "" : `<button class="btn" type="button" data-fivhinweis="${esc(v.id)}|ungenutzt">${icon("eye-off")}Nutze ich nicht</button>`)
+      : `<button class="btn" type="button" data-fivstatus="${esc(v.id)}|aktiv">${icon("rotate-ccw")}Wieder aktiv</button>`,
+    body: form + note("„Gekündigt“ notiert nur den Stand. Kündigen musst du beim Anbieter selbst. „Nutze ich nicht“ lässt den Berater daran erinnern.")};
+};
+SHEETS.fiziel = id => {
+  const z = id === "neu" ? null : fiZ(id); if (id !== "neu" && !z) return null;
+  const form = `<form class="grp fiform" id="fizielform" data-id="${z ? esc(z.id) : ""}"><label class="ganz">Name<input class="inp" name="name" value="${esc(z ? z.name : "")}" maxlength="80" required placeholder="z. B. Notgroschen"></label>
+    <label>Ziel in €<input class="inp" name="ziel" inputmode="decimal" value="${z ? esc(fiFeld(z.ziel_cent)) : ""}" required placeholder="5.000"></label>${z ? "" : `<label>Schon gespart in €<input class="inp" name="stand" inputmode="decimal" placeholder="0"></label>`}
+    <label>Bis (optional)<input class="inp" type="date" name="bis" value="${esc(z ? z.bis : "")}"></label>
+    <span class="k">${z ? `<button class="btn danger" type="button" data-fizielweg="${esc(z.id)}">${icon("eye-off")}Ausblenden</button>` : "<span></span>"}<button class="btn pri">${z ? "Speichern" : "Anlegen"}</button></span></form>`;
+  if (!z) return {lead: sq("piggy-bank", "green", "xxl"), title: "Neues Sparziel", sub: fiBer(FIN.bereich), body: form};
+  const p = Math.min(100, Math.round(100 * z.stand_cent / z.ziel_cent)), rest = Math.max(0, z.ziel_cent - z.stand_cent);
+  const mo = z.bis ? Math.max(1, Math.round((new Date(z.bis + "T12:00") - new Date()) / (30.44 * 864e5))) : 0;
+  return {lead: sq("piggy-bank", "green", "xxl"), title: pv(z.name), sub: `${p} % erreicht${z.bis ? " · bis " + fiTagLang(z.bis) : ""}`,
+    body: `<div class="grp fiziring">${ring(p, "green", ringText(p, "%"))}<div><b>${fiEur(z.stand_cent)}</b><span>von ${fiEur(z.ziel_cent)}</span><span>${rest ? `noch ${fiEur(rest)}` : "Ziel erreicht"}</span></div></div>` +
+      (mo && rest ? note(esc(`Bis ${fiTagLang(z.bis)} fehlen ${fiEur(rest)}. Das sind etwa ${fiEur(Math.ceil(rest / mo))} im Monat.`)) : "") +
+      gh2("Stand ändern") + `<form class="grp fistand" id="fizielstand" data-id="${esc(z.id)}"><input class="inp" name="betrag" inputmode="decimal" placeholder="Betrag, z. B. 200" aria-label="Betrag">
+        <button class="btn" type="button" data-fizieldazu="1">${icon("plus")}Dazu</button><button class="btn" type="button" data-fizieldazu="-1">${icon("minus")}Weg</button><button class="btn pri">Stand setzen</button></form>` +
+      gh2("Angaben") + form + (z.verlauf.length > 1 ? gh2("Verlauf") + grp(more("fizielv-" + z.id, z.verlauf.slice().reverse(), 5, v => row("", esc(fiEur(v.stand_cent)), esc(wer(v.von)), val(esc(ago(v.zeit)))))) : "")};
+};
+SHEETS.fitipps = () => {
+  const u = FIN.daten; if (!u) return null;
+  if (FIN.tippsAlle == null) fiTippsLaden();
+  const E = (FIN.tippsAlle || []).filter(t => t.erledigt && t.bereich === FIN.bereich);
+  const z = (t, offen) => `<div class="todo">${sq(t.art === "agent" ? "bot" : "lightbulb", t.art === "agent" ? "purple" : "yellow")}<div class="t"><p class="wtext">${pv(esc(t.text))}</p><p class="by">${t.art === "agent" ? esc(`${wer(t.von)}, ${ago(t.zeit)}`) : "Hinweis der Zentrale"}</p></div>
+    <button class="btn sm" type="button" data-fitipp="${esc(t.id)}"${offen ? "" : ' data-zurueck="1"'}>${offen ? icon("check") + "Erledigt" : "Zurückholen"}</button></div>`;
+  return {lead: sq("lightbulb", "yellow", "xxl"), title: "Dein Berater", sub: `${u.tipps.length} ${u.tipps.length === 1 ? "Tipp" : "Tipps"} offen · ${fiBer(u.bereich)}`,
+    body: (u.tipps.length ? grp(u.tipps.map(t => z(t, true)).join("")) : empty("Gerade keine Tipps offen.", "circle-check")) + (E.length ? gh2(`Erledigt, ${E.length}`) + grp(more("fitippe", E, 5, t => z(t, false))) : "") +
+      note("Die Tipps kommen aus eingebauten Regeln (ungenutzte Abos, Kündigungsfristen, teure Monate, doppelte Abos) und von deinem Agenten, der deine Buchungen ansieht.")};
+};
+SHEETS.fieingang = () => {
+  const h = FIN.buch; if (!h) return null;
+  const E = h.eingang || [];
+  const z = e => `<div class="row">${sq(e.art === "pdf" ? "file-text" : e.art === "csv" ? "file-spreadsheet" : "image", e.status === "wartet" ? "blue" : "gray")}<span class="t"><b>${esc(e.name)}</b><span>${esc(e.status === "wartet" ? `wartet seit ${ago(e.zeit)}, wird von deinem Agenten gelesen` : `${e.ergebnis || "erledigt"} · ${ago(e.erledigt || e.zeit)}`)}</span></span>
+    ${e.status === "wartet" ? `<button class="btn sm" type="button" data-fieingangok="${e.nr}|erledigt">Erledigt</button>` : e.art !== "csv" ? `<button class="btn sm" type="button" data-fieingangok="${e.nr}|wartet">Nochmal lesen</button>` : ""}</div>`;
+  return {lead: sq("inbox", "blue", "xxl"), title: "Eingang", sub: `Kontoauszüge und Belege · ${fiBer(h.bereich)}`,
+    body: (E.length ? grp(E.map(z).join("")) : empty("Noch keine Dateien.", "inbox")) + note("CSV-Dateien liest die Zentrale sofort. PDF-Auszüge und Bilder liest Claude und trägt die Buchungen ein. Die Dateien bleiben auf diesem Rechner.")};
+};
+
+document.addEventListener("click", async e => {
+  const t = e.target, q = s => t.closest(s); let x;
+  if ((x = q("[data-pvknopf]"))) { pvSetzen(document.body.classList.contains("pv-zu")); return; }
+  if ((x = q("[data-frist]"))) { const [id, art] = x.dataset.frist.split("|"), v = (D.fristen || []).find(f => f.id === id) || fiV(id) || {name: "Dieser Vertrag"};
+    if (art === "gekuendigt" && !(await bestaetigen(`${pvWeg(v.name)} als gekündigt markieren?`, "Kündigen musst du beim Anbieter selbst, hier wird es nur notiert.", "Gekündigt"))) return;
+    x.disabled = true;
+    if (await post(`/api/finanzen/vertraege/${id}`, art === "gekuendigt" ? {status: "gekuendigt"} : {behalten: true})) { if (FIN.daten) fiLaden(); } else x.disabled = false;
+    return; }
+  if ((x = q("[data-fibereich]"))) { if (FIN.bereich !== x.dataset.fibereich) { FIN.bereich = x.dataset.fibereich; FIN.daten = FIN.buch = null; FIN.meldung = null; FIN.tippsAlle = null; FIN.kontoWahl = ""; fiMerke(); renderPage(); fiLaden(); } return; }
+  if ((x = q("[data-fisicht]"))) { FIN.sicht = x.dataset.fisicht; fiMerke(); closeSheet(); renderPage(); return; }
+  if ((x = q("[data-fimonat]"))) { if (x.disabled) return; FIN.monat = x.dataset.fimonat; FIN.sicht = "buch"; fiMerke(); closeSheet(); renderPage(); await fiLaden(); return; }
+  if ((x = q("[data-fitipp]"))) { x.disabled = true; if (await post(`/api/finanzen/tipps/${x.dataset.fitipp}`, {erledigt: !x.dataset.zurueck})) { FIN.tippsAlle = null; $("sheet")._h = null; await fiLaden(); } else x.disabled = false; return; }
+  if ((x = q("[data-fikatsetzen]"))) { const [id, k] = x.dataset.fikatsetzen.split("|"); x.disabled = true; const r = await post(`/api/finanzen/buchungen/${id}`, {kategorie: k});
+    if (r) { FIN.regelHinweis = {id, text: `Gemerkt: ${r.gegenpartei || "Diese Buchung"} ist ab jetzt ${r.kategorie_name}.` + (r.mit_geaendert ? ` ${r.mit_geaendert} weitere ${r.mit_geaendert === 1 ? "Buchung" : "Buchungen"} angepasst.` : "")}; $("sheet")._h = null; await fiLaden(); } else x.disabled = false; return; }
+  if ((x = q("[data-fibuchbereich]"))) { const [id, b] = x.dataset.fibuchbereich.split("|"); if (await post(`/api/finanzen/buchungen/${id}`, {bereich: b})) { closeSheet(); await fiLaden(); } return; }
+  if ((x = q("[data-fibuchweg]"))) { if (!(await bestaetigen("Buchung ausblenden?", "Sie zählt dann nicht mehr mit. Gelöscht wird nichts.", "Ausblenden"))) return; if (await post(`/api/finanzen/buchungen/${x.dataset.fibuchweg}`, {entfernen: true})) { closeSheet(); await fiLaden(); } return; }
+  if ((x = q("[data-fivorschlag]"))) { x.disabled = true; const r = await post("/api/finanzen/vorschlaege/uebernehmen", {bereich: FIN.bereich, schluessel: x.dataset.fivorschlag}); if (r) { await fiLaden(); openSheet("fivertrag:" + r.id); } else x.disabled = false; return; }
+  if ((x = q("[data-fivorschlagnein]"))) { if (!(await bestaetigen("Kein Abo?", "Dann schlägt die Zentrale es nicht mehr vor.", "Kein Abo"))) return; if (await post("/api/finanzen/vorschlaege/ignorieren", {bereich: FIN.bereich, schluessel: x.dataset.fivorschlagnein})) { $("sheet")._h = null; await fiLaden(); } return; }
+  if ((x = q("[data-fivstatus]"))) { const [id, st] = x.dataset.fivstatus.split("|"); if (st === "gekuendigt" && !(await bestaetigen("Als gekündigt markieren?", "Kündigen musst du beim Anbieter selbst, hier wird es nur notiert.", "Gekündigt"))) return;
+    if (await post(`/api/finanzen/vertraege/${id}`, {status: st})) { $("sheet")._h = null; await fiLaden(); } return; }
+  if ((x = q("[data-fivhinweis]"))) { const [id, hw] = x.dataset.fivhinweis.split("|"); if (await post(`/api/finanzen/vertraege/${id}`, {hinweis: hw})) { $("sheet")._h = null; await fiLaden(); } return; }
+  if ((x = q("[data-fivweg]"))) { if (!(await bestaetigen("Vertrag ausblenden?", "Gelöscht wird nichts.", "Ausblenden"))) return; if (await post(`/api/finanzen/vertraege/${x.dataset.fivweg}`, {entfernen: true})) { closeSheet(); await fiLaden(); } return; }
+  if ((x = q("[data-fizielweg]"))) { if (!(await bestaetigen("Sparziel ausblenden?", "Gelöscht wird nichts.", "Ausblenden"))) return; if (await post(`/api/finanzen/ziele/${x.dataset.fizielweg}`, {entfernen: true})) { closeSheet(); await fiLaden(); } return; }
+  if ((x = q("[data-fizieldazu]"))) { const f = x.closest("form"), v = f.elements.betrag.value.trim().replace(/^[+\-−]\s*/, ""); if (!v) { f.elements.betrag.focus(); return; } x.disabled = true;
+    const r = await post(`/api/finanzen/ziele/${f.dataset.id}`, {dazu: (x.dataset.fizieldazu === "-1" ? "-" : "") + v}); x.disabled = false; if (r) { f.reset(); $("sheet")._h = null; await fiLaden(); } return; }
+  if ((x = q("[data-fikontowahl]"))) { FIN.kontoWahl = FIN.kontoWahl === x.dataset.fikontowahl ? "" : x.dataset.fikontowahl; $("sheet")._h = null; renderSheet(); return; }
+  if ((x = q("[data-fikontoweg]"))) { if (!(await bestaetigen("Konto ausblenden?", "Es zählt dann nicht mehr zum Kontostand.", "Ausblenden"))) return; if (await post("/api/finanzen/konto", {id: x.dataset.fikontoweg, entfernen: true})) { FIN.kontoWahl = ""; $("sheet")._h = null; await fiLaden(); } return; }
+  if ((x = q("[data-firbezahlt]"))) { x.disabled = true; if (await post(`/api/finanzen/rechnungen/${x.dataset.firbezahlt}`, {bezahlt: true})) { closeSheet(); await fiLaden(); } else x.disabled = false; return; }
+  if ((x = q("[data-firweg]"))) { if (!(await bestaetigen("Rechnung ausblenden?", "Gelöscht wird nichts.", "Ausblenden"))) return; if (await post(`/api/finanzen/rechnungen/${x.dataset.firweg}`, {entfernen: true})) { closeSheet(); await fiLaden(); } return; }
+  if ((x = q("[data-fieingangok]"))) { const [nr, st] = x.dataset.fieingangok.split("|"); if (await post(`/api/finanzen/eingang/${nr}`, {status: st})) { $("sheet")._h = null; await fiLaden(); } return; }
+  if ((x = q("[data-fiart]"))) { FIN.neuArt = x.dataset.fiart; const f = x.closest("form"); f.elements.art.value = FIN.neuArt; x.parentNode.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === x)); return; }
+});
+document.addEventListener("submit", async e => {
+  const f = e.target; if (!f.id || !/^fi[a-z]/.test(f.id)) return;
+  e.preventDefault();
+  const F = n => (f.elements[n] ? f.elements[n].value.trim() : ""), b = f.querySelector("button.pri") || f.querySelector("button");
+  const fertig = async zu => { if (document.activeElement) document.activeElement.blur(); $("sheet")._h = null; if (zu) closeSheet(); await fiLaden(); };
+  const senden = async (pfad, body) => { if (b) b.disabled = true; const r = await post(pfad, body); if (b) b.disabled = false; return r; };
+  let r;
+  if (f.id === "fisatz") { if (!F("text")) return; r = await senden("/api/finanzen/satz", {text: F("text"), bereich: FIN.bereich});
+    if (r) { FIN.satz = ""; f.reset(); FIN.meldung = {ok: true, text: `Gebucht: ${r.text}, ${fiEur(r.betrag_cent, true)}, ${r.emoji} ${r.kategorie_name}${r.bereich !== FIN.bereich ? ` (${fiBer(r.bereich)})` : ""}.`}; await fertig(); } return; }
+  if (f.id === "fibuchneu") { if (!F("betrag") || !F("text")) return;
+    r = await senden("/api/finanzen/buchungen", {betrag: (F("art") === "ein" ? "" : "-") + F("betrag").replace(/^[+\-−]\s*/, ""), text: F("text"), datum: F("datum"), kategorie: F("kategorie") || undefined, bereich: F("bereich"), konto: F("konto"), notiz: F("notiz")});
+    if (r) { FIN.meldung = {ok: true, text: `Eingetragen: ${r.text}, ${fiEur(r.betrag_cent, true)}, ${r.emoji} ${r.kategorie_name}.`}; FIN.neuArt = "aus"; await fertig(true); } return; }
+  if (f.id === "firechform") { const body = {name: F("name"), betrag: F("betrag"), faellig: F("faellig"), rechnungsnr: F("rechnungsnr"), link: F("link"), notiz: F("notiz")};
+    r = await senden(f.dataset.id ? `/api/finanzen/rechnungen/${f.dataset.id}` : "/api/finanzen/rechnungen", f.dataset.id ? body : Object.assign(body, {bereich: FIN.bereich})); if (r) await fertig(true); return; }
+  if (f.id === "finotiz") { r = await senden(`/api/finanzen/buchungen/${f.dataset.id}`, {notiz: f.elements.notiz.value}); if (r) await fertig(); return; }
+  if (f.id === "fibuchedit") { r = await senden(`/api/finanzen/buchungen/${f.dataset.id}`, {datum: F("datum"), betrag: F("betrag"), text: F("text")}); if (r) await fertig(); return; }
+  if (f.id === "fivertrag") { const body = {name: F("name"), betrag: F("betrag"), rhythmus: F("rhythmus"), kategorie: F("kategorie"), naechste_zahlung: F("naechste_zahlung"), kuendbar_bis: F("kuendbar_bis"),
+      kuendigungsfrist: F("kuendigungsfrist"), hinweis: F("hinweis"), notiz: F("notiz")};
+    r = await senden(f.dataset.id ? `/api/finanzen/vertraege/${f.dataset.id}` : "/api/finanzen/vertraege", f.dataset.id ? body : {...body, bereich: FIN.bereich}); if (r) await fertig(!f.dataset.id); return; }
+  if (f.id === "fizielform") { r = await senden(f.dataset.id ? `/api/finanzen/ziele/${f.dataset.id}` : "/api/finanzen/ziele", f.dataset.id ? {name: F("name"), ziel: F("ziel"), bis: F("bis")} : {bereich: FIN.bereich, name: F("name"), ziel: F("ziel"), stand: F("stand"), bis: F("bis")});
+    if (r) await fertig(!f.dataset.id); return; }
+  if (f.id === "fizielstand") { if (!F("betrag")) return; r = await senden(`/api/finanzen/ziele/${f.dataset.id}`, {stand: F("betrag")}); if (r) { f.reset(); await fertig(); } return; }
+  if (f.id === "fikonto") { r = await senden("/api/finanzen/konto", {bereich: FIN.bereich, name: F("name"), stand: F("stand"), datum: F("datum")}); if (r) { FIN.kontoWahl = ""; await fertig(); } return; }
+});
+document.addEventListener("input", e => { if (e.target.closest && e.target.closest("#fisatz")) FIN.satz = e.target.value; });
+document.addEventListener("change", e => { if (e.target.id === "fidatei" && e.target.files.length) { const L = [...e.target.files]; e.target.value = ""; fiHochladen(L); } });
+const fiOffen = () => PAGE === "finanzen" && !!KEY;
+const fiDateien = e => e.dataTransfer && [...(e.dataTransfer.types || [])].includes("Files");
+document.addEventListener("dragover", e => { if (!fiOffen() || !fiDateien(e)) return; e.preventDefault(); const d = $("fidrop"); if (d) d.classList.add("ueber"); });
+document.addEventListener("dragleave", e => { if (!fiOffen() || e.relatedTarget) return; const d = $("fidrop"); if (d) d.classList.remove("ueber"); });
+document.addEventListener("drop", e => { if (!fiOffen() || !fiDateien(e)) return; e.preventDefault(); const d = $("fidrop"); if (d) d.classList.remove("ueber"); if (e.dataTransfer.files.length) fiHochladen([...e.dataTransfer.files]); });
 
 /* ---------- Klicks und Formulare ---------- */
 document.addEventListener("click", async e => {

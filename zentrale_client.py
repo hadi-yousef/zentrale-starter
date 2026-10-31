@@ -51,6 +51,20 @@ Papierkorb (Seite „Papierkorb“; endgültig löschen darf nur der Besitzer):
   py zentrale_client.py --agent codex papierkorb
   py zentrale_client.py --agent codex notiz-suche "sicherung stick"
 
+Finanzen (Seite „Finanzen“, Privat und Firma getrennt, alles mit --bereich firma auch für die Firma):
+  py zentrale_client.py --agent claude finanzen                      (Überblick als Text)
+  py zentrale_client.py --agent claude buchung "35 € Tanken"           („+1800 Lohn“ = Einnahme, ohne Vorzeichen = Ausgabe)
+  py zentrale_client.py --agent claude buchungen --monat 2030-01
+  py zentrale_client.py --agent claude finanz-import auszug.csv        (CSV sofort, PDF/Bild in den Eingang)
+  py zentrale_client.py --agent claude finanz-eingang                  (PDFs und Bilder, die auf Auslesen warten)
+  py zentrale_client.py --agent claude finanz-eingang-holen 3 --ziel f3.pdf
+  py zentrale_client.py --agent claude buchungen-eintragen --datei buchungen.json --eingang 3
+  py zentrale_client.py --agent claude vertrag-neu "Streaming" --betrag 13,99 --rhythmus monat --kuendbar-bis 2030-02-01
+  py zentrale_client.py --agent claude sparziel "Urlaub" --ziel 1500 --stand 300
+  py zentrale_client.py --agent claude rechnung "Werkstatt" --betrag 290 --faellig 2030-01-31 ; rechnung-bezahlt 1
+  py zentrale_client.py --agent claude finanz-tipp "Streaming seit 2 Monaten ungenutzt, Kündigen spart 168 € im Jahr."
+  py zentrale_client.py --agent claude fristen                        (Abos, die in den nächsten 30 Tagen kündbar sind)
+
 Sonst:
   py zentrale_client.py --agent codex ich                      (wer bin ich für die Zentrale?)
   py zentrale_client.py --agent codex agenten
@@ -66,6 +80,7 @@ import os
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
@@ -127,6 +142,251 @@ class Zentrale:
 
     def post(self, pfad, daten):
         return self._anfrage(pfad, daten)
+
+    # ---------- Finanzen. Beträge in Cent, Buchungen: Einnahme +, Ausgabe − ----------
+
+    def finanzen(self, bereich="privat", monat=""):
+        """Überblick: Kontostand, Monat, Verlauf, Kategorien, Verträge, Vorschläge, Ziele, offene Tipps."""
+        return self.get(f"/api/finanzen?bereich={urllib.parse.quote(bereich)}&monat={urllib.parse.quote(monat or '')}")
+
+    def finanz_get(self, pfad, **q):
+        return self.get(f"/api/finanzen/{pfad}?" + urllib.parse.urlencode({k: v for k, v in q.items() if v not in (None, "")}))
+
+    def finanz_post(self, pfad, body):
+        return self._anfrage(f"/api/finanzen/{pfad}", body, timeout=120)
+
+    def buchung(self, satz, bereich=None, datum=None, kategorie=None, konto="", notiz="", quelle=None):
+        """Satz wie „35 € Tanken“ oder „+1800 Lohn“ buchen. Ohne Vorzeichen = Ausgabe."""
+        return self.finanz_post("satz", {"text": satz, "bereich": bereich, "datum": datum, "kategorie": kategorie, "konto": konto, "notiz": notiz, "quelle": quelle})
+
+    def finanz_datei(self, pfad, bereich="privat", konto=""):
+        """CSV wird sofort eingelesen, PDF und Bilder landen im Finanz-Eingang."""
+        import base64
+        with open(pfad, "rb") as f:
+            daten = base64.b64encode(f.read()).decode()
+        return self.finanz_post("upload", {"name": os.path.basename(pfad), "daten": daten, "bereich": bereich, "konto": konto})
+
+    def finanz_eingang_holen(self, nr, ziel):
+        import shutil
+        req = urllib.request.Request(f"{self.url}/api/finanzen/eingang/{nr}/datei", headers={"Authorization": "Bearer " + self.schluessel})
+        with urllib.request.urlopen(req, timeout=120) as r, open(ziel, "wb") as f:
+            shutil.copyfileobj(r, f, 1024 * 1024)
+        return ziel
+
+
+# ---------- Finanzen: Befehle für Agenten ----------
+
+def _eur(c, plus=False):
+    c = int(c or 0)
+    return ("−" if c < 0 else "+" if plus and c > 0 else "") + f"{abs(c) // 100:,}".replace(",", ".") + f",{abs(c) % 100:02d} €"
+
+
+FINANZ_BEFEHLE = ("finanzen", "buchung", "buchungen", "buchung-aendern", "finanz-import", "finanz-eingang", "finanz-eingang-holen", "finanz-eingang-erledigt",
+                  "buchungen-eintragen", "vertraege", "vertrag-neu", "vertrag-aendern", "sparziele", "sparziel", "sparziel-stand", "kontostand",
+                  "finanz-tipps", "finanz-tipp", "finanz-tipp-erledigt", "rechnungen", "rechnung", "rechnung-bezahlt", "fristen")
+
+
+def finanz_parser(sub, gemeinsam):
+    b = lambda p: p.add_argument("--bereich", default="privat", choices=["privat", "firma"])
+    p = sub.add_parser("finanzen", help="Finanzen: Überblick als Text (Kontostand, Monat, Abos, Ziele, Tipps)", parents=[gemeinsam]); b(p)
+    p.add_argument("--monat", default="", help="JJJJ-MM, Standard: dieser Monat")
+    p = sub.add_parser("buchung", help="Satz wie „35 € Tanken“ oder „+1800 Lohn“ buchen (ohne Vorzeichen = Ausgabe)", parents=[gemeinsam])
+    p.add_argument("satz"); p.add_argument("--bereich", choices=["privat", "firma"]); p.add_argument("--datum", help="JJJJ-MM-TT, Standard: heute")
+    p.add_argument("--kategorie", help="z. B. auto, lebensmittel, abos (sonst automatisch)"); p.add_argument("--konto", default=""); p.add_argument("--notiz", default="")
+    p.add_argument("--quelle", choices=["hand", "agent"])
+    p = sub.add_parser("buchungen", help="Buchungen zeigen", parents=[gemeinsam]); b(p)
+    p.add_argument("--monat", default=""); p.add_argument("--kategorie"); p.add_argument("--suche"); p.add_argument("--anzahl", type=int, default=50)
+    p = sub.add_parser("buchung-aendern", help="Kategorie, Notiz, Bereich einer Buchung ändern oder entfernen", parents=[gemeinsam])
+    p.add_argument("nr"); p.add_argument("--kategorie"); p.add_argument("--notiz"); p.add_argument("--bereich", choices=["privat", "firma"]); p.add_argument("--text")
+    p.add_argument("--entfernen", action="store_true", help="ausblenden (wird nicht gelöscht)")
+    p = sub.add_parser("finanz-import", help="Kontoauszug hochladen: CSV wird sofort eingelesen, PDF/Bild kommt in den Eingang", parents=[gemeinsam]); b(p)
+    p.add_argument("datei"); p.add_argument("--konto", default="", help="Name des Kontos (sonst aus der Datei erraten)")
+    p = sub.add_parser("finanz-eingang", help="PDFs und Bilder, die auf Auslesen warten", parents=[gemeinsam])
+    p.add_argument("--alle", action="store_true", help="auch erledigte")
+    p = sub.add_parser("finanz-eingang-holen", help="Datei aus dem Finanz-Eingang holen", parents=[gemeinsam])
+    p.add_argument("nr"); p.add_argument("--ziel", required=True)
+    p = sub.add_parser("finanz-eingang-erledigt", help="Eingang ohne Buchungen abschließen (z. B. kein Auszug)", parents=[gemeinsam])
+    p.add_argument("nr"); p.add_argument("--ergebnis", default=""); p.add_argument("--zurueck", action="store_true")
+    p = sub.add_parser("buchungen-eintragen", help="Buchungen aus einer JSON-Datei eintragen (aus PDF oder Bild gelesen)", parents=[gemeinsam])
+    p.add_argument("--datei", required=True, help='[{"datum": "2026-10-21", "betrag": "-42,30", "text": "Billa", "gegenpartei": "Billa"}, …] oder {"buchungen": […], "kontostand": {…}}')
+    p.add_argument("--eingang", help="Nummer im Finanz-Eingang (wird danach erledigt)"); p.add_argument("--bereich", choices=["privat", "firma"])
+    p.add_argument("--konto", default=""); p.add_argument("--quelle", choices=["pdf", "bild", "agent"]); p.add_argument("--offen-lassen", action="store_true")
+    p = sub.add_parser("vertraege", help="Verträge und Abos mit Monatssumme und erkannten Abos", parents=[gemeinsam]); b(p)
+    p = sub.add_parser("vertrag-neu", aliases=["abo"], help="Vertrag oder Abo anlegen", parents=[gemeinsam]); b(p)
+    p.add_argument("name"); p.add_argument("--betrag", required=True, help="Preis je Rhythmus, z. B. 13,99")
+    p.add_argument("--rhythmus", default="monat", choices=["monat", "quartal", "jahr", "woche"]); p.add_argument("--kategorie")
+    p.add_argument("--kuendbar-bis", help="JJJJ-MM-TT"); p.add_argument("--frist", default="", help="Kündigungsfrist, z. B. „1 Monat zum Monatsende“")
+    p.add_argument("--naechste", help="nächste Zahlung JJJJ-MM-TT"); p.add_argument("--notiz", default=""); p.add_argument("--hinweis", default="", help="z. B. ungenutzt")
+    p = sub.add_parser("vertrag-aendern", help="Vertrag ändern, kündigen (--status gekuendigt) oder als ungenutzt markieren", parents=[gemeinsam])
+    p.add_argument("nr"); p.add_argument("--betrag"); p.add_argument("--rhythmus", choices=["monat", "quartal", "jahr", "woche"]); p.add_argument("--status", choices=["aktiv", "gekuendigt"])
+    p.add_argument("--hinweis"); p.add_argument("--kuendbar-bis"); p.add_argument("--frist"); p.add_argument("--naechste"); p.add_argument("--notiz"); p.add_argument("--name")
+    p.add_argument("--entfernen", action="store_true"); p.add_argument("--behalten", action="store_true", help="der Besitzer behält es: für diese Frist nicht mehr erinnern")
+    p = sub.add_parser("fristen", help="Abos und Verträge, die in den nächsten 30 Tagen gekündigt werden müssten", parents=[gemeinsam])
+    p = sub.add_parser("sparziele", help="Sparziele zeigen", parents=[gemeinsam]); b(p)
+    p = sub.add_parser("sparziel", help="Sparziel anlegen", parents=[gemeinsam]); b(p)
+    p.add_argument("name"); p.add_argument("--ziel", required=True, help="z. B. 5000"); p.add_argument("--stand", default="0"); p.add_argument("--bis")
+    p = sub.add_parser("sparziel-stand", help="Stand eines Sparziels setzen (Betrag) oder ändern (--dazu)", parents=[gemeinsam])
+    p.add_argument("nr"); p.add_argument("betrag", nargs="?"); p.add_argument("--dazu", help="dazulegen, negativ = wegnehmen")
+    p = sub.add_parser("kontostand", help="Kontostand von Hand setzen", parents=[gemeinsam]); b(p)
+    p.add_argument("betrag"); p.add_argument("--konto", default="Konto"); p.add_argument("--datum")
+    p = sub.add_parser("finanz-tipps", help="offene Tipps des Beraters", parents=[gemeinsam])
+    p.add_argument("--bereich", choices=["privat", "firma"]); p.add_argument("--alle", action="store_true")
+    p = sub.add_parser("finanz-tipp", help="Tipp des Beraters an den Besitzer (erscheint auf der Seite Finanzen)", parents=[gemeinsam]); b(p)
+    p.add_argument("text")
+    p = sub.add_parser("finanz-tipp-erledigt", help="Tipp abhaken", parents=[gemeinsam])
+    p.add_argument("id"); p.add_argument("--zurueck", action="store_true")
+    p = sub.add_parser("rechnungen", help="offene Rechnungen (beim Lohn nachzahlen)", parents=[gemeinsam])
+    p.add_argument("--alle", action="store_true", help="auch bezahlte")
+    p = sub.add_parser("rechnung", help="offene Rechnung eintragen (gleiche Rechnungsnummer = ergänzen)", parents=[gemeinsam]); b(p)
+    p.add_argument("name"); p.add_argument("--betrag", required=True); p.add_argument("--faellig", help="JJJJ-MM-TT"); p.add_argument("--rechnungsnr", default="")
+    p.add_argument("--link", default="", help="Zahl-Link (https://…)"); p.add_argument("--notiz", default=""); p.add_argument("--nicht-bei-lohn", action="store_true")
+    p = sub.add_parser("rechnung-bezahlt", help="Rechnung als bezahlt markieren", parents=[gemeinsam])
+    p.add_argument("nr"); p.add_argument("--zurueck", action="store_true", help="wieder offen")
+
+
+def rzeile(r):
+    return (f"[Nr. {r['nr']}] {'BEZAHLT ' if r['status'] == 'bezahlt' else ''}{r['name']}: {_eur(r['betrag_cent'])}" + (f", fällig {r['faellig']}" if r.get("faellig") else "")
+            + (" (ÜBERFÄLLIG)" if r.get("ueberfaellig") else "") + (f", Rechnung {r['rechnungsnr']}" if r.get("rechnungsnr") else "")
+            + (f", Link {r['link']}" if r.get("link") else "")
+            + (f", Dateien: {', '.join(r['dateien'])}" if r.get("dateien") else ""))
+
+
+def finanz_ausfuehren(z, args):
+    w = args.befehl
+    zeile = lambda x: f"[Nr. {x['nr']}] {x['datum']}  {_eur(x['betrag_cent'], True):>13}  {x['emoji']} {x.get('gegenpartei') or x['text'][:60]}" + \
+        (f" · {x['text'][:60]}" if x.get("gegenpartei") and x["gegenpartei"].lower() != x["text"].lower() else "") + (f"  [{x['bereich']}]" if x.get("bereich") == "firma" else "")
+    vzeile = lambda v: f"[Nr. {v['nr']}] {v['emoji']} {v['name']}: {_eur(v['betrag_cent'])} je {v['rhythmus']} = {_eur(v['monat_cent'])}/Monat" + \
+        (f", nächste {v['naechste']}" if v.get("naechste") else "") + (f", kündbar bis {v['kuendbar_bis']}" if v.get("kuendbar_bis") else "") + \
+        (f"  ({v['hinweis']})" if v.get("hinweis") else "") + ("  GEKÜNDIGT" if v["status"] == "gekuendigt" else "")
+    if w == "finanzen":
+        u = z.finanzen(args.bereich, args.monat)
+        W, K = u["werte"], u["kontostand"]
+        print(f"Finanzen {u['bereich']}, {u['monat_name']}")
+        print(f"Kontostand: {_eur(K['summe_cent'])}" + (" (" + ", ".join(f"{k['name']} {_eur(k['stand_cent'])} am {k['datum']}" for k in K["konten"]) + ")" if K["konten"] else " (noch nicht eingetragen)"))
+        print(f"Einnahmen {_eur(W['einnahmen_cent'])}, Ausgaben {_eur(W['ausgaben_cent'])}, gespart {_eur(W['gespart_cent'])}" +
+              (f" ({W['sparquote']} %)" if W["sparquote"] is not None else "") + (f", aufs Sparen gelegt {_eur(W['sparen_cent'])}" if W["sparen_cent"] else ""))
+        print("Verlauf: " + " | ".join(f"{v['name'][:3]} {_eur(v['einnahmen_cent'], True)} {_eur(-v['ausgaben_cent'])}" for v in u["verlauf"]))
+        if u["kategorien"]:
+            print("Ausgaben nach Kategorie: " + ", ".join(f"{k['emoji']} {k['name']} {_eur(k['summe_cent'])}" for k in u["kategorien"]))
+        print(f"Verträge und Abos: {_eur(u['vertraege_monat_cent'])} im Monat")
+        for v in u["vertraege"]:
+            print("  " + vzeile(v))
+        for v in u["vorschlaege"]:
+            print(f"  Erkannt (noch kein Vertrag): {v['name']} {_eur(v['betrag_cent'])} je {v['rhythmus']}, {v['monate']} Monate, zuletzt {v['letzte']}")
+        for zl in u["ziele"]:
+            print(f"Sparziel [Nr. {zl['nr']}] {zl['name']}: {_eur(zl['stand_cent'])} von {_eur(zl['ziel_cent'])}" + (f" bis {zl['bis']}" if zl.get("bis") else ""))
+        for t in u["tipps"]:
+            print(f"Tipp ({t['id']}): {t['text']}")
+        for r in u.get("rechnungen") or []:
+            print("Offene Rechnung " + rzeile(r))
+        if u["eingang_wartet"]:
+            print(f"Finanz-Eingang: {u['eingang_wartet']} {'Datei wartet' if u['eingang_wartet'] == 1 else 'Dateien warten'} auf Auslesen (finanz-eingang).")
+        print(f"{u['buchungen_gesamt']} Buchungen" + (f" von {u['erste']} bis {u['letzte']}" if u["erste"] else ""))
+    elif w == "buchung":
+        x = z.buchung(args.satz, args.bereich, args.datum, args.kategorie, args.konto, args.notiz, args.quelle)
+        print("Gebucht: " + zeile(x) + f"  ({x['kategorie_name']}, {x['bereich']})")
+    elif w == "buchungen":
+        d = z.finanz_get("buchungen", bereich=args.bereich, monat=args.monat, kategorie=args.kategorie, q=args.suche, anzahl=args.anzahl)
+        for x in d["buchungen"]:
+            print(zeile(x))
+        print(f"{len(d['buchungen'])} von {d['anzahl']} Buchungen, Summe {_eur(sum(x['betrag_cent'] for x in d['buchungen']), True)}")
+    elif w == "buchung-aendern":
+        b = {k: v for k, v in (("kategorie", args.kategorie), ("notiz", args.notiz), ("bereich", args.bereich), ("text", args.text)) if v is not None}
+        if args.entfernen:
+            b["entfernen"] = True
+        x = z.finanz_post(f"buchungen/{args.nr}", b)
+        print(("Ausgeblendet: " if x.get("entfernt") else "Geändert: ") + zeile(x) + (f"  (dazu {x['mit_geaendert']} weitere dieser Gegenpartei)" if x.get("mit_geaendert") else ""))
+    elif w == "finanz-import":
+        r = z.finanz_datei(args.datei, args.bereich, args.konto)
+        if r["art"] == "csv":
+            e = r["ergebnis"]
+            print(f"Eingelesen ({e['bank']}, {e['von']} bis {e['bis']}): {e['text']}." + (f" Kontostand {e['konto']}: {_eur(e['kontostand'])}." if e.get("kontostand") is not None else ""))
+            for f in e["fehler"]:
+                print("  " + f)
+        else:
+            print(f"Im Finanz-Eingang: Nr. {r['eingang']['nr']} ({r['art']})" + (", war schon da" if r.get("schon_da") else ", wartet auf Auslesen"))
+    elif w == "finanz-eingang":
+        for e in z.finanz_get("eingang", alle="1" if args.alle else "0")["eingang"]:
+            print(f"[Nr. {e['nr']}] {e['status']}: {e['name']} ({e['art']}, {e['bereich']}, {e['bytes'] // 1024} kB, {time.strftime('%d.%m. %H:%M', time.localtime(e['zeit']))})" +
+                  (f" → {e['ergebnis']}" if e.get("ergebnis") else ""))
+    elif w == "finanz-eingang-holen":
+        print("Gespeichert:", z.finanz_eingang_holen(args.nr, args.ziel))
+    elif w == "finanz-eingang-erledigt":
+        e = z.finanz_post(f"eingang/{args.nr}", {"status": "wartet" if args.zurueck else "erledigt", "ergebnis": args.ergebnis})
+        print(f"Eingang Nr. {e['nr']}: {e['status']}")
+    elif w == "buchungen-eintragen":
+        with open(args.datei, encoding="utf-8") as f:
+            d = json.load(f)
+        body = d if isinstance(d, dict) else {"buchungen": d}
+        for k, v in (("eingang", args.eingang), ("bereich", args.bereich), ("konto", args.konto), ("quelle", args.quelle)):
+            if v:
+                body[k] = v
+        body["erledigt"] = not args.offen_lassen
+        r = z.finanz_post("buchungen/menge", body)
+        print(f"{r['neu']} neu, {r['doppelt']} doppelt, {r['zusammengefuehrt']} zusammengeführt" + (f", Eingang Nr. {args.eingang} erledigt" if args.eingang and not args.offen_lassen else ""))
+        for f in r["fehler"]:
+            print("  " + f)
+    elif w == "vertraege":
+        u = z.finanzen(args.bereich)
+        print(f"Verträge und Abos ({u['bereich']}): {_eur(u['vertraege_monat_cent'])} im Monat")
+        for v in u["vertraege"]:
+            print(vzeile(v))
+        for v in u["vorschlaege"]:
+            print(f"Erkannt, noch nicht eingetragen: {v['name']} {_eur(v['betrag_cent'])} je {v['rhythmus']} ({v['monate']} Monate, zuletzt {v['letzte']}), Schlüssel „{v['schluessel']}“")
+    elif w in ("vertrag-neu", "abo"):
+        v = z.finanz_post("vertraege", {"bereich": args.bereich, "name": args.name, "betrag": args.betrag, "rhythmus": args.rhythmus, "kategorie": args.kategorie,
+                                        "kuendbar_bis": args.kuendbar_bis or "", "kuendigungsfrist": args.frist, "naechste_zahlung": args.naechste or "",
+                                        "notiz": args.notiz, "hinweis": args.hinweis})
+        print("Angelegt: " + vzeile(v))
+    elif w == "vertrag-aendern":
+        b = {k: v for k, v in (("betrag", args.betrag), ("rhythmus", args.rhythmus), ("status", args.status), ("hinweis", args.hinweis), ("kuendbar_bis", args.kuendbar_bis),
+                               ("kuendigungsfrist", args.frist), ("naechste_zahlung", args.naechste), ("notiz", args.notiz), ("name", args.name)) if v is not None}
+        if args.entfernen:
+            b["entfernen"] = True
+        if args.behalten:
+            b["behalten"] = True
+        print("Geändert: " + vzeile(z.finanz_post(f"vertraege/{args.nr}", b)))
+    elif w == "fristen":
+        F = z.finanz_get("fristen")["fristen"]
+        print("Keine Kündigungsfristen in den nächsten 30 Tagen." if not F else "\n".join(
+            f"[Nr. {v['nr']}] {v['name']}: kündbar bis {v['kuendbar_bis']} (in {v['tage']} Tagen), {_eur(v['betrag_cent'])} je {v['rhythmus']}"
+            + (f", Testphase bis {v['testphase_bis']}" if v.get("testphase_bis") else "") for v in F))
+    elif w == "sparziele":
+        for zl in z.finanzen(args.bereich)["ziele"]:
+            print(f"[Nr. {zl['nr']}] {zl['name']}: {_eur(zl['stand_cent'])} von {_eur(zl['ziel_cent'])} ({round(100 * zl['stand_cent'] / zl['ziel_cent'])} %)" + (f", bis {zl['bis']}" if zl.get("bis") else ""))
+    elif w == "sparziel":
+        zl = z.finanz_post("ziele", {"bereich": args.bereich, "name": args.name, "ziel": args.ziel, "stand": args.stand, "bis": args.bis or ""})
+        print(f"Sparziel Nr. {zl['nr']} angelegt: {zl['name']}, {_eur(zl['stand_cent'])} von {_eur(zl['ziel_cent'])}")
+    elif w == "sparziel-stand":
+        if not args.betrag and not args.dazu:
+            raise SystemExit("Betrag oder --dazu angeben.")
+        zl = z.finanz_post(f"ziele/{args.nr}", {"stand": args.betrag} if args.betrag else {"dazu": args.dazu})
+        print(f"{zl['name']}: {_eur(zl['stand_cent'])} von {_eur(zl['ziel_cent'])}")
+    elif w == "kontostand":
+        k = z.finanz_post("konto", {"bereich": args.bereich, "name": args.konto, "stand": args.betrag, "datum": args.datum})
+        print(f"Kontostand {k['name']} ({k['bereich']}): {_eur(k['stand_cent'])} am {k['datum']}")
+    elif w == "finanz-tipps":
+        for t in z.finanz_get("tipps", bereich=args.bereich, alle="1" if args.alle else "")["tipps"]:
+            print(f"[{t['id']}] {'erledigt ' if t['erledigt'] else ''}({t['bereich']}, {t['art']}) {t['text']}")
+    elif w == "finanz-tipp":
+        t = z.finanz_post("tipps", {"bereich": args.bereich, "text": args.text})
+        print(f"Tipp Nr. {t['nr']} eingetragen (id {t['id']}).")
+    elif w == "finanz-tipp-erledigt":
+        z.finanz_post(f"tipps/{args.id}", {"erledigt": not args.zurueck})
+        print("Zurückgeholt." if args.zurueck else "Abgehakt.")
+    elif w == "rechnungen":
+        R = z.finanz_get("rechnungen", alle="1" if args.alle else "")["rechnungen"]
+        for r in R:
+            print(rzeile(r))
+        print(f"{sum(1 for r in R if r['status'] == 'offen')} offen, zusammen {_eur(sum(r['betrag_cent'] for r in R if r['status'] == 'offen'))}")
+    elif w == "rechnung":
+        b = {k: v for k, v in (("bereich", args.bereich), ("name", args.name), ("betrag", args.betrag), ("faellig", args.faellig), ("rechnungsnr", args.rechnungsnr),
+                               ("link", args.link), ("notiz", args.notiz)) if v}
+        b["bei_lohn"] = not args.nicht_bei_lohn
+        r = z.finanz_post("rechnungen", b)
+        print("Eingetragen: " + rzeile(r))
+    elif w == "rechnung-bezahlt":
+        print(rzeile(z.finanz_post(f"rechnungen/{args.nr}", {"bezahlt": not args.zurueck})))
 
 
 def zeit(t):
@@ -429,11 +689,13 @@ def main():
     P("papierkorb", "was im Papierkorb liegt (Aufräumen und Notizen)")
     p = P("notiz-suche", "Notizen durchsuchen"); p.add_argument("suche")
 
+    finanz_parser(sub, gemeinsam)
+
     a = ap.parse_args()
     try:
         z = Zentrale(a.url, a.schluessel, a.agent)
         pruefen(z)
-        ausfuehren(z, a)
+        finanz_ausfuehren(z, a) if a.befehl in FINANZ_BEFEHLE or a.befehl == "abo" else ausfuehren(z, a)
     except Fehler as e:
         sys.exit(f"Fehler: {e}")
 

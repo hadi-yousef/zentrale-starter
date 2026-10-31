@@ -22,4 +22,8 @@ Größere Änderungen nur nach Entwurf als Bild und OK des Besitzers (`REGELN.md
 | ![](bilder/08-papierkorb.png) | **Papierkorb** | Oben die Summe. Je Papierkorb (C:\Papierkorb, Notizen) ein Abschnitt mit „Alles leeren“, in jeder Zeile „Löschen“, unten der Windows-Papierkorb mit „Leeren“. Löschen kann nur der Besitzer. |
 | ![](bilder/09-papierkorb-blatt.png) | Name angetippt | Herkunft und Größe, „Zurücklegen“ und „Endgültig löschen“. |
 | ![](bilder/10-uebersicht-dunkel.png) | dunkel | Folgt der Einstellung von Windows. |
-| ![](bilder/11-handy-agenten.png) | Handy | Leiste unten statt links. |
+| ![](bilder/11-handy-agenten.png) | Handy | Leiste unten statt links, bei vielen Seiten zum Wischen. |
+| ![](bilder/14-finanzen.png) | **Finanzen** | Privat/Firma, Auge (Beträge sind verdeckt, bis man es antippt), Überblick/Haushaltsbuch. Vier Zahlen, Bald kündbar, Offen zu zahlen, Berater, Ein- und Ausgaben, Verträge und Abos, Sparziele. |
+
+Die Leiste hat diese Seiten: Übersicht, Agenten, Projekte, Wünsche, Berichte, Notizen, Finanzen, Papierkorb. Einige ältere Bilder
+oben zeigen die Leiste noch ohne „Finanzen“; das ist kein Fehler.

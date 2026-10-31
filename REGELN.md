@@ -69,10 +69,11 @@ Du bist kein Ja-Sager. Der Besitzer hat mehr davon, wenn du ehrlich widersprichs
   - Dazwischen (Texte, Doku, kleine Code-Änderungen): wer gerade im Thema ist, mit mittlerer Denkstufe.
 
 ## Was dem Besitzer vorbehalten ist
-- **Nie endgültig löschen.** Was weg soll, wird auf derselben Platte in den Papierkorb **verschoben**
+- **Nie endgültig löschen, was sich nicht neu erzeugt.** Was weg soll, wird auf derselben Platte in den Papierkorb **verschoben**
   (`py aufraeumen\verschieben.py --papierkorb …`, landet in `C:\Papierkorb`). Der Besitzer sieht alles auf der Seite
   „Papierkorb“ in der Zentrale und kann es dort zurücklegen. Endgültig löschen kann nur er, die Zentrale lässt Agenten
   dort nicht löschen. Auch nie mit `del`, `Remove-Item`, `rm` oder `rmdir` an diesen Regeln vorbei.
+  Einzige Ausnahme: was sich von selbst neu erzeugt, siehe „Sichern und Aufräumen“.
 - Passwörter, Schlüssel, Kontonummern und Zugangsdaten nie eintippen, speichern, kopieren oder wiederholen.
   Passwort-Manager, Schlüsselbund und Ordner wie `.ssh` fasst du nicht an.
 - Riskante Änderungen (System, Treiber, Platten, Firewall, Konten, Programme installieren) nur nach direkter Freigabe des
@@ -89,8 +90,15 @@ Du bist kein Ja-Sager. Der Besitzer hat mehr davon, wenn du ehrlich widersprichs
   - Eigene Dokumente, Fotos und Videos: an einen festen Ort, dazu eine Kopie auf Stick oder Cloud.
 - **Nur eine Kopie je Sache am festen Ort.** Keine zweite Kopie mit Datum, `-alt` oder „Kopie“ anlegen, sondern denselben
   Ort auffrischen.
-- **Reste, die sich neu erzeugen** (`node_modules`, `.venv`, `build`, Caches): auch die nur in den Papierkorb, nie löschen.
-- Jeder Schritt beim Aufräumen kommt ins Protokoll (`aufraeumen\protokoll.jsonl`) und lässt sich zurückschieben.
+- **Direkt entfernen ohne Papierkorb** darf der Agent nur, was sich von selbst neu erzeugt: Zwischenspeicher (uv, pip,
+  npm), `%TEMP%`, `__pycache__` und ähnliche, eindeutige Bau-Reste, `.venv` und `node_modules` in Projekten mit
+  `pyproject.toml`/`uv.lock`/`requirements*.txt` bzw. Lockfile. Und nur mit `aufraeumen\putzen.py`: Es nimmt nur
+  Unberührtes, fasst Downloads, Dokumente, Repos und Daten der Zentrale nie an und schreibt alles ins Protokoll.
+  Das erste Mal nach dem Ja des Besitzers, danach als tägliche Putzrunde (`docs/PUTZEN.md`).
+- **Der Papierkorb ist für den Rest:** was weg soll, sich aber nicht neu erzeugen lässt. Im Zweifel gilt es als „lässt
+  sich nicht neu erzeugen“.
+- **Große Dateien gehören an ihren festen Ort**, nicht doppelt auf dem Rechner. Sicherungskopien nie auf dieselbe Platte.
+- Jeder Schritt beim Aufräumen kommt ins Protokoll (`aufraeumen\protokoll.jsonl`). Verschobenes lässt sich zurückschieben.
 - Zwei Agenten (oder zwei Threads) ändern nie gleichzeitig dieselben Dateien. Wer anfängt, schreibt es als Stand-Notiz.
 
 ## Oberflächen

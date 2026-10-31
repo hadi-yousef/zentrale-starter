@@ -12,6 +12,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
 import berichte
+import finanzen
 import hub
 import laeufe
 import notizen
@@ -114,6 +115,11 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(200, notizen.lesen(arg("pfad")))
             if url.path == "/api/notizen/suche":
                 return self._json(200, {"treffer": notizen.suche(arg("q"))})
+            if url.path == "/api/finanzen" or url.path.startswith("/api/finanzen/"):
+                r = finanzen.api_get(url.path.split("/")[3:], q)
+                if r is None:
+                    return self._json(404, {"fehler": "unbekannt"})
+                return self._json(200, r[1]) if r[0] == "json" else self._send(200, r[1], r[2])
         except ValueError as e:
             return self._json(400, {"fehler": str(e)})
         if url.path in ("/", "/index.html"):
@@ -134,7 +140,9 @@ class Handler(BaseHTTPRequestHandler):
             n = int(self.headers.get("Content-Length") or 0)
         except ValueError:
             n = -1
-        grenze = GROSS if url.path.startswith(("/api/berichte", "/api/notizen")) else hub.MAX_BODY
+        # Finanzen: Kontoauszüge kommen als Datei (base64, bis 10 MB)
+        grenze = finanzen.UPLOAD_MAX if url.path == "/api/finanzen/upload" else 4 * 1024 * 1024 if url.path.startswith("/api/finanzen/") \
+            else GROSS if url.path.startswith(("/api/berichte", "/api/notizen")) else hub.MAX_BODY
         if n < 0 or n > grenze:
             return self._json(413, {"fehler": "Die Anfrage ist zu groß."})
         teile = url.path.split("/")[3:]
@@ -152,6 +160,8 @@ class Handler(BaseHTTPRequestHandler):
         self._json(200, r)
 
     def _post(self, aid, pfad, teile, b):
+        if pfad.startswith("/api/finanzen/"):
+            return finanzen.api_post(aid, teile, b)
         if pfad.startswith("/api/pos/"):
             # /api/pos/projekte[/<id>], /api/pos/aufgaben[/<id>]
             if teile == ["projekte"]:
