@@ -68,14 +68,36 @@ def liste():
     return {"berichte": sorted(X, key=lambda b: -max([b["zeit"]] + [m["zeit"] for m in b["verlauf"]]))}
 
 
+LISTE = re.compile(r"^\s*(?:[-*•]|\d+[.)]|Frage\s*\d+\s*[:.)])\s*", re.I)
+
+
+def _aufteilen(text):
+    """Mehrere Fragen in einer Frage (eine je Zeile, gern als Liste) werden einzelne Fragen, damit der Besitzer sie
+    nacheinander bekommt. Zeilen ohne Fragezeichen gehören als Erklärung zur nächsten Frage."""
+    zeilen = [LISTE.sub("", z).strip() for z in text.splitlines()]
+    zeilen = [z for z in zeilen if z]
+    if sum(z.endswith("?") for z in zeilen) < 2:
+        return [text]
+    teile, puffer = [], []
+    for z in zeilen:
+        puffer.append(z)
+        if z.endswith("?"):
+            teile.append("\n".join(puffer))
+            puffer = []
+    if puffer:
+        teile[-1] += "\n" + "\n".join(puffer)
+    return teile
+
+
 def neu(von, b):
     fragen = []
     for f in (b.get("fragen") or [])[:80]:
         f = f if isinstance(f, dict) else {"text": f}
         t = _text(f.get("text"), 1000)
-        if t:
-            fragen.append({"id": secrets.token_hex(3), "text": t, "antwort": None,
-                           "vorschlaege": [_text(v, 120) for v in (f.get("vorschlaege") or [])[:6] if _text(v, 120)]})
+        vor = [_text(v, 120) for v in (f.get("vorschlaege") or [])[:6] if _text(v, 120)]
+        for teil in (_aufteilen(t) if t else []):
+            fragen.append({"id": secrets.token_hex(3), "text": teil, "antwort": None, "vorschlaege": vor})
+    fragen = fragen[:80]
     with _sperre:
         d = _lesen()
         if len(d["berichte"]) >= 5000:

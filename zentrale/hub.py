@@ -21,7 +21,7 @@ STATE_DIR = Path(os.environ.get("ZENTRALE_DATEN") or Path(__file__).resolve().pa
 SCHLUESSEL = STATE_DIR / "schluessel.json"
 BESITZER = "besitzer"
 MAX_BODY = 64 * 1024
-FASSUNG = "2026-11-01"   # bei jedem Update hochsetzen, auch FASSUNG in index.src.html; der Client und die Seite vergleichen
+FASSUNG = "2026-11-02"   # bei jedem Update hochsetzen, auch FASSUNG in index.src.html; der Client und die Seite vergleichen
 ORDNER = Path(__file__).resolve().parent.parent   # der Ordner dieser Zentrale (zentrale-starter)
 
 _lock = threading.Lock()

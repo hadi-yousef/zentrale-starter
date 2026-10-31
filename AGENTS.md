@@ -282,7 +282,7 @@ Erst wenn der Besitzer es will, je mit eigener Freigabe:
 | Wunsch lesen (vor der Arbeit) | `wunsch-zeigen 3` |
 | Stand festhalten | `wunsch-notiz 3 "Stand: … · Als Nächstes: … · Wartet auf: …"` |
 | Wunsch abhaken | `wunsch-erledigt 3 --ergebnis "…"` |
-| Frage an den Besitzer | `bericht-neu "Titel" --kurz "…" --frage "…" --vorschlaege "Ja\|Nein"` |
+| Frage an den Besitzer | `bericht-neu "Titel" --kurz "…" --frage "…" --vorschlaege "Ja\|Nein" --frage "…"` (je Frage ein `--frage`, er bekommt sie nacheinander) |
 | Auf Antwort warten | `berichte-warten` (endet, sobald er antwortet; Code 3 = keine Antwort) |
 | Im Chat beantwortet | `bericht-erledigt 4 --antwort "Ja"` |
 | Projekte und Aufgaben | `projekte`, `projekt-neu`, `projekt-schritt`, `aufgabe`, `aufgabe-erledigt` |
@@ -308,6 +308,27 @@ So geht es: erst `notiz-suche "drucker"`, gibt es die Notiz, dann `notiz-ergaenz
 (hängt den Text mit Datum unten an), sonst `notiz-neu "Drucker" --ordner Geräte --text "…"`. Nur Fakten mit Datum und
 Quelle, nie Passwörter, Kontonummern oder Gesundheitsdaten.
 
+- **So sieht ein Bericht aus** (immer dieses Format, die Seite „Berichte“ ist darauf gebaut):
+
+  | Teil | Was hinein gehört | Beispiel |
+  |---|---|---|
+  | Titel | `Thema: Ergebnis – offener Punkt`, kurz, ohne Kürzel | `Fotos: 3 Ordner doppelt – welcher bleibt?` |
+  | `--kurz` | 2–3 Sätze Stand: was du gemacht hast, was herauskam, was noch fehlt. **Keine Fragen.** | `In Bilder, Desktop und Downloads liegen dieselben 412 Fotos (2,1 GB). Ich habe nichts verschoben.` |
+  | `--text-datei` | der ganze Bericht als Markdown (Tabellen, Einzelheiten). Öffnet sich extra über „Ganzen Bericht lesen“. **Keine Fragen.** | `aufraeumen\fotos.md` |
+  | `--frage` | **je Entscheidung ein eigenes `--frage`**, ein Satz, konkret. Der Besitzer bekommt sie nacheinander: erst Frage 1, nach seiner Antwort Frage 2. | `Welcher Ordner bleibt?` |
+  | `--vorschlaege` | direkt hinter jede Frage, 2–4 fertige Antworten zum Antippen, getrennt mit `\|`. Bei einer echten Wahl die Möglichkeiten nennen, nicht nur Ja/Nein. | `Bilder\Fotos\|Desktop\Fotos` |
+  | `--projekt`, `--wunsch` | Projekt und Wunsch-Nummer, damit er den Bericht zuordnen kann | `--projekt Aufräumen --wunsch 7` |
+
+  ```powershell
+  py zentrale_client.py --agent claude bericht-neu "Fotos: 3 Ordner doppelt – welcher bleibt?" `
+      --kurz "In Bilder, Desktop und Downloads liegen dieselben 412 Fotos (2,1 GB). Ich habe nichts verschoben." `
+      --text-datei aufraeumen\fotos.md --projekt Aufräumen --wunsch 7 `
+      --frage "Welcher Ordner bleibt?" --vorschlaege "Bilder\Fotos|Desktop\Fotos" `
+      --frage "Die anderen zwei in den Papierkorb?" --vorschlaege "Ja|Nein, erst ansehen"
+  ```
+  Falsch: alle Fragen in `--kurz` oder in den Text schreiben, mehrere Fragen in ein `--frage` packen, Fragen ohne
+  Vorschläge. Ein Bericht ohne Frage (nur Ergebnis) ist erlaubt, dann ohne `--frage`. Wie es richtig aussieht:
+  `docs/bilder/05-berichte.png`.
 - Ist der Besitzer im Chat, fragst du dort und brauchst keinen Bericht. `berichte-warten` nur starten, wenn du wirklich auf
   eine Antwort wartest, die er in der Zentrale gibt.
 - Längere Texte für Berichte und Notizen erst in eine Datei schreiben (UTF-8) und mit `--text-datei` schicken. Das ist unter

@@ -199,16 +199,56 @@ select.inp{padding-right:8px}
 .acts .btn.pri{background:var(--blue)}
 @media (max-width:640px){.veil{padding:0;align-items:flex-end}.sheet{border-radius:18px 18px 0 0;max-height:94vh;width:100%}}
 
-/* Berichte: Fragen wie in der Nachrichten-App */
-.chat{display:flex;flex-direction:column;gap:8px;padding:4px 2px}
-.bl{max-width:82%;padding:9px 13px;border-radius:18px;font-size:15px;line-height:1.38;white-space:pre-wrap;overflow-wrap:anywhere}
-.bl.ag{align-self:flex-start;background:var(--grp);border-bottom-left-radius:6px}
-.bl.ich{align-self:flex-end;background:var(--blue);color:#fff;border-bottom-right-radius:6px}
-.bl small{display:block;font-size:11.5px;opacity:.7;margin-bottom:2px}
-.vor{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;margin:4px 0 2px}
-.vor .btn{border-radius:18px;background:color-mix(in srgb,var(--blue) 13%,transparent)}
-.antwort{display:flex;gap:8px;margin-top:10px}
-.antwort .inp{border-radius:19px}
+
+/* Berichte wie in der Zentrale des Vorbilds: links die Liste, rechts der Verlauf */
+.be2{display:grid;grid-template-columns:340px minmax(0,1fr);background:var(--card);border-radius:20px;box-shadow:var(--shadow);overflow:hidden;height:min(720px,calc(100vh - 200px));min-height:520px}
+.bel{border-right:1px solid var(--sep);overflow:auto;background:color-mix(in srgb,var(--fill) 30%,transparent)}
+.belk{padding:14px 16px 8px;display:flex;gap:8px;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:1;background:var(--card)}.belk b{font-size:17px}.belk span{font-size:13px}
+.ben{display:grid;grid-template-columns:10px 54px minmax(0,1fr);gap:0 10px;width:100%;text-align:left;padding:11px 14px 11px 8px;border-bottom:1px solid var(--sep);align-items:start}
+.ben .pt{width:9px;height:9px;border-radius:50%;background:var(--blue);margin-top:6px}.ben .pt.leer{background:none}
+.beav{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:#fff;flex:none}.beav svg{width:19px;height:19px}
+.ben .t{min-width:0;display:flex;flex-direction:column}.ben .t b{display:flex;justify-content:space-between;gap:8px;font-size:14.5px;font-weight:600}.ben .t b span{font-weight:400;color:var(--ink2);font-size:12.5px;flex:none}
+.ben .t>span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--ink2);font-size:13px;margin-top:2px}
+.befr{font-style:normal;display:inline-flex;width:max-content;align-items:center;gap:4px;margin-top:5px;font-size:12px;font-weight:600;color:var(--orange);background:color-mix(in srgb,var(--orange) 14%,transparent);border-radius:999px;padding:2px 8px}
+.befr svg{width:13px;height:13px}.befr.ok{color:var(--green);background:color-mix(in srgb,var(--green) 14%,transparent)}
+.benr{font-size:14px;font-weight:700;color:var(--blue);font-variant-numeric:tabular-nums;white-space:nowrap;margin-top:1px;letter-spacing:-.01em}
+.ben .t>span.bezl{display:flex;flex-wrap:wrap;align-items:center;gap:0 6px;overflow:visible;margin-top:0;-webkit-line-clamp:unset}.bezl .befr{margin-top:5px}
+.beab{font-style:normal;display:inline-flex;width:max-content;max-width:100%;align-items:center;margin-top:5px;font-size:12px;font-weight:600;border-radius:999px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  --ab:var(--ink2);color:var(--ab);background:color-mix(in srgb,var(--ab) 14%,transparent)}
+.beab.cx{--ab:#0C8A6B}.beab.cl{--ab:#B85A38}.beab.as{--ab:#2563EB}
+@media (prefers-color-scheme:dark){.beab.cx{--ab:#4EE0B5}.beab.cl{--ab:#F0A17F}.beab.as{--ab:#8CC8FF}}
+.bekn{display:block;font-size:11.5px;font-weight:650;color:var(--ink2);margin-bottom:2px;font-variant-numeric:tabular-nums}
+.bem.ich.woanders{font-style:italic;opacity:.85}
+.beck .btn{flex:none}
+.belk{flex-wrap:wrap}.beproj{flex:1 1 100%;height:32px;font-size:13.5px;padding:0 8px;margin-top:2px}
+.beab2{display:flex;align-items:center;gap:6px;margin:0;padding:12px 16px 6px;font:600 12.5px var(--font);color:var(--ink2);border-bottom:1px solid var(--sep)}
+.beab2.warte{color:var(--orange)}.beab2 .i{width:14px;height:14px}
+.bemehr{display:block;width:100%;padding:14px;color:var(--blue);font-size:14px;text-align:center}
+.ben:hover{background:var(--hover)}.ben.on{background:color-mix(in srgb,var(--blue) 14%,transparent)}
+.bec{display:flex;flex-direction:column;min-width:0;height:100%;overflow:hidden}
+.beck{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--sep);background:var(--card)}.beck .beav{width:34px;height:34px}
+.beck .t{flex:1;min-width:0}.beck b{display:block;font-size:15px}.beck .t>span{color:var(--ink2);font-size:12.5px;display:block}
+.bez{flex:1;overflow:auto;padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.betag{align-self:center;color:var(--ink2);font-size:11.5px;margin:6px 0 2px}
+.bem{max-width:78%;align-self:flex-start;background:var(--fill);border-radius:18px;padding:9px 13px;font-size:14.5px;line-height:1.4;white-space:pre-wrap;overflow-wrap:anywhere}
+.bem.ich{align-self:flex-end;background:var(--blue);color:#fff}
+.bem .nr{display:block;font-size:11.5px;font-weight:650;color:var(--orange);margin-bottom:2px}
+.bewer{font-size:11.5px;color:var(--ink2);margin:4px 0 -4px 12px}
+.bestatus{align-self:flex-end;font-size:11.5px;color:var(--ink2);margin:-4px 6px 0}
+.bekarte{align-self:flex-start;max-width:86%;background:var(--card);border-radius:16px;box-shadow:0 0 0 1px var(--sep),var(--shadow);padding:14px 16px;font-size:14px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
+.bekarte h4{font-size:15.5px;margin:0 0 6px;display:flex;align-items:center;gap:8px;white-space:normal}.bekarte h4 svg{width:16px;height:16px;color:var(--orange);flex:none}
+.bekarte .btn{margin-top:10px}
+.bechips{display:flex;flex-wrap:wrap;gap:6px;align-self:flex-start;max-width:86%;margin-left:4px}
+.bechip{border-radius:999px;padding:6px 12px;font-size:13.5px;background:var(--card);box-shadow:0 0 0 1px color-mix(in srgb,var(--blue) 45%,transparent);color:var(--blue)}
+.bechip.on{background:var(--blue);color:#fff}.bechip:hover{background:color-mix(in srgb,var(--blue) 10%,transparent)}
+.berest{align-self:center;color:var(--ink2);font-size:12px;margin-top:4px;display:flex;align-items:center;gap:6px}.berest svg{width:13px;height:13px}
+.bef{display:flex;gap:8px;align-items:flex-end;padding:10px 14px 14px;border-top:1px solid var(--sep)}
+.bef .inp{flex:1;border-radius:20px;height:auto;min-height:38px;max-height:140px;padding:9px 14px;resize:none;line-height:1.35;field-sizing:content}
+.bef .btn{border-radius:50%;width:36px;height:36px;padding:0;justify-content:center;flex:none}
+#sheet .bec{height:auto;overflow:visible}#sheet .bez{padding:12px 4px;overflow:visible}#sheet .bef{padding:10px 0 0;position:sticky;bottom:0;background:var(--sheet)}
+@media (max-width:900px){.be2{grid-template-columns:1fr;height:auto;min-height:0}.be2>.bec{display:none}.bel{border-right:0}}
+.belk .muted{color:var(--ink2)}
+.beleer{padding:28px 16px;color:var(--ink2);text-align:center;font-size:14px;display:flex;flex-direction:column;align-items:center;gap:8px}.beleer svg{width:28px;height:28px}
 
 /* Markdown */
 .mdx{font-size:15px;line-height:1.55;overflow-wrap:anywhere}
@@ -373,7 +413,7 @@ async function post(pfad, body){
 }
 
 /* ---------- Daten ---------- */
-const FASSUNG = "2026-11-01";   // gleich wie hub.FASSUNG
+const FASSUNG = "2026-11-02";   // gleich wie hub.FASSUNG
 const D = {pos: null, wuensche: null, berichte: null, notizen: null, agenten: null, laeufe: null, papierkorb: null, ich: null, fehler: ""};
 async function laden(){
   if (!KEY) return;
@@ -538,18 +578,102 @@ function viewWuensche(){
   return h;
 }
 
-/* Berichte */
+/* Berichte: links die Liste (offene Fragen oben, älteste zuerst), rechts der Verlauf wie in einer Nachrichten-App.
+   Die Fragen kommen nacheinander: die nächste erst nach der Antwort. Am Handy öffnet ein Bericht als Blatt. */
 function berichtZeile(b){
   const o = offeneFragen(b);
-  return row(sq("message-square-text", o ? "green" : "gray"), `${b.gelesen ? "" : `<span class="dot run" style="margin-right:7px;vertical-align:1px"></span>`}Bericht Nr. ${b.nr} · ${esc(b.titel)}`, `${esc(b.von)} · ${esc(ago(Math.max(b.zeit, ...b.verlauf.map(m => m.zeit))))}${b.kurz ? " · " + esc(b.kurz) : ""}`,
-    o ? chip(o === 1 ? "1 Frage" : o + " Fragen", "run") : "", sh("bericht:" + b.id));
+  return row(sq("message-square-text", o ? "green" : "gray"), `${b.gelesen ? "" : `<span class="dot run" style="margin-right:7px;vertical-align:1px"></span>`}Bericht Nr. ${b.nr} · ${esc(b.titel)}`, `${esc(wer(b.von))} · ${esc(ago(beZuletzt(b)))}${b.kurz ? " · " + esc(b.kurz) : ""}`,
+    o ? chip(o === 1 ? "1 Frage" : o + " Fragen", "run") : "", `data-act="beoeffnen" data-id="${esc(b.id)}"`);
+}
+const BER = {sel: "", text: {}, projekt: "", mehr: false};
+const schmal = () => matchMedia("(max-width:900px)").matches;
+const beAlle = () => D.berichte?.berichte || [];
+const beInfo = id => id ? beAlle().find(b => b.id === id) : null;
+const beZuletzt = b => Math.max(b.zeit, ...b.verlauf.map(m => m.zeit));
+const beWer = v => v === "besitzer" ? "Du" : wer(v);
+const abArt = v => String(v || "").startsWith("codex") ? "cx" : String(v || "").startsWith("claude") ? "cl" : "";
+const abSchild = (v, projekt) => `<em class="beab ${abArt(v)}">${esc([wer(v), projekt].filter(Boolean).join(" · "))}</em>`;
+const beAv = (b, gross) => { const a = abArt(b.von), [c, ic] = a === "cx" ? ["teal", "terminal"] : a === "cl" ? ["purple", "bot"] : ["gray", "bot"];
+  return `<span class="beav" style="background:var(--${c})${gross ? ";width:56px;height:56px" : ""}">${icon(ic)}</span>`; };
+function beDatum(t){
+  const d = new Date(t * 1000), h = new Date();
+  if (d.toDateString() === h.toDateString()) return d.toLocaleTimeString("de-DE", {hour: "2-digit", minute: "2-digit"});
+  return d.toLocaleDateString("de-DE", d.getFullYear() === h.getFullYear() ? {day: "numeric", month: "short"} : {day: "numeric", month: "short", year: "numeric"});
+}
+function beGelesen(b){ if (!b.gelesen && !b._gemeldet) { b._gemeldet = 1; api(`/api/berichte/${b.id}/gelesen`, {ja: true}).catch(() => {}); } }
+function beListe(){
+  const A = beAlle(), offen = A.reduce((n, b) => n + offeneFragen(b), 0);
+  const P = [...new Set(A.map(b => b.projekt || ""))].filter(Boolean).sort((a, b) => a.localeCompare(b, "de"));
+  if (BER.projekt && !P.includes(BER.projekt)) BER.projekt = "";
+  const B = BER.projekt ? A.filter(b => b.projekt === BER.projekt) : A;
+  const O = B.filter(b => offeneFragen(b)).sort((a, b) => a.zeit - b.zeit), R = B.filter(b => !offeneFragen(b)), N = BER.mehr ? R.length : 12;
+  const zeile = b => {
+    const o = offeneFragen(b), m = b.verlauf[b.verlauf.length - 1], vor = m ? `${beWer(m.von)}: ${m.text}` : `${wer(b.von)}: ${b.kurz || b.titel}`;
+    return `<button class="ben${b.id === BER.sel ? " on" : ""}" type="button" data-act="besel" data-id="${esc(b.id)}"><span class="pt${b.gelesen ? " leer" : ""}"></span><strong class="benr">${b.nr ? "Nr. " + b.nr : ""}</strong>
+      <span class="t"><b>${esc(b.titel)}<span>${esc(beDatum(beZuletzt(b)))}</span></b><span>${esc(vor)}</span><span class="bezl">${abSchild(b.von, b.projekt)}${o ? `<i class="befr">${icon("message-circle-question")} ${o} ${o === 1 ? "Frage" : "Fragen"}</i>` : b.fragen.length ? `<i class="befr ok">${icon("check")} ${b.erledigt ? "erledigt" : "beantwortet"}</i>` : ""}</span></span></button>`; };
+  const filter = P.length > 1 ? `<select class="inp beproj" data-beproj aria-label="Nach Projekt filtern"><option value="">Alle Projekte (${A.length})</option>${P.map(x => `<option value="${esc(x)}"${x === BER.projekt ? " selected" : ""}>${esc(x)} (${A.filter(b => b.projekt === x).length})</option>`).join("")}</select>` : "";
+  return `<div class="bel"><div class="belk"><b>Berichte</b><span class="muted">${offen ? `${offen} ${offen === 1 ? "Frage" : "Fragen"} offen` : "alles beantwortet"}</span>${filter}</div>` +
+    (!A.length ? `<p class="beleer">Noch keine Berichte.<br>Wenn dein Agent eine Entscheidung braucht, fragt er hier, mit Vorschlägen zum Antippen.</p>` :
+     (O.length ? `<h5 class="beab2 warte">${icon("message-circle-question")}Wartet auf dich</h5>${O.map(zeile).join("")}` : "") +
+     (R.length ? (O.length ? `<h5 class="beab2">Alle anderen</h5>` : "") + R.slice(0, N).map(zeile).join("") +
+       (R.length > N ? `<button class="bemehr" type="button" data-act="bemehr">Ältere anzeigen (${R.length - N})</button>` : "") : "") +
+     (!B.length ? `<p class="beleer">Keine Berichte in diesem Projekt.</p>` : "")) + `</div>`;
+}
+/* Verlauf: Bericht-Karte, dann die Fragen nacheinander (die nächste erst nach der Antwort), dazwischen freie Nachrichten nach Zeit */
+function beVerlauf(b){
+  const E = [], n = b.fragen.length, aktuell = b.fragen.findIndex(f => !f.antwort);
+  let seit = b.zeit;
+  E.push([b.zeit, 0, `<span class="betag">${esc(beDatum(b.zeit))}</span><div class="bekarte">${b.nr ? `<span class="bekn">Bericht Nr. ${b.nr}</span>` : ""}<h4>${icon("file-text")}${esc(b.titel)}</h4>${esc(b.kurz || "")}${b.text ? `<br><button class="btn sm" type="button" ${sh("berichttext:" + b.id)}>${icon("book-open")}Ganzen Bericht lesen</button>` : ""}</div>`]);
+  b.fragen.forEach((f, k) => {
+    if (aktuell >= 0 && k > aktuell) return;
+    E.push([seit, 2 * k + 1, `<div class="bem"><span class="nr">Frage ${k + 1} von ${n}</span>${esc(f.text)}</div>` +
+      (!f.antwort && f.vorschlaege.length ? `<div class="bechips">${f.vorschlaege.map(v => `<button class="bechip" type="button" data-act="bechip" data-id="${esc(b.id)}" data-frage="${esc(f.id)}" data-wert="${esc(v)}">${esc(v)}</button>`).join("")}</div>` : "")]);
+    if (f.antwort) seit = f.antwort.zeit;
+    /* Woanders beantwortet (im Chat mit dem Agenten): steht nicht im Verlauf, darum hier als Blase des Besitzers */
+    if (f.antwort && f.antwort.woanders && !b.verlauf.some(m => m.frage === f.id)) {
+      const nurNotiz = /^im chat beantwortet\.?$/i.test(f.antwort.text || "");
+      E.push([f.antwort.zeit, 2 * k + 2, `<div class="bem ich${nurNotiz ? " woanders" : ""}">${esc(f.antwort.text || "Im Chat beantwortet")}</div>` + (nurNotiz ? "" : `<span class="bestatus">im Chat beantwortet</span>`)]);
+    }
+  });
+  const letzteIch = [...b.verlauf].reverse().find(m => m.von === "besitzer");
+  b.verlauf.forEach((m, k) => {
+    const fk = m.frage ? b.fragen.findIndex(f => f.id === m.frage) : -1;
+    E.push([m.zeit, fk >= 0 ? 2 * fk + 2 : 1000 + k, (m.von !== "besitzer" ? `<span class="bewer">${esc(wer(m.von))}</span>` : "") + `<div class="bem${m.von === "besitzer" ? " ich" : ""}">${esc(m.text)}</div>` +
+      (m === letzteIch ? `<span class="bestatus">${m.abgeholt ? `Bei ${esc(wer(b.von))} angekommen` : "Gesendet, wartet auf " + esc(wer(b.von))}</span>` : "")]);
+  });
+  E.sort((x, y) => x[0] - y[0] || x[1] - y[1]);
+  const rest = aktuell < 0 ? 0 : n - aktuell - 1;
+  return E.map(x => x[2]).join("") + (rest ? `<span class="berest">${icon("clock")}noch ${rest} ${rest === 1 ? "Frage" : "Fragen"} danach</span>` : n && aktuell < 0 ? `<span class="berest">${icon("circle-check")}Alle Fragen beantwortet</span>` : "");
+}
+function beChat(b){
+  const i = b.fragen.findIndex(f => !f.antwort);
+  return `<div class="bez" data-bez="${esc(b.id)}">${beVerlauf(b)}</div><form class="bef" data-form="bnachricht" data-id="${esc(b.id)}" data-frage="${i >= 0 ? esc(b.fragen[i].id) : ""}"><textarea class="inp" rows="1" name="text" data-betext="${esc(b.id)}" aria-label="Antwort" placeholder="${i >= 0 ? `Antwort auf Frage ${i + 1} …` : `Nachricht an ${esc(wer(b.von))} …`}">${esc(BER.text[b.id] || "")}</textarea><button class="btn pri" aria-label="Senden">${icon("arrow-up")}</button></form>`;
+}
+const beTitel = b => (b.nr ? `Nr. ${b.nr} · ` : "") + b.titel;
+const beUnter = b => [wer(b.von), b.projekt, b.wunsch && (wunschZu(b.wunsch) || {}).titel].filter(Boolean).join(" · ");
+const beErledigtKnopf = b => offeneFragen(b) ? `<button class="btn sm" type="button" data-act="beerledigt" data-id="${esc(b.id)}" title="Alle offenen Fragen als beantwortet markieren">${icon("check-check")}Erledigt</button>` : "";
+const beKopf = b => `<div class="beck">${beAv(b)}<span class="t"><b>${esc(beTitel(b))}</b><span>${esc(beUnter(b))}</span></span>${beErledigtKnopf(b)}</div>`;
+/* Neu zeichnen und den Verlauf unten halten (wie in Nachrichten), solange man nicht nach oben gescrollt hat */
+function beUnten(fn){
+  const z = {}; document.querySelectorAll("#pages .bez").forEach(x => z[x.dataset.bez] = x.scrollHeight - x.scrollTop - x.clientHeight < 60);
+  fn();
+  document.querySelectorAll("#pages .bez").forEach(x => { if (z[x.dataset.bez] !== false) x.scrollTop = x.scrollHeight; });
+}
+async function beSenden(bid, text, frage){
+  text = String(text || "").trim(); if (!text) return null;
+  if (document.activeElement) document.activeElement.blur();
+  const ok = await post(`/api/berichte/${bid}/nachricht`, frage ? {text, frage} : {text});
+  if (ok) { BER.text[bid] = ""; $("sheet")._h = null; renderAll(); }
+  return ok;
 }
 function viewBerichte(){
-  const L = D.berichte?.berichte || [], offen = L.filter(b => offeneFragen(b)), rest = L.filter(b => !offeneFragen(b));
-  return kopf("Berichte", `${fragenOffen()} Fragen offen · ${L.length} Berichte`)
-    + (L.length ? "" : empty("<b>Noch keine Berichte</b>Wenn dein Agent eine Entscheidung braucht, fragt er hier, mit Vorschlägen zum Antippen.", "message-square-text"))
-    + (offen.length ? gh("Mit offenen Fragen") + grp(offen.map(berichtZeile).join("")) : "")
-    + (rest.length ? gh("Alle") + grp(more("be-rest", rest, 10, berichtZeile)) : "");
+  const A = beAlle();
+  if (!beInfo(BER.sel) && !schmal() && A.length) BER.sel = (A.filter(b => offeneFragen(b)).sort((a, c) => a.zeit - c.zeit)[0] || A[0]).id;
+  const b = beInfo(BER.sel);
+  if (b && !schmal()) beGelesen(b);
+  return kopf("Berichte", "Ergebnisse und Fragen deiner Agenten")
+    + `<div class="be2">${beListe()}<div class="bec">${b ? beKopf(b) + beChat(b) : `<div class="beleer" style="margin:auto">${icon("message-square-text")}<p>Wähle einen Bericht aus.</p></div>`}</div></div>`
+    + note("Deine Agenten schicken hier Berichte mit Fragen. Die Fragen kommen nacheinander, die nächste erst nach deiner Antwort. Der Agent bekommt deine Antwort sofort.");
 }
 
 /* Notizen */
@@ -611,14 +735,15 @@ const VIEWS = {uebersicht: viewUebersicht, agenten: viewAgenten, projekte: viewP
 function renderPage(){
   if (!D.pos) { setHtml($("pages"), D.fehler ? empty(`<b>Zentrale nicht erreichbar</b>${esc(D.fehler)}`, "wifi-off") : ""); return; }
   const alt = D.ich && D.ich.fassung !== FASSUNG ? `<div class="alt">${icon("triangle-alert")}<span><b>Die Zentrale läuft noch mit der alten Fassung</b>Diese Seite ist neu (${esc(FASSUNG)}), die laufende Zentrale ${esc(D.ich.fassung || "alt")}. Sag deinem Agenten: „Zentrale neu starten“.</span></div>` : "";
-  setHtml($("pages"), `<section class="page on">${alt}${VIEWS[PAGE]()}</section>`);
+  beUnten(() => setHtml($("pages"), `<section class="page on">${alt}${VIEWS[PAGE]()}</section>`));
 }
 function renderAll(){ renderNav(); renderPage(); renderSheet(); }
 
 /* ---------- Blätter (Fenster beim Antippen) ---------- */
 let SHEET = null;
 const SHEETS = {};
-function openSheet(spec){ SHEET = spec; $("sheet")._h = null; renderSheet(); $("veil").classList.add("open"); document.body.classList.add("noscroll"); }
+function openSheet(spec){ SHEET = spec; $("sheet")._h = null; renderSheet(); $("veil").classList.add("open"); document.body.classList.add("noscroll");
+  if (spec.startsWith("bericht:")) { const b = $("sheet").querySelector(".sh-body"); if (b) b.scrollTop = b.scrollHeight; } }
 function closeSheet(){ SHEET = null; $("veil").classList.remove("open"); document.body.classList.remove("noscroll"); }
 function renderSheet(){
   if (!SHEET) return;
@@ -686,22 +811,15 @@ SHEETS["wunsch-neu"] = () => ({lead: sq("star", "yellow", "xl"), title: "Neuer W
   body: `<form class="form" data-form="wunsch"><label>Was<input class="inp" name="titel" required></label><label>Genauer (optional)<textarea class="inp" name="text"></textarea></label><div class="zeile"><label>Priorität<select class="inp" name="prio"><option value="hoch">Hoch</option><option value="mittel" selected>Mittel</option><option value="niedrig">Niedrig</option></select></label><label>Gruppe (optional)<input class="inp" name="gruppe"></label></div><button class="btn pri" type="submit">Eintragen</button></form>`});
 
 SHEETS.bericht = id => {
-  const b = (D.berichte?.berichte || []).find(x => x.id === id); if (!b) return null;
-  if (!b.gelesen && !b._gemeldet) { b._gemeldet = 1; api(`/api/berichte/${b.id}/gelesen`, {ja: true}).catch(() => {}); }
-  const naechste = b.fragen.find(f => !f.antwort);
-  const blasen = [];
-  b.fragen.forEach((f, i) => {
-    if (f !== naechste && !f.antwort) return;
-    blasen.push(`<div class="bl ag"><small>Frage ${i + 1} von ${b.fragen.length}</small>${esc(f.text)}</div>`);
-    if (f.antwort) blasen.push(`<div class="bl ich">${esc(f.antwort.text)}</div>`);
-  });
-  for (const m of b.verlauf.filter(m => !m.frage)) blasen.push(`<div class="bl ${m.von === "besitzer" ? "ich" : "ag"}"><small>${esc(wer(m.von))} · ${esc(ago(m.zeit))}</small>${esc(m.text)}</div>`);
-  const vor = naechste && naechste.vorschlaege.length ? `<div class="vor">${naechste.vorschlaege.map(v => `<button class="btn sm" type="button" data-act="vorschlag" data-id="${esc(b.id)}" data-frage="${esc(naechste.id)}" data-wert="${esc(v)}">${esc(v)}</button>`).join("")}</div>` : "";
-  return {lead: sq("message-square-text", "green", "xl"), title: `Bericht Nr. ${b.nr}`, sub: `${esc(b.titel)} · von ${esc(b.von)} · ${esc(ago(b.zeit))}`,
-    body: (b.kurz ? `<div class="papier">${esc(b.kurz)}</div>` : "")
-      + (b.fragen.length || b.verlauf.length ? gh2(naechste ? `Noch ${offeneFragen(b)} von ${b.fragen.length} Fragen offen` : "Antworten") + `<div class="chat">${blasen.join("")}</div>${vor}` : "")
-      + `<form class="antwort" data-form="bnachricht" data-id="${esc(b.id)}" data-frage="${esc(naechste ? naechste.id : "")}"><input class="inp" name="text" placeholder="${naechste ? "Antwort schreiben" : "Nachricht an " + esc(b.von)}" required><button class="btn pri" type="submit">${icon("arrow-up")}</button></form>`
-      + (b.text ? gh2("Ganzer Bericht") + `<div class="papier">${md(b.text)}</div>` : "")};
+  const b = beInfo(id); if (!b) return null;
+  BER.sel = id; beGelesen(b);
+  return {lead: beAv(b, true), title: esc(beTitel(b)), sub: `${esc(beUnter(b))} · ${esc(beDatum(b.zeit))}`,
+    body: (offeneFragen(b) ? `<div class="acts">${beErledigtKnopf(b)}</div>` : "") + `<div class="bec">${beChat(b)}</div>`};
+};
+SHEETS.berichttext = id => {
+  const b = beInfo(id); if (!b) return null;
+  return {lead: beAv(b, true), title: esc(beTitel(b)), sub: `${esc(beUnter(b))} · ${esc(beDatum(b.zeit))}`,
+    body: `<div class="acts"><button class="btn" type="button" data-act="betextzurueck" data-id="${esc(b.id)}">${icon("arrow-left")}Zurück zu den Fragen</button></div><div class="papier">${md(b.text)}</div>`};
 };
 
 const NZ = {pfad: "", n: null, edit: false, laden: false};
@@ -753,7 +871,15 @@ document.addEventListener("click", async e => {
     case "pkweg": case "pknweg":
       if (await bestaetigen("Endgültig löschen?", "Das lässt sich nicht rückgängig machen.", "Löschen", true) && await post("/api/papierkorb/loeschen", t.dataset.act === "pkweg" ? {nr: +id} : {notiz: id})) { closeSheet(); toast("Gelöscht"); }
       return;
-    case "vorschlag": return post(`/api/berichte/${id}/nachricht`, {text: w, frage: t.dataset.frage});
+    case "bechip": t.disabled = true; if (!(await beSenden(id, w, t.dataset.frage))) t.disabled = false; return;
+    case "besel": BER.sel = id; if (schmal()) return openSheet("bericht:" + id); return renderPage();
+    case "beoeffnen": BER.sel = id; if (schmal()) return openSheet("bericht:" + id); if (PAGE === "berichte") return renderPage(); location.hash = "berichte"; return;
+    case "bemehr": BER.mehr = true; return renderPage();
+    case "betextzurueck": if (schmal()) return openSheet("bericht:" + id); return closeSheet();
+    case "beerledigt":
+      if (!(await bestaetigen("Bericht erledigt?", "Alle offenen Fragen werden als beantwortet markiert.", "Erledigt"))) return;
+      t.disabled = true; if (await post(`/api/berichte/${id}/erledigt`, {})) { $("sheet")._h = null; renderAll(); } else t.disabled = false;
+      return;
     case "nbearbeiten": NZ.edit = true; $("sheet")._h = null; return renderSheet();
     case "nabbrechen": NZ.edit = false; $("sheet")._h = null; return renderSheet();
     case "nweg": if (await bestaetigen("In den Papierkorb?", "Die Notiz wird nicht gelöscht, sondern in den Papierkorb im Notizen-Ordner verschoben.", "Verschieben", true)) { if (await post("/api/notizen/papierkorb", {pfad: NZ.pfad})) { closeSheet(); toast("Im Papierkorb"); } } return;
@@ -770,14 +896,16 @@ document.addEventListener("submit", async e => {
   if (art === "projekt") { ok = await post("/api/pos/projekte", {name: v.name, beschreibung: v.beschreibung, naechster_schritt: v.naechster_schritt, orte: v.pfad ? [{geraet: "Dieser Rechner", pfad: v.pfad}] : []}); if (ok) return openSheet("projekt:" + ok.id); }
   if (art === "wunsch") { ok = await post("/api/wuensche", v); if (ok) return openSheet("wunsch:" + ok.id); }
   if (art === "wnotiz") ok = await post(`/api/wuensche/${f.dataset.id}/notizen`, {text: v.text});
-  if (art === "bnachricht") ok = await post(`/api/berichte/${f.dataset.id}/nachricht`, {text: v.text, frage: f.dataset.frage || undefined});
+  if (art === "bnachricht") { ok = await beSenden(f.dataset.id, v.text, f.dataset.frage || ""); if (!ok) f.querySelectorAll("button").forEach(b => b.disabled = false); return; }
   if (art === "notiz") { ok = await post("/api/notizen/neu", v); if (ok) return openSheet("notiz:" + ok.pfad); }
   if (art === "nspeichern") { ok = await post("/api/notizen/speichern", {pfad: NZ.pfad, text: v.text, version: NZ.n.version}); if (ok) { NZ.n = ok; NZ.edit = false; toast("Gespeichert"); } }
   f.querySelectorAll("button").forEach(b => b.disabled = false);
   if (ok) { $("sheet")._h = null; renderSheet(); }
 });
 let suchT = 0;
+document.addEventListener("change", e => { if (e.target.matches("[data-beproj]")) { BER.projekt = e.target.value; BER.mehr = false; e.target.blur(); renderPage(); } });
 document.addEventListener("input", e => {
+  if (e.target.matches("[data-betext]")) { BER.text[e.target.dataset.betext] = e.target.value; return; }
   if (e.target.id !== "nsuche") return;
   UI.q = e.target.value; clearTimeout(suchT);
   suchT = setTimeout(async () => {
@@ -786,6 +914,7 @@ document.addEventListener("input", e => {
     const i = $("nsuche"); i.focus(); i.setSelectionRange(i.value.length, i.value.length);
   }, 250);
 });
+document.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey && !e.isComposing && e.target.matches("[data-betext]")) { e.preventDefault(); e.target.form.requestSubmit(); } });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && SHEET && !$("dlg").classList.contains("open")) closeSheet(); });
 
 /* ---------- Anmelden und Seiten wechseln ---------- */

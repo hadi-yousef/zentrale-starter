@@ -27,6 +27,7 @@ Projekte und Aufgaben:
 Berichte an den Besitzer, mit Fragen und Vorschlägen:
   py zentrale_client.py --agent codex bericht-neu "Plan: Ordner aufräumen" --kurz "Drei Schritte." --text-datei plan.md `
       --frage "Passt der Plan?" --vorschlaege "Ja|Nein" --frage "Alte Downloads in den Papierkorb?" --vorschlaege "Ja|Später"
+      Je Frage ein eigenes --frage: Der Besitzer bekommt sie nacheinander. Fragen nie in --kurz oder in den Text schreiben.
   py zentrale_client.py --agent codex berichte                 (offene Fragen und neue Antworten zuerst)
   py zentrale_client.py --agent codex bericht 4                (ein Bericht mit Verlauf)
   py zentrale_client.py --agent codex bericht-antwort 4 "Danke, ich fange an."
@@ -157,7 +158,7 @@ def groesse(b):
         b /= 1024
 
 
-FASSUNG = "2026-11-01"   # gleich wie hub.FASSUNG; weicht die laufende Zentrale ab, kommt eine Warnung
+FASSUNG = "2026-11-02"   # gleich wie hub.FASSUNG; weicht die laufende Zentrale ab, kommt eine Warnung
 
 
 def pruefen(z):
@@ -315,6 +316,9 @@ def ausfuehren(z, a):
         b = z.post("/api/berichte", {"titel": a.titel, "kurz": a.kurz or "", "text": text_aus(a), "fragen": a.fragen or [],
                                      "sitzung": a.sitzung or "", "projekt": a.projekt or "", "wunsch": a.wunsch or ""})
         print(f"Bericht Nr. {b['nr']} angelegt, {len(b['fragen'])} {'Frage' if len(b['fragen']) == 1 else 'Fragen'}.")
+        if not b["fragen"] and "?" in (b.get("kurz") or "") + (b.get("text") or ""):
+            print("Hinweis: Der Bericht hat keine Frage zum Antippen. Fragen an den Besitzer gehören je in ein eigenes --frage, "
+                  "dann bekommt er sie nacheinander.")
     elif a.befehl == "bericht-antwort":
         b = z.post(f"/api/berichte/{q(a.nr)}/nachricht", {"text": a.text})
         print(f"Antwort in Bericht Nr. {b['nr']} geschrieben.")

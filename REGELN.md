@@ -15,7 +15,8 @@ rufst du es auf.
 - Wo es einen vernünftigen Standard gibt, entscheidest du selbst. Fragen nur bei echten Weichenstellungen und bei Geld,
   Konten, Löschen oder Daten nach außen. Bis zur Antwort machst du mit dem Rest weiter.
 - **Wohin Fragen und Ergebnisse gehen:** Ist der Besitzer im Chat, direkt in die Antwort. Ist er nicht da, als Bericht
-  in der Zentrale mit Vorschlägen zum Antippen (`bericht-neu … --frage … --vorschlaege "Ja|Nein"`).
+  in der Zentrale mit Vorschlägen zum Antippen (`bericht-neu … --frage … --vorschlaege "Ja|Nein"`). Je Frage ein
+  eigenes `--frage`, nie alle Fragen in den Text: Der Besitzer bekommt sie nacheinander.
 - **Wünsche:** Jeden echten Auftrag des Besitzers sofort als Wunsch eintragen, **immer mit Priorität**
   (`wunsch "…" --text … --prio hoch|mittel|niedrig`). Vorher die Notizen des Wunschs lesen (`wunsch-zeigen <nr>`).
   Den Stand als kurze Notiz festhalten (`wunsch-notiz <nr> "Stand: … · Als Nächstes: … · Wartet auf: …"`).

@@ -199,16 +199,56 @@ select.inp{padding-right:8px}
 .acts .btn.pri{background:var(--blue)}
 @media (max-width:640px){.veil{padding:0;align-items:flex-end}.sheet{border-radius:18px 18px 0 0;max-height:94vh;width:100%}}
 
-/* Berichte: Fragen wie in der Nachrichten-App */
-.chat{display:flex;flex-direction:column;gap:8px;padding:4px 2px}
-.bl{max-width:82%;padding:9px 13px;border-radius:18px;font-size:15px;line-height:1.38;white-space:pre-wrap;overflow-wrap:anywhere}
-.bl.ag{align-self:flex-start;background:var(--grp);border-bottom-left-radius:6px}
-.bl.ich{align-self:flex-end;background:var(--blue);color:#fff;border-bottom-right-radius:6px}
-.bl small{display:block;font-size:11.5px;opacity:.7;margin-bottom:2px}
-.vor{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;margin:4px 0 2px}
-.vor .btn{border-radius:18px;background:color-mix(in srgb,var(--blue) 13%,transparent)}
-.antwort{display:flex;gap:8px;margin-top:10px}
-.antwort .inp{border-radius:19px}
+
+/* Berichte wie in der Zentrale des Vorbilds: links die Liste, rechts der Verlauf */
+.be2{display:grid;grid-template-columns:340px minmax(0,1fr);background:var(--card);border-radius:20px;box-shadow:var(--shadow);overflow:hidden;height:min(720px,calc(100vh - 200px));min-height:520px}
+.bel{border-right:1px solid var(--sep);overflow:auto;background:color-mix(in srgb,var(--fill) 30%,transparent)}
+.belk{padding:14px 16px 8px;display:flex;gap:8px;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:1;background:var(--card)}.belk b{font-size:17px}.belk span{font-size:13px}
+.ben{display:grid;grid-template-columns:10px 54px minmax(0,1fr);gap:0 10px;width:100%;text-align:left;padding:11px 14px 11px 8px;border-bottom:1px solid var(--sep);align-items:start}
+.ben .pt{width:9px;height:9px;border-radius:50%;background:var(--blue);margin-top:6px}.ben .pt.leer{background:none}
+.beav{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:#fff;flex:none}.beav svg{width:19px;height:19px}
+.ben .t{min-width:0;display:flex;flex-direction:column}.ben .t b{display:flex;justify-content:space-between;gap:8px;font-size:14.5px;font-weight:600}.ben .t b span{font-weight:400;color:var(--ink2);font-size:12.5px;flex:none}
+.ben .t>span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--ink2);font-size:13px;margin-top:2px}
+.befr{font-style:normal;display:inline-flex;width:max-content;align-items:center;gap:4px;margin-top:5px;font-size:12px;font-weight:600;color:var(--orange);background:color-mix(in srgb,var(--orange) 14%,transparent);border-radius:999px;padding:2px 8px}
+.befr svg{width:13px;height:13px}.befr.ok{color:var(--green);background:color-mix(in srgb,var(--green) 14%,transparent)}
+.benr{font-size:14px;font-weight:700;color:var(--blue);font-variant-numeric:tabular-nums;white-space:nowrap;margin-top:1px;letter-spacing:-.01em}
+.ben .t>span.bezl{display:flex;flex-wrap:wrap;align-items:center;gap:0 6px;overflow:visible;margin-top:0;-webkit-line-clamp:unset}.bezl .befr{margin-top:5px}
+.beab{font-style:normal;display:inline-flex;width:max-content;max-width:100%;align-items:center;margin-top:5px;font-size:12px;font-weight:600;border-radius:999px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  --ab:var(--ink2);color:var(--ab);background:color-mix(in srgb,var(--ab) 14%,transparent)}
+.beab.cx{--ab:#0C8A6B}.beab.cl{--ab:#B85A38}.beab.as{--ab:#2563EB}
+@media (prefers-color-scheme:dark){.beab.cx{--ab:#4EE0B5}.beab.cl{--ab:#F0A17F}.beab.as{--ab:#8CC8FF}}
+.bekn{display:block;font-size:11.5px;font-weight:650;color:var(--ink2);margin-bottom:2px;font-variant-numeric:tabular-nums}
+.bem.ich.woanders{font-style:italic;opacity:.85}
+.beck .btn{flex:none}
+.belk{flex-wrap:wrap}.beproj{flex:1 1 100%;height:32px;font-size:13.5px;padding:0 8px;margin-top:2px}
+.beab2{display:flex;align-items:center;gap:6px;margin:0;padding:12px 16px 6px;font:600 12.5px var(--font);color:var(--ink2);border-bottom:1px solid var(--sep)}
+.beab2.warte{color:var(--orange)}.beab2 .i{width:14px;height:14px}
+.bemehr{display:block;width:100%;padding:14px;color:var(--blue);font-size:14px;text-align:center}
+.ben:hover{background:var(--hover)}.ben.on{background:color-mix(in srgb,var(--blue) 14%,transparent)}
+.bec{display:flex;flex-direction:column;min-width:0;height:100%;overflow:hidden}
+.beck{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--sep);background:var(--card)}.beck .beav{width:34px;height:34px}
+.beck .t{flex:1;min-width:0}.beck b{display:block;font-size:15px}.beck .t>span{color:var(--ink2);font-size:12.5px;display:block}
+.bez{flex:1;overflow:auto;padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.betag{align-self:center;color:var(--ink2);font-size:11.5px;margin:6px 0 2px}
+.bem{max-width:78%;align-self:flex-start;background:var(--fill);border-radius:18px;padding:9px 13px;font-size:14.5px;line-height:1.4;white-space:pre-wrap;overflow-wrap:anywhere}
+.bem.ich{align-self:flex-end;background:var(--blue);color:#fff}
+.bem .nr{display:block;font-size:11.5px;font-weight:650;color:var(--orange);margin-bottom:2px}
+.bewer{font-size:11.5px;color:var(--ink2);margin:4px 0 -4px 12px}
+.bestatus{align-self:flex-end;font-size:11.5px;color:var(--ink2);margin:-4px 6px 0}
+.bekarte{align-self:flex-start;max-width:86%;background:var(--card);border-radius:16px;box-shadow:0 0 0 1px var(--sep),var(--shadow);padding:14px 16px;font-size:14px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
+.bekarte h4{font-size:15.5px;margin:0 0 6px;display:flex;align-items:center;gap:8px;white-space:normal}.bekarte h4 svg{width:16px;height:16px;color:var(--orange);flex:none}
+.bekarte .btn{margin-top:10px}
+.bechips{display:flex;flex-wrap:wrap;gap:6px;align-self:flex-start;max-width:86%;margin-left:4px}
+.bechip{border-radius:999px;padding:6px 12px;font-size:13.5px;background:var(--card);box-shadow:0 0 0 1px color-mix(in srgb,var(--blue) 45%,transparent);color:var(--blue)}
+.bechip.on{background:var(--blue);color:#fff}.bechip:hover{background:color-mix(in srgb,var(--blue) 10%,transparent)}
+.berest{align-self:center;color:var(--ink2);font-size:12px;margin-top:4px;display:flex;align-items:center;gap:6px}.berest svg{width:13px;height:13px}
+.bef{display:flex;gap:8px;align-items:flex-end;padding:10px 14px 14px;border-top:1px solid var(--sep)}
+.bef .inp{flex:1;border-radius:20px;height:auto;min-height:38px;max-height:140px;padding:9px 14px;resize:none;line-height:1.35;field-sizing:content}
+.bef .btn{border-radius:50%;width:36px;height:36px;padding:0;justify-content:center;flex:none}
+#sheet .bec{height:auto;overflow:visible}#sheet .bez{padding:12px 4px;overflow:visible}#sheet .bef{padding:10px 0 0;position:sticky;bottom:0;background:var(--sheet)}
+@media (max-width:900px){.be2{grid-template-columns:1fr;height:auto;min-height:0}.be2>.bec{display:none}.bel{border-right:0}}
+.belk .muted{color:var(--ink2)}
+.beleer{padding:28px 16px;color:var(--ink2);text-align:center;font-size:14px;display:flex;flex-direction:column;align-items:center;gap:8px}.beleer svg{width:28px;height:28px}
 
 /* Markdown */
 .mdx{font-size:15px;line-height:1.55;overflow-wrap:anywhere}
@@ -263,7 +303,7 @@ select.inp{padding-right:8px}
 <div class="toast" id="toast"></div>
 <script>
 "use strict";
-const ICONS = {"arrow-right": "<path d=\"M5 12h14\" /> <path d=\"m12 5 7 7-7 7\" />", "arrow-right-left": "<path d=\"m16 3 4 4-4 4\" /> <path d=\"M20 7H4\" /> <path d=\"m8 21-4-4 4-4\" /> <path d=\"M4 17h16\" />", "arrow-up": "<path d=\"m5 12 7-7 7 7\" /> <path d=\"M12 19V5\" />", "badge": "<path d=\"M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z\" />", "book-open": "<path d=\"M12 5v16\" /> <path d=\"M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z\" />", "bot": "<path d=\"M12 8V4H8\" /> <rect width=\"16\" height=\"12\" x=\"4\" y=\"8\" rx=\"2\" /> <path d=\"M2 14h2\" /> <path d=\"M20 14h2\" /> <path d=\"M15 13v2\" /> <path d=\"M9 13v2\" />", "broom": "<path d=\"M13.5 10.5 22 2\" /> <path d=\"M14.734 13.841a2 2 0 00-.314-2.42L12.58 9.58a2 2 0 00-2.421-.314l-7.657 4.461A1 1 0 002.3 15.3l6.403 6.403a1 1 0 001.571-.204z\" /> <path d=\"m5 18 2-2\" /> <path d=\"m7.699 10.7 5.602 5.601\" />", "check": "<path d=\"M20 6 9 17l-5-5\" />", "chevron-right": "<path d=\"m9 18 6-6-6-6\" />", "circle-dot": "<circle cx=\"12\" cy=\"12\" r=\"1\" /> <circle cx=\"12\" cy=\"12\" r=\"10\" />", "file": "<path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\" /> <path d=\"M14 2v5a1 1 0 0 0 1 1h5\" />", "file-text": "<path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\" /> <path d=\"M14 2v5a1 1 0 0 0 1 1h5\" /> <path d=\"M10 9H8\" /> <path d=\"M16 13H8\" /> <path d=\"M16 17H8\" />", "folder": "<path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z\" />", "folder-plus": "<path d=\"M12 10v6\" /> <path d=\"M9 13h6\" /> <path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z\" />", "form": "<path d=\"M4 14h6\" /> <path d=\"M4 2h10\" /> <rect x=\"4\" y=\"18\" width=\"16\" height=\"4\" rx=\"1\" /> <rect x=\"4\" y=\"6\" width=\"16\" height=\"4\" rx=\"1\" />", "grid": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" /> <path d=\"M3 9h18\" /> <path d=\"M3 15h18\" /> <path d=\"M9 3v18\" /> <path d=\"M15 3v18\" />", "hd": "<path d=\"M10 12H6\" /> <path d=\"M10 15V9\" /> <path d=\"M14 14.5a.5.5 0 0 0 .5.5h1a2.5 2.5 0 0 0 2.5-2.5v-1A2.5 2.5 0 0 0 15.5 9h-1a.5.5 0 0 0-.5.5z\" /> <path d=\"M6 15V9\" /> <rect x=\"2\" y=\"5\" width=\"20\" height=\"14\" rx=\"2\" />", "key-round": "<path d=\"M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z\" /> <circle cx=\"16.5\" cy=\"7.5\" r=\".5\" fill=\"currentColor\" />", "layout-grid": "<rect width=\"7\" height=\"7\" x=\"3\" y=\"3\" rx=\"1\" /> <rect width=\"7\" height=\"7\" x=\"14\" y=\"3\" rx=\"1\" /> <rect width=\"7\" height=\"7\" x=\"14\" y=\"14\" rx=\"1\" /> <rect width=\"7\" height=\"7\" x=\"3\" y=\"14\" rx=\"1\" />", "list-checks": "<path d=\"M13 5h8\" /> <path d=\"M13 12h8\" /> <path d=\"M13 19h8\" /> <path d=\"m3 17 2 2 4-4\" /> <path d=\"m3 7 2 2 4-4\" />", "loader": "<path d=\"M12 2v4\" /> <path d=\"m16.2 7.8 2.9-2.9\" /> <path d=\"M18 12h4\" /> <path d=\"m16.2 16.2 2.9 2.9\" /> <path d=\"M12 18v4\" /> <path d=\"m4.9 19.1 2.9-2.9\" /> <path d=\"M2 12h4\" /> <path d=\"m4.9 4.9 2.9 2.9\" />", "message-square-text": "<path d=\"M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z\" /> <path d=\"M7 11h10\" /> <path d=\"M7 15h6\" /> <path d=\"M7 7h8\" />", "monitor": "<rect width=\"20\" height=\"14\" x=\"2\" y=\"3\" rx=\"2\" /> <line x1=\"8\" x2=\"16\" y1=\"21\" y2=\"21\" /> <line x1=\"12\" x2=\"12\" y1=\"17\" y2=\"21\" />", "notebook-pen": "<path d=\"M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4\" /> <path d=\"M2 6h4\" /> <path d=\"M2 10h4\" /> <path d=\"M2 14h4\" /> <path d=\"M2 18h4\" /> <path d=\"M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z\" />", "pencil": "<path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\" /> <path d=\"m15 5 4 4\" />", "plus": "<path d=\"M5 12h14\" /> <path d=\"M12 5v14\" />", "rotate-ccw": "<path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\" /> <path d=\"M3 3v5h5\" />", "search": "<path d=\"m21 21-4.34-4.34\" /> <circle cx=\"11\" cy=\"11\" r=\"8\" />", "sheet": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" ry=\"2\" /> <line x1=\"3\" x2=\"21\" y1=\"9\" y2=\"9\" /> <line x1=\"3\" x2=\"21\" y1=\"15\" y2=\"15\" /> <line x1=\"9\" x2=\"9\" y1=\"9\" y2=\"21\" /> <line x1=\"15\" x2=\"15\" y1=\"9\" y2=\"21\" />", "star": "<path d=\"M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z\" />", "text": "<path d=\"M21 5H3\" /> <path d=\"M15 12H3\" /> <path d=\"M17 19H3\" />", "trash-2": "<path d=\"M10 11v6\" /> <path d=\"M14 11v6\" /> <path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6\" /> <path d=\"M3 6h18\" /> <path d=\"M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\" />", "triangle-alert": "<path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\" /> <path d=\"M12 9v4\" /> <path d=\"M12 17h.01\" />", "user-round": "<circle cx=\"12\" cy=\"8\" r=\"5\" /> <path d=\"M20 21a8 8 0 0 0-16 0\" />", "wifi-off": "<path d=\"M12 20h.01\" /> <path d=\"M8.5 16.429a5 5 0 0 1 7 0\" /> <path d=\"M5 12.859a10 10 0 0 1 5.17-2.69\" /> <path d=\"M19 12.859a10 10 0 0 0-2.007-1.523\" /> <path d=\"M2 8.82a15 15 0 0 1 4.177-2.643\" /> <path d=\"M22 8.82a15 15 0 0 0-11.288-3.764\" /> <path d=\"m2 2 20 20\" />", "x": "<path d=\"M18 6 6 18\" /> <path d=\"m6 6 12 12\" />"};
+const ICONS = {"arrow-left": "<path d=\"m12 19-7-7 7-7\" /> <path d=\"M19 12H5\" />", "arrow-right": "<path d=\"M5 12h14\" /> <path d=\"m12 5 7 7-7 7\" />", "arrow-right-left": "<path d=\"m16 3 4 4-4 4\" /> <path d=\"M20 7H4\" /> <path d=\"m8 21-4-4 4-4\" /> <path d=\"M4 17h16\" />", "arrow-up": "<path d=\"m5 12 7-7 7 7\" /> <path d=\"M12 19V5\" />", "badge": "<path d=\"M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z\" />", "book-open": "<path d=\"M12 5v16\" /> <path d=\"M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z\" />", "bot": "<path d=\"M12 8V4H8\" /> <rect width=\"16\" height=\"12\" x=\"4\" y=\"8\" rx=\"2\" /> <path d=\"M2 14h2\" /> <path d=\"M20 14h2\" /> <path d=\"M15 13v2\" /> <path d=\"M9 13v2\" />", "broom": "<path d=\"M13.5 10.5 22 2\" /> <path d=\"M14.734 13.841a2 2 0 00-.314-2.42L12.58 9.58a2 2 0 00-2.421-.314l-7.657 4.461A1 1 0 002.3 15.3l6.403 6.403a1 1 0 001.571-.204z\" /> <path d=\"m5 18 2-2\" /> <path d=\"m7.699 10.7 5.602 5.601\" />", "check": "<path d=\"M20 6 9 17l-5-5\" />", "check-check": "<path d=\"M18 6 7 17l-5-5\" /> <path d=\"m22 10-7.5 7.5L13 16\" />", "chevron-right": "<path d=\"m9 18 6-6-6-6\" />", "circle-check": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"m16 9-5.5 5.5L8 12\" />", "circle-dot": "<circle cx=\"12\" cy=\"12\" r=\"1\" /> <circle cx=\"12\" cy=\"12\" r=\"10\" />", "clock": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"M12 6v6l4 2\" />", "file": "<path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\" /> <path d=\"M14 2v5a1 1 0 0 0 1 1h5\" />", "file-text": "<path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\" /> <path d=\"M14 2v5a1 1 0 0 0 1 1h5\" /> <path d=\"M10 9H8\" /> <path d=\"M16 13H8\" /> <path d=\"M16 17H8\" />", "folder": "<path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z\" />", "folder-plus": "<path d=\"M12 10v6\" /> <path d=\"M9 13h6\" /> <path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z\" />", "form": "<path d=\"M4 14h6\" /> <path d=\"M4 2h10\" /> <rect x=\"4\" y=\"18\" width=\"16\" height=\"4\" rx=\"1\" /> <rect x=\"4\" y=\"6\" width=\"16\" height=\"4\" rx=\"1\" />", "grid": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" /> <path d=\"M3 9h18\" /> <path d=\"M3 15h18\" /> <path d=\"M9 3v18\" /> <path d=\"M15 3v18\" />", "hd": "<path d=\"M10 12H6\" /> <path d=\"M10 15V9\" /> <path d=\"M14 14.5a.5.5 0 0 0 .5.5h1a2.5 2.5 0 0 0 2.5-2.5v-1A2.5 2.5 0 0 0 15.5 9h-1a.5.5 0 0 0-.5.5z\" /> <path d=\"M6 15V9\" /> <rect x=\"2\" y=\"5\" width=\"20\" height=\"14\" rx=\"2\" />", "key-round": "<path d=\"M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z\" /> <circle cx=\"16.5\" cy=\"7.5\" r=\".5\" fill=\"currentColor\" />", "layout-grid": "<rect width=\"7\" height=\"7\" x=\"3\" y=\"3\" rx=\"1\" /> <rect width=\"7\" height=\"7\" x=\"14\" y=\"3\" rx=\"1\" /> <rect width=\"7\" height=\"7\" x=\"14\" y=\"14\" rx=\"1\" /> <rect width=\"7\" height=\"7\" x=\"3\" y=\"14\" rx=\"1\" />", "list-checks": "<path d=\"M13 5h8\" /> <path d=\"M13 12h8\" /> <path d=\"M13 19h8\" /> <path d=\"m3 17 2 2 4-4\" /> <path d=\"m3 7 2 2 4-4\" />", "loader": "<path d=\"M12 2v4\" /> <path d=\"m16.2 7.8 2.9-2.9\" /> <path d=\"M18 12h4\" /> <path d=\"m16.2 16.2 2.9 2.9\" /> <path d=\"M12 18v4\" /> <path d=\"m4.9 19.1 2.9-2.9\" /> <path d=\"M2 12h4\" /> <path d=\"m4.9 4.9 2.9 2.9\" />", "message-circle-question": "<path d=\"M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719\" /> <path d=\"M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3\" /> <path d=\"M12 17h.01\" />", "message-square-text": "<path d=\"M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z\" /> <path d=\"M7 11h10\" /> <path d=\"M7 15h6\" /> <path d=\"M7 7h8\" />", "monitor": "<rect width=\"20\" height=\"14\" x=\"2\" y=\"3\" rx=\"2\" /> <line x1=\"8\" x2=\"16\" y1=\"21\" y2=\"21\" /> <line x1=\"12\" x2=\"12\" y1=\"17\" y2=\"21\" />", "notebook-pen": "<path d=\"M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4\" /> <path d=\"M2 6h4\" /> <path d=\"M2 10h4\" /> <path d=\"M2 14h4\" /> <path d=\"M2 18h4\" /> <path d=\"M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z\" />", "pencil": "<path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\" /> <path d=\"m15 5 4 4\" />", "plus": "<path d=\"M5 12h14\" /> <path d=\"M12 5v14\" />", "rotate-ccw": "<path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\" /> <path d=\"M3 3v5h5\" />", "search": "<path d=\"m21 21-4.34-4.34\" /> <circle cx=\"11\" cy=\"11\" r=\"8\" />", "sheet": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" ry=\"2\" /> <line x1=\"3\" x2=\"21\" y1=\"9\" y2=\"9\" /> <line x1=\"3\" x2=\"21\" y1=\"15\" y2=\"15\" /> <line x1=\"9\" x2=\"9\" y1=\"9\" y2=\"21\" /> <line x1=\"15\" x2=\"15\" y1=\"9\" y2=\"21\" />", "star": "<path d=\"M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z\" />", "terminal": "<path d=\"M12 19h8\" /> <path d=\"m4 17 6-6-6-6\" />", "text": "<path d=\"M21 5H3\" /> <path d=\"M15 12H3\" /> <path d=\"M17 19H3\" />", "trash-2": "<path d=\"M10 11v6\" /> <path d=\"M14 11v6\" /> <path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6\" /> <path d=\"M3 6h18\" /> <path d=\"M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\" />", "triangle-alert": "<path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\" /> <path d=\"M12 9v4\" /> <path d=\"M12 17h.01\" />", "user-round": "<circle cx=\"12\" cy=\"8\" r=\"5\" /> <path d=\"M20 21a8 8 0 0 0-16 0\" />", "wifi-off": "<path d=\"M12 20h.01\" /> <path d=\"M8.5 16.429a5 5 0 0 1 7 0\" /> <path d=\"M5 12.859a10 10 0 0 1 5.17-2.69\" /> <path d=\"M19 12.859a10 10 0 0 0-2.007-1.523\" /> <path d=\"M2 8.82a15 15 0 0 1 4.177-2.643\" /> <path d=\"M22 8.82a15 15 0 0 0-11.288-3.764\" /> <path d=\"m2 2 20 20\" />", "x": "<path d=\"M18 6 6 18\" /> <path d=\"m6 6 12 12\" />"};
 
 /* ---------- Werkzeuge ---------- */
 const $ = id => document.getElementById(id);
@@ -373,7 +413,7 @@ async function post(pfad, body){
 }
 
 /* ---------- Daten ---------- */
-const FASSUNG = "2026-11-01";   // gleich wie hub.FASSUNG
+const FASSUNG = "2026-11-02";   // gleich wie hub.FASSUNG
 const D = {pos: null, wuensche: null, berichte: null, notizen: null, agenten: null, laeufe: null, papierkorb: null, ich: null, fehler: ""};
 async function laden(){
   if (!KEY) return;
@@ -538,18 +578,102 @@ function viewWuensche(){
   return h;
 }
 
-/* Berichte */
+/* Berichte: links die Liste (offene Fragen oben, älteste zuerst), rechts der Verlauf wie in einer Nachrichten-App.
+   Die Fragen kommen nacheinander: die nächste erst nach der Antwort. Am Handy öffnet ein Bericht als Blatt. */
 function berichtZeile(b){
   const o = offeneFragen(b);
-  return row(sq("message-square-text", o ? "green" : "gray"), `${b.gelesen ? "" : `<span class="dot run" style="margin-right:7px;vertical-align:1px"></span>`}Bericht Nr. ${b.nr} · ${esc(b.titel)}`, `${esc(b.von)} · ${esc(ago(Math.max(b.zeit, ...b.verlauf.map(m => m.zeit))))}${b.kurz ? " · " + esc(b.kurz) : ""}`,
-    o ? chip(o === 1 ? "1 Frage" : o + " Fragen", "run") : "", sh("bericht:" + b.id));
+  return row(sq("message-square-text", o ? "green" : "gray"), `${b.gelesen ? "" : `<span class="dot run" style="margin-right:7px;vertical-align:1px"></span>`}Bericht Nr. ${b.nr} · ${esc(b.titel)}`, `${esc(wer(b.von))} · ${esc(ago(beZuletzt(b)))}${b.kurz ? " · " + esc(b.kurz) : ""}`,
+    o ? chip(o === 1 ? "1 Frage" : o + " Fragen", "run") : "", `data-act="beoeffnen" data-id="${esc(b.id)}"`);
+}
+const BER = {sel: "", text: {}, projekt: "", mehr: false};
+const schmal = () => matchMedia("(max-width:900px)").matches;
+const beAlle = () => D.berichte?.berichte || [];
+const beInfo = id => id ? beAlle().find(b => b.id === id) : null;
+const beZuletzt = b => Math.max(b.zeit, ...b.verlauf.map(m => m.zeit));
+const beWer = v => v === "besitzer" ? "Du" : wer(v);
+const abArt = v => String(v || "").startsWith("codex") ? "cx" : String(v || "").startsWith("claude") ? "cl" : "";
+const abSchild = (v, projekt) => `<em class="beab ${abArt(v)}">${esc([wer(v), projekt].filter(Boolean).join(" · "))}</em>`;
+const beAv = (b, gross) => { const a = abArt(b.von), [c, ic] = a === "cx" ? ["teal", "terminal"] : a === "cl" ? ["purple", "bot"] : ["gray", "bot"];
+  return `<span class="beav" style="background:var(--${c})${gross ? ";width:56px;height:56px" : ""}">${icon(ic)}</span>`; };
+function beDatum(t){
+  const d = new Date(t * 1000), h = new Date();
+  if (d.toDateString() === h.toDateString()) return d.toLocaleTimeString("de-DE", {hour: "2-digit", minute: "2-digit"});
+  return d.toLocaleDateString("de-DE", d.getFullYear() === h.getFullYear() ? {day: "numeric", month: "short"} : {day: "numeric", month: "short", year: "numeric"});
+}
+function beGelesen(b){ if (!b.gelesen && !b._gemeldet) { b._gemeldet = 1; api(`/api/berichte/${b.id}/gelesen`, {ja: true}).catch(() => {}); } }
+function beListe(){
+  const A = beAlle(), offen = A.reduce((n, b) => n + offeneFragen(b), 0);
+  const P = [...new Set(A.map(b => b.projekt || ""))].filter(Boolean).sort((a, b) => a.localeCompare(b, "de"));
+  if (BER.projekt && !P.includes(BER.projekt)) BER.projekt = "";
+  const B = BER.projekt ? A.filter(b => b.projekt === BER.projekt) : A;
+  const O = B.filter(b => offeneFragen(b)).sort((a, b) => a.zeit - b.zeit), R = B.filter(b => !offeneFragen(b)), N = BER.mehr ? R.length : 12;
+  const zeile = b => {
+    const o = offeneFragen(b), m = b.verlauf[b.verlauf.length - 1], vor = m ? `${beWer(m.von)}: ${m.text}` : `${wer(b.von)}: ${b.kurz || b.titel}`;
+    return `<button class="ben${b.id === BER.sel ? " on" : ""}" type="button" data-act="besel" data-id="${esc(b.id)}"><span class="pt${b.gelesen ? " leer" : ""}"></span><strong class="benr">${b.nr ? "Nr. " + b.nr : ""}</strong>
+      <span class="t"><b>${esc(b.titel)}<span>${esc(beDatum(beZuletzt(b)))}</span></b><span>${esc(vor)}</span><span class="bezl">${abSchild(b.von, b.projekt)}${o ? `<i class="befr">${icon("message-circle-question")} ${o} ${o === 1 ? "Frage" : "Fragen"}</i>` : b.fragen.length ? `<i class="befr ok">${icon("check")} ${b.erledigt ? "erledigt" : "beantwortet"}</i>` : ""}</span></span></button>`; };
+  const filter = P.length > 1 ? `<select class="inp beproj" data-beproj aria-label="Nach Projekt filtern"><option value="">Alle Projekte (${A.length})</option>${P.map(x => `<option value="${esc(x)}"${x === BER.projekt ? " selected" : ""}>${esc(x)} (${A.filter(b => b.projekt === x).length})</option>`).join("")}</select>` : "";
+  return `<div class="bel"><div class="belk"><b>Berichte</b><span class="muted">${offen ? `${offen} ${offen === 1 ? "Frage" : "Fragen"} offen` : "alles beantwortet"}</span>${filter}</div>` +
+    (!A.length ? `<p class="beleer">Noch keine Berichte.<br>Wenn dein Agent eine Entscheidung braucht, fragt er hier, mit Vorschlägen zum Antippen.</p>` :
+     (O.length ? `<h5 class="beab2 warte">${icon("message-circle-question")}Wartet auf dich</h5>${O.map(zeile).join("")}` : "") +
+     (R.length ? (O.length ? `<h5 class="beab2">Alle anderen</h5>` : "") + R.slice(0, N).map(zeile).join("") +
+       (R.length > N ? `<button class="bemehr" type="button" data-act="bemehr">Ältere anzeigen (${R.length - N})</button>` : "") : "") +
+     (!B.length ? `<p class="beleer">Keine Berichte in diesem Projekt.</p>` : "")) + `</div>`;
+}
+/* Verlauf: Bericht-Karte, dann die Fragen nacheinander (die nächste erst nach der Antwort), dazwischen freie Nachrichten nach Zeit */
+function beVerlauf(b){
+  const E = [], n = b.fragen.length, aktuell = b.fragen.findIndex(f => !f.antwort);
+  let seit = b.zeit;
+  E.push([b.zeit, 0, `<span class="betag">${esc(beDatum(b.zeit))}</span><div class="bekarte">${b.nr ? `<span class="bekn">Bericht Nr. ${b.nr}</span>` : ""}<h4>${icon("file-text")}${esc(b.titel)}</h4>${esc(b.kurz || "")}${b.text ? `<br><button class="btn sm" type="button" ${sh("berichttext:" + b.id)}>${icon("book-open")}Ganzen Bericht lesen</button>` : ""}</div>`]);
+  b.fragen.forEach((f, k) => {
+    if (aktuell >= 0 && k > aktuell) return;
+    E.push([seit, 2 * k + 1, `<div class="bem"><span class="nr">Frage ${k + 1} von ${n}</span>${esc(f.text)}</div>` +
+      (!f.antwort && f.vorschlaege.length ? `<div class="bechips">${f.vorschlaege.map(v => `<button class="bechip" type="button" data-act="bechip" data-id="${esc(b.id)}" data-frage="${esc(f.id)}" data-wert="${esc(v)}">${esc(v)}</button>`).join("")}</div>` : "")]);
+    if (f.antwort) seit = f.antwort.zeit;
+    /* Woanders beantwortet (im Chat mit dem Agenten): steht nicht im Verlauf, darum hier als Blase des Besitzers */
+    if (f.antwort && f.antwort.woanders && !b.verlauf.some(m => m.frage === f.id)) {
+      const nurNotiz = /^im chat beantwortet\.?$/i.test(f.antwort.text || "");
+      E.push([f.antwort.zeit, 2 * k + 2, `<div class="bem ich${nurNotiz ? " woanders" : ""}">${esc(f.antwort.text || "Im Chat beantwortet")}</div>` + (nurNotiz ? "" : `<span class="bestatus">im Chat beantwortet</span>`)]);
+    }
+  });
+  const letzteIch = [...b.verlauf].reverse().find(m => m.von === "besitzer");
+  b.verlauf.forEach((m, k) => {
+    const fk = m.frage ? b.fragen.findIndex(f => f.id === m.frage) : -1;
+    E.push([m.zeit, fk >= 0 ? 2 * fk + 2 : 1000 + k, (m.von !== "besitzer" ? `<span class="bewer">${esc(wer(m.von))}</span>` : "") + `<div class="bem${m.von === "besitzer" ? " ich" : ""}">${esc(m.text)}</div>` +
+      (m === letzteIch ? `<span class="bestatus">${m.abgeholt ? `Bei ${esc(wer(b.von))} angekommen` : "Gesendet, wartet auf " + esc(wer(b.von))}</span>` : "")]);
+  });
+  E.sort((x, y) => x[0] - y[0] || x[1] - y[1]);
+  const rest = aktuell < 0 ? 0 : n - aktuell - 1;
+  return E.map(x => x[2]).join("") + (rest ? `<span class="berest">${icon("clock")}noch ${rest} ${rest === 1 ? "Frage" : "Fragen"} danach</span>` : n && aktuell < 0 ? `<span class="berest">${icon("circle-check")}Alle Fragen beantwortet</span>` : "");
+}
+function beChat(b){
+  const i = b.fragen.findIndex(f => !f.antwort);
+  return `<div class="bez" data-bez="${esc(b.id)}">${beVerlauf(b)}</div><form class="bef" data-form="bnachricht" data-id="${esc(b.id)}" data-frage="${i >= 0 ? esc(b.fragen[i].id) : ""}"><textarea class="inp" rows="1" name="text" data-betext="${esc(b.id)}" aria-label="Antwort" placeholder="${i >= 0 ? `Antwort auf Frage ${i + 1} …` : `Nachricht an ${esc(wer(b.von))} …`}">${esc(BER.text[b.id] || "")}</textarea><button class="btn pri" aria-label="Senden">${icon("arrow-up")}</button></form>`;
+}
+const beTitel = b => (b.nr ? `Nr. ${b.nr} · ` : "") + b.titel;
+const beUnter = b => [wer(b.von), b.projekt, b.wunsch && (wunschZu(b.wunsch) || {}).titel].filter(Boolean).join(" · ");
+const beErledigtKnopf = b => offeneFragen(b) ? `<button class="btn sm" type="button" data-act="beerledigt" data-id="${esc(b.id)}" title="Alle offenen Fragen als beantwortet markieren">${icon("check-check")}Erledigt</button>` : "";
+const beKopf = b => `<div class="beck">${beAv(b)}<span class="t"><b>${esc(beTitel(b))}</b><span>${esc(beUnter(b))}</span></span>${beErledigtKnopf(b)}</div>`;
+/* Neu zeichnen und den Verlauf unten halten (wie in Nachrichten), solange man nicht nach oben gescrollt hat */
+function beUnten(fn){
+  const z = {}; document.querySelectorAll("#pages .bez").forEach(x => z[x.dataset.bez] = x.scrollHeight - x.scrollTop - x.clientHeight < 60);
+  fn();
+  document.querySelectorAll("#pages .bez").forEach(x => { if (z[x.dataset.bez] !== false) x.scrollTop = x.scrollHeight; });
+}
+async function beSenden(bid, text, frage){
+  text = String(text || "").trim(); if (!text) return null;
+  if (document.activeElement) document.activeElement.blur();
+  const ok = await post(`/api/berichte/${bid}/nachricht`, frage ? {text, frage} : {text});
+  if (ok) { BER.text[bid] = ""; $("sheet")._h = null; renderAll(); }
+  return ok;
 }
 function viewBerichte(){
-  const L = D.berichte?.berichte || [], offen = L.filter(b => offeneFragen(b)), rest = L.filter(b => !offeneFragen(b));
-  return kopf("Berichte", `${fragenOffen()} Fragen offen · ${L.length} Berichte`)
-    + (L.length ? "" : empty("<b>Noch keine Berichte</b>Wenn dein Agent eine Entscheidung braucht, fragt er hier, mit Vorschlägen zum Antippen.", "message-square-text"))
-    + (offen.length ? gh("Mit offenen Fragen") + grp(offen.map(berichtZeile).join("")) : "")
-    + (rest.length ? gh("Alle") + grp(more("be-rest", rest, 10, berichtZeile)) : "");
+  const A = beAlle();
+  if (!beInfo(BER.sel) && !schmal() && A.length) BER.sel = (A.filter(b => offeneFragen(b)).sort((a, c) => a.zeit - c.zeit)[0] || A[0]).id;
+  const b = beInfo(BER.sel);
+  if (b && !schmal()) beGelesen(b);
+  return kopf("Berichte", "Ergebnisse und Fragen deiner Agenten")
+    + `<div class="be2">${beListe()}<div class="bec">${b ? beKopf(b) + beChat(b) : `<div class="beleer" style="margin:auto">${icon("message-square-text")}<p>Wähle einen Bericht aus.</p></div>`}</div></div>`
+    + note("Deine Agenten schicken hier Berichte mit Fragen. Die Fragen kommen nacheinander, die nächste erst nach deiner Antwort. Der Agent bekommt deine Antwort sofort.");
 }
 
 /* Notizen */
@@ -611,14 +735,15 @@ const VIEWS = {uebersicht: viewUebersicht, agenten: viewAgenten, projekte: viewP
 function renderPage(){
   if (!D.pos) { setHtml($("pages"), D.fehler ? empty(`<b>Zentrale nicht erreichbar</b>${esc(D.fehler)}`, "wifi-off") : ""); return; }
   const alt = D.ich && D.ich.fassung !== FASSUNG ? `<div class="alt">${icon("triangle-alert")}<span><b>Die Zentrale läuft noch mit der alten Fassung</b>Diese Seite ist neu (${esc(FASSUNG)}), die laufende Zentrale ${esc(D.ich.fassung || "alt")}. Sag deinem Agenten: „Zentrale neu starten“.</span></div>` : "";
-  setHtml($("pages"), `<section class="page on">${alt}${VIEWS[PAGE]()}</section>`);
+  beUnten(() => setHtml($("pages"), `<section class="page on">${alt}${VIEWS[PAGE]()}</section>`));
 }
 function renderAll(){ renderNav(); renderPage(); renderSheet(); }
 
 /* ---------- Blätter (Fenster beim Antippen) ---------- */
 let SHEET = null;
 const SHEETS = {};
-function openSheet(spec){ SHEET = spec; $("sheet")._h = null; renderSheet(); $("veil").classList.add("open"); document.body.classList.add("noscroll"); }
+function openSheet(spec){ SHEET = spec; $("sheet")._h = null; renderSheet(); $("veil").classList.add("open"); document.body.classList.add("noscroll");
+  if (spec.startsWith("bericht:")) { const b = $("sheet").querySelector(".sh-body"); if (b) b.scrollTop = b.scrollHeight; } }
 function closeSheet(){ SHEET = null; $("veil").classList.remove("open"); document.body.classList.remove("noscroll"); }
 function renderSheet(){
   if (!SHEET) return;
@@ -686,22 +811,15 @@ SHEETS["wunsch-neu"] = () => ({lead: sq("star", "yellow", "xl"), title: "Neuer W
   body: `<form class="form" data-form="wunsch"><label>Was<input class="inp" name="titel" required></label><label>Genauer (optional)<textarea class="inp" name="text"></textarea></label><div class="zeile"><label>Priorität<select class="inp" name="prio"><option value="hoch">Hoch</option><option value="mittel" selected>Mittel</option><option value="niedrig">Niedrig</option></select></label><label>Gruppe (optional)<input class="inp" name="gruppe"></label></div><button class="btn pri" type="submit">Eintragen</button></form>`});
 
 SHEETS.bericht = id => {
-  const b = (D.berichte?.berichte || []).find(x => x.id === id); if (!b) return null;
-  if (!b.gelesen && !b._gemeldet) { b._gemeldet = 1; api(`/api/berichte/${b.id}/gelesen`, {ja: true}).catch(() => {}); }
-  const naechste = b.fragen.find(f => !f.antwort);
-  const blasen = [];
-  b.fragen.forEach((f, i) => {
-    if (f !== naechste && !f.antwort) return;
-    blasen.push(`<div class="bl ag"><small>Frage ${i + 1} von ${b.fragen.length}</small>${esc(f.text)}</div>`);
-    if (f.antwort) blasen.push(`<div class="bl ich">${esc(f.antwort.text)}</div>`);
-  });
-  for (const m of b.verlauf.filter(m => !m.frage)) blasen.push(`<div class="bl ${m.von === "besitzer" ? "ich" : "ag"}"><small>${esc(wer(m.von))} · ${esc(ago(m.zeit))}</small>${esc(m.text)}</div>`);
-  const vor = naechste && naechste.vorschlaege.length ? `<div class="vor">${naechste.vorschlaege.map(v => `<button class="btn sm" type="button" data-act="vorschlag" data-id="${esc(b.id)}" data-frage="${esc(naechste.id)}" data-wert="${esc(v)}">${esc(v)}</button>`).join("")}</div>` : "";
-  return {lead: sq("message-square-text", "green", "xl"), title: `Bericht Nr. ${b.nr}`, sub: `${esc(b.titel)} · von ${esc(b.von)} · ${esc(ago(b.zeit))}`,
-    body: (b.kurz ? `<div class="papier">${esc(b.kurz)}</div>` : "")
-      + (b.fragen.length || b.verlauf.length ? gh2(naechste ? `Noch ${offeneFragen(b)} von ${b.fragen.length} Fragen offen` : "Antworten") + `<div class="chat">${blasen.join("")}</div>${vor}` : "")
-      + `<form class="antwort" data-form="bnachricht" data-id="${esc(b.id)}" data-frage="${esc(naechste ? naechste.id : "")}"><input class="inp" name="text" placeholder="${naechste ? "Antwort schreiben" : "Nachricht an " + esc(b.von)}" required><button class="btn pri" type="submit">${icon("arrow-up")}</button></form>`
-      + (b.text ? gh2("Ganzer Bericht") + `<div class="papier">${md(b.text)}</div>` : "")};
+  const b = beInfo(id); if (!b) return null;
+  BER.sel = id; beGelesen(b);
+  return {lead: beAv(b, true), title: esc(beTitel(b)), sub: `${esc(beUnter(b))} · ${esc(beDatum(b.zeit))}`,
+    body: (offeneFragen(b) ? `<div class="acts">${beErledigtKnopf(b)}</div>` : "") + `<div class="bec">${beChat(b)}</div>`};
+};
+SHEETS.berichttext = id => {
+  const b = beInfo(id); if (!b) return null;
+  return {lead: beAv(b, true), title: esc(beTitel(b)), sub: `${esc(beUnter(b))} · ${esc(beDatum(b.zeit))}`,
+    body: `<div class="acts"><button class="btn" type="button" data-act="betextzurueck" data-id="${esc(b.id)}">${icon("arrow-left")}Zurück zu den Fragen</button></div><div class="papier">${md(b.text)}</div>`};
 };
 
 const NZ = {pfad: "", n: null, edit: false, laden: false};
@@ -753,7 +871,15 @@ document.addEventListener("click", async e => {
     case "pkweg": case "pknweg":
       if (await bestaetigen("Endgültig löschen?", "Das lässt sich nicht rückgängig machen.", "Löschen", true) && await post("/api/papierkorb/loeschen", t.dataset.act === "pkweg" ? {nr: +id} : {notiz: id})) { closeSheet(); toast("Gelöscht"); }
       return;
-    case "vorschlag": return post(`/api/berichte/${id}/nachricht`, {text: w, frage: t.dataset.frage});
+    case "bechip": t.disabled = true; if (!(await beSenden(id, w, t.dataset.frage))) t.disabled = false; return;
+    case "besel": BER.sel = id; if (schmal()) return openSheet("bericht:" + id); return renderPage();
+    case "beoeffnen": BER.sel = id; if (schmal()) return openSheet("bericht:" + id); if (PAGE === "berichte") return renderPage(); location.hash = "berichte"; return;
+    case "bemehr": BER.mehr = true; return renderPage();
+    case "betextzurueck": if (schmal()) return openSheet("bericht:" + id); return closeSheet();
+    case "beerledigt":
+      if (!(await bestaetigen("Bericht erledigt?", "Alle offenen Fragen werden als beantwortet markiert.", "Erledigt"))) return;
+      t.disabled = true; if (await post(`/api/berichte/${id}/erledigt`, {})) { $("sheet")._h = null; renderAll(); } else t.disabled = false;
+      return;
     case "nbearbeiten": NZ.edit = true; $("sheet")._h = null; return renderSheet();
     case "nabbrechen": NZ.edit = false; $("sheet")._h = null; return renderSheet();
     case "nweg": if (await bestaetigen("In den Papierkorb?", "Die Notiz wird nicht gelöscht, sondern in den Papierkorb im Notizen-Ordner verschoben.", "Verschieben", true)) { if (await post("/api/notizen/papierkorb", {pfad: NZ.pfad})) { closeSheet(); toast("Im Papierkorb"); } } return;
@@ -770,14 +896,16 @@ document.addEventListener("submit", async e => {
   if (art === "projekt") { ok = await post("/api/pos/projekte", {name: v.name, beschreibung: v.beschreibung, naechster_schritt: v.naechster_schritt, orte: v.pfad ? [{geraet: "Dieser Rechner", pfad: v.pfad}] : []}); if (ok) return openSheet("projekt:" + ok.id); }
   if (art === "wunsch") { ok = await post("/api/wuensche", v); if (ok) return openSheet("wunsch:" + ok.id); }
   if (art === "wnotiz") ok = await post(`/api/wuensche/${f.dataset.id}/notizen`, {text: v.text});
-  if (art === "bnachricht") ok = await post(`/api/berichte/${f.dataset.id}/nachricht`, {text: v.text, frage: f.dataset.frage || undefined});
+  if (art === "bnachricht") { ok = await beSenden(f.dataset.id, v.text, f.dataset.frage || ""); if (!ok) f.querySelectorAll("button").forEach(b => b.disabled = false); return; }
   if (art === "notiz") { ok = await post("/api/notizen/neu", v); if (ok) return openSheet("notiz:" + ok.pfad); }
   if (art === "nspeichern") { ok = await post("/api/notizen/speichern", {pfad: NZ.pfad, text: v.text, version: NZ.n.version}); if (ok) { NZ.n = ok; NZ.edit = false; toast("Gespeichert"); } }
   f.querySelectorAll("button").forEach(b => b.disabled = false);
   if (ok) { $("sheet")._h = null; renderSheet(); }
 });
 let suchT = 0;
+document.addEventListener("change", e => { if (e.target.matches("[data-beproj]")) { BER.projekt = e.target.value; BER.mehr = false; e.target.blur(); renderPage(); } });
 document.addEventListener("input", e => {
+  if (e.target.matches("[data-betext]")) { BER.text[e.target.dataset.betext] = e.target.value; return; }
   if (e.target.id !== "nsuche") return;
   UI.q = e.target.value; clearTimeout(suchT);
   suchT = setTimeout(async () => {
@@ -786,6 +914,7 @@ document.addEventListener("input", e => {
     const i = $("nsuche"); i.focus(); i.setSelectionRange(i.value.length, i.value.length);
   }, 250);
 });
+document.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey && !e.isComposing && e.target.matches("[data-betext]")) { e.preventDefault(); e.target.form.requestSubmit(); } });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && SHEET && !$("dlg").classList.contains("open")) closeSheet(); });
 
 /* ---------- Anmelden und Seiten wechseln ---------- */
