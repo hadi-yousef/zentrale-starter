@@ -18,7 +18,7 @@ Projekt gelten.
 - **Wünsche:** Jeden echten Auftrag des Besitzers sofort als Wunsch eintragen, **immer mit Priorität**
   (`wunsch "…" --text … --prio hoch|mittel|niedrig`). Vorher die Notizen des Wunschs lesen (`wunsch-zeigen <nr>`).
   Den Stand als kurze Notiz festhalten (`wunsch-notiz <nr> "Stand: … · Als Nächstes: … · Wartet auf: …"`).
-  Erledigtes im selben Arbeitsschritt abhaken (`wunsch-erledigt <nr> --ergebnis "…"`).
+  Erledigtes im selben Arbeitsschritt abhaken (`wunsch-erledigt <nr> --ergebnis "…"`). Wie das genau geht: `docs/WUENSCHE.md`.
 - Eigene Aufgaben hakt der Agent selbst ab, nicht der Besitzer.
 
 ## Mitdenken und offen sagen

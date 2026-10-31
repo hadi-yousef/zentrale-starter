@@ -30,6 +30,9 @@ Freigabe heißt: Er sagt es im Chat, oder er antwortet in der Zentrale auf einen
 Den Stand hältst du in der Zentrale fest: je Phase ein Wunsch (Priorität hoch), dazu Stand-Notizen. So weiß auch ein
 neuer Thread, wo es weitergeht.
 
+**Wie das Wunsch-System genau geht** (wann ein Wunsch, Priorität, Stand-Notizen, Abhaken, Beispiele, häufige Fehler):
+`docs/WUENSCHE.md`. Lies es, bevor du den ersten Wunsch einträgst.
+
 ---
 
 ## Arbeiten in T3 Code
@@ -233,7 +236,7 @@ Erst wenn der Besitzer es will, je mit eigener Freigabe:
 ## Die Zentrale für Agenten
 
 - Läuft unter http://127.0.0.1:8090, nur auf diesem Rechner. Daten in `daten\` (JSON und Markdown, in `.gitignore`).
-- Alle Befehle: `py zentrale_client.py --help`. Immer mit `--agent claude` bzw. `--agent codex`. Die wichtigsten:
+- Alle Befehle: `py zentrale_client.py --help`. Immer mit `--agent claude` bzw. `--agent codex`. Wünsche genau: `docs/WUENSCHE.md`. Die wichtigsten:
 
 | Zweck | Befehl (nach `py zentrale_client.py --agent codex`) |
 |---|---|
@@ -267,6 +270,7 @@ Erst wenn der Besitzer es will, je mit eigener Freigabe:
 | `aufraeumen\` | `inventur.py` (lesen), `sichern.py` (kopieren mit Prüfung), `verschieben.py`, `rueckgaengig.py`, Protokoll |
 | `vorlagen\INDEX.md` | Vorlage für den Wegweiser je Projekt |
 | `docs\AUTOSTART.md` | Autostart: Windows, kurz Mac und Linux |
+| `docs\WUENSCHE.md` | So geht das Wunsch-System, mit Beispielen |
 
 An der Oberfläche ändern: nur `index.src.html`, danach `py zentrale\bauen.py`. Bausteine wiederverwenden
 (`row`, `grp`, `gh`, `sq`, `openSheet`, `bestaetigen`, `eingeben`), jeden Text aus Daten mit `esc()` maskieren, nie
