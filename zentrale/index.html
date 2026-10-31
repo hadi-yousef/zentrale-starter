@@ -133,6 +133,19 @@ button.row:hover{background:var(--hover)}
 .empty b{color:var(--ink);font-weight:600;display:block;margin-bottom:2px}
 .empty .i{width:28px;height:28px;display:block;margin:0 auto 8px;color:var(--ink3)}
 .cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 22px}
+/* Agenten: eine Karte je Agent */
+.agk{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.agc{display:flex;flex-direction:column;gap:3px;width:100%;background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:14px 16px;min-width:0;transition:transform .18s,box-shadow .18s}
+.agc:hover{transform:translateY(-1px);box-shadow:var(--shadow2)}
+.agc .top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.agc .top b{font-weight:600;font-size:16px}.agc .top .chip{margin-left:auto}
+.agc .was{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.agc .klein{color:var(--ink2);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.agc .unten{margin-top:6px;padding-top:8px;border-top:.5px solid var(--sep)}
+.agc.pause .was{color:var(--ink2);font-weight:400}
+.ava{--c:var(--blue);width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;font:600 14px var(--round);flex:none;background:linear-gradient(180deg,color-mix(in srgb,var(--c) 78%,#fff),var(--c))}
+.ava.xl{width:46px;height:46px;font-size:17px}
+.balken{height:5px;border-radius:3px;background:var(--fill);margin-top:6px;overflow:hidden}.balken i{display:block;height:100%;border-radius:3px;background:var(--blue)}
 @media (max-width:860px){.cols{grid-template-columns:minmax(0,1fr)}}
 .ck{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--ink3);display:grid;place-items:center;flex:none;color:transparent}
 .ck .i{width:14px;height:14px;stroke-width:3}
@@ -243,7 +256,7 @@ select.inp{padding-right:8px}
 <div class="toast" id="toast"></div>
 <script>
 "use strict";
-const ICONS = {"arrow-right": "<path d=\"M5 12h14\" /> <path d=\"m12 5 7 7-7 7\" />", "arrow-up": "<path d=\"m5 12 7-7 7 7\" /> <path d=\"M12 19V5\" />", "badge": "<path d=\"M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z\" />", "bot": "<path d=\"M12 8V4H8\" /> <rect width=\"16\" height=\"12\" x=\"4\" y=\"8\" rx=\"2\" /> <path d=\"M2 14h2\" /> <path d=\"M20 14h2\" /> <path d=\"M15 13v2\" /> <path d=\"M9 13v2\" />", "check": "<path d=\"M20 6 9 17l-5-5\" />", "chevron-right": "<path d=\"m9 18 6-6-6-6\" />", "circle-dot": "<circle cx=\"12\" cy=\"12\" r=\"1\" /> <circle cx=\"12\" cy=\"12\" r=\"10\" />", "file-text": "<path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\" /> <path d=\"M14 2v5a1 1 0 0 0 1 1h5\" /> <path d=\"M10 9H8\" /> <path d=\"M16 13H8\" /> <path d=\"M16 17H8\" />", "folder": "<path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z\" />", "folder-plus": "<path d=\"M12 10v6\" /> <path d=\"M9 13h6\" /> <path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z\" />", "form": "<path d=\"M4 14h6\" /> <path d=\"M4 2h10\" /> <rect x=\"4\" y=\"18\" width=\"16\" height=\"4\" rx=\"1\" /> <rect x=\"4\" y=\"6\" width=\"16\" height=\"4\" rx=\"1\" />", "grid": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" /> <path d=\"M3 9h18\" /> <path d=\"M3 15h18\" /> <path d=\"M9 3v18\" /> <path d=\"M15 3v18\" />", "hd": "<path d=\"M10 12H6\" /> <path d=\"M10 15V9\" /> <path d=\"M14 14.5a.5.5 0 0 0 .5.5h1a2.5 2.5 0 0 0 2.5-2.5v-1A2.5 2.5 0 0 0 15.5 9h-1a.5.5 0 0 0-.5.5z\" /> <path d=\"M6 15V9\" /> <rect x=\"2\" y=\"5\" width=\"20\" height=\"14\" rx=\"2\" />", "key-round": "<path d=\"M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z\" /> <circle cx=\"16.5\" cy=\"7.5\" r=\".5\" fill=\"currentColor\" />", "layout-grid": "<rect width=\"7\" height=\"7\" x=\"3\" y=\"3\" rx=\"1\" /> <rect width=\"7\" height=\"7\" x=\"14\" y=\"3\" rx=\"1\" /> <rect width=\"7\" height=\"7\" x=\"14\" y=\"14\" rx=\"1\" /> <rect width=\"7\" height=\"7\" x=\"3\" y=\"14\" rx=\"1\" />", "list-checks": "<path d=\"M13 5h8\" /> <path d=\"M13 12h8\" /> <path d=\"M13 19h8\" /> <path d=\"m3 17 2 2 4-4\" /> <path d=\"m3 7 2 2 4-4\" />", "message-square-text": "<path d=\"M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z\" /> <path d=\"M7 11h10\" /> <path d=\"M7 15h6\" /> <path d=\"M7 7h8\" />", "notebook-pen": "<path d=\"M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4\" /> <path d=\"M2 6h4\" /> <path d=\"M2 10h4\" /> <path d=\"M2 14h4\" /> <path d=\"M2 18h4\" /> <path d=\"M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z\" />", "pencil": "<path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\" /> <path d=\"m15 5 4 4\" />", "plus": "<path d=\"M5 12h14\" /> <path d=\"M12 5v14\" />", "rotate-ccw": "<path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\" /> <path d=\"M3 3v5h5\" />", "search": "<path d=\"m21 21-4.34-4.34\" /> <circle cx=\"11\" cy=\"11\" r=\"8\" />", "sheet": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" ry=\"2\" /> <line x1=\"3\" x2=\"21\" y1=\"9\" y2=\"9\" /> <line x1=\"3\" x2=\"21\" y1=\"15\" y2=\"15\" /> <line x1=\"9\" x2=\"9\" y1=\"9\" y2=\"21\" /> <line x1=\"15\" x2=\"15\" y1=\"9\" y2=\"21\" />", "star": "<path d=\"M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z\" />", "text": "<path d=\"M21 5H3\" /> <path d=\"M15 12H3\" /> <path d=\"M17 19H3\" />", "trash-2": "<path d=\"M10 11v6\" /> <path d=\"M14 11v6\" /> <path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6\" /> <path d=\"M3 6h18\" /> <path d=\"M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\" />", "wifi-off": "<path d=\"M12 20h.01\" /> <path d=\"M8.5 16.429a5 5 0 0 1 7 0\" /> <path d=\"M5 12.859a10 10 0 0 1 5.17-2.69\" /> <path d=\"M19 12.859a10 10 0 0 0-2.007-1.523\" /> <path d=\"M2 8.82a15 15 0 0 1 4.177-2.643\" /> <path d=\"M22 8.82a15 15 0 0 0-11.288-3.764\" /> <path d=\"m2 2 20 20\" />", "x": "<path d=\"M18 6 6 18\" /> <path d=\"m6 6 12 12\" />"};
+const ICONS = {"arrow-right": "<path d=\"M5 12h14\" /> <path d=\"m12 5 7 7-7 7\" />", "arrow-up": "<path d=\"m5 12 7-7 7 7\" /> <path d=\"M12 19V5\" />", "badge": "<path d=\"M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z\" />", "bot": "<path d=\"M12 8V4H8\" /> <rect width=\"16\" height=\"12\" x=\"4\" y=\"8\" rx=\"2\" /> <path d=\"M2 14h2\" /> <path d=\"M20 14h2\" /> <path d=\"M15 13v2\" /> <path d=\"M9 13v2\" />", "check": "<path d=\"M20 6 9 17l-5-5\" />", "chevron-right": "<path d=\"m9 18 6-6-6-6\" />", "circle-dot": "<circle cx=\"12\" cy=\"12\" r=\"1\" /> <circle cx=\"12\" cy=\"12\" r=\"10\" />", "file-text": "<path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\" /> <path d=\"M14 2v5a1 1 0 0 0 1 1h5\" /> <path d=\"M10 9H8\" /> <path d=\"M16 13H8\" /> <path d=\"M16 17H8\" />", "folder": "<path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z\" />", "folder-plus": "<path d=\"M12 10v6\" /> <path d=\"M9 13h6\" /> <path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z\" />", "form": "<path d=\"M4 14h6\" /> <path d=\"M4 2h10\" /> <rect x=\"4\" y=\"18\" width=\"16\" height=\"4\" rx=\"1\" /> <rect x=\"4\" y=\"6\" width=\"16\" height=\"4\" rx=\"1\" />", "grid": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" /> <path d=\"M3 9h18\" /> <path d=\"M3 15h18\" /> <path d=\"M9 3v18\" /> <path d=\"M15 3v18\" />", "hd": "<path d=\"M10 12H6\" /> <path d=\"M10 15V9\" /> <path d=\"M14 14.5a.5.5 0 0 0 .5.5h1a2.5 2.5 0 0 0 2.5-2.5v-1A2.5 2.5 0 0 0 15.5 9h-1a.5.5 0 0 0-.5.5z\" /> <path d=\"M6 15V9\" /> <rect x=\"2\" y=\"5\" width=\"20\" height=\"14\" rx=\"2\" />", "key-round": "<path d=\"M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z\" /> <circle cx=\"16.5\" cy=\"7.5\" r=\".5\" fill=\"currentColor\" />", "layout-grid": "<rect width=\"7\" height=\"7\" x=\"3\" y=\"3\" rx=\"1\" /> <rect width=\"7\" height=\"7\" x=\"14\" y=\"3\" rx=\"1\" /> <rect width=\"7\" height=\"7\" x=\"14\" y=\"14\" rx=\"1\" /> <rect width=\"7\" height=\"7\" x=\"3\" y=\"14\" rx=\"1\" />", "list-checks": "<path d=\"M13 5h8\" /> <path d=\"M13 12h8\" /> <path d=\"M13 19h8\" /> <path d=\"m3 17 2 2 4-4\" /> <path d=\"m3 7 2 2 4-4\" />", "loader": "<path d=\"M12 2v4\" /> <path d=\"m16.2 7.8 2.9-2.9\" /> <path d=\"M18 12h4\" /> <path d=\"m16.2 16.2 2.9 2.9\" /> <path d=\"M12 18v4\" /> <path d=\"m4.9 19.1 2.9-2.9\" /> <path d=\"M2 12h4\" /> <path d=\"m4.9 4.9 2.9 2.9\" />", "message-square-text": "<path d=\"M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z\" /> <path d=\"M7 11h10\" /> <path d=\"M7 15h6\" /> <path d=\"M7 7h8\" />", "notebook-pen": "<path d=\"M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4\" /> <path d=\"M2 6h4\" /> <path d=\"M2 10h4\" /> <path d=\"M2 14h4\" /> <path d=\"M2 18h4\" /> <path d=\"M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z\" />", "pencil": "<path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\" /> <path d=\"m15 5 4 4\" />", "plus": "<path d=\"M5 12h14\" /> <path d=\"M12 5v14\" />", "rotate-ccw": "<path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\" /> <path d=\"M3 3v5h5\" />", "search": "<path d=\"m21 21-4.34-4.34\" /> <circle cx=\"11\" cy=\"11\" r=\"8\" />", "sheet": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" ry=\"2\" /> <line x1=\"3\" x2=\"21\" y1=\"9\" y2=\"9\" /> <line x1=\"3\" x2=\"21\" y1=\"15\" y2=\"15\" /> <line x1=\"9\" x2=\"9\" y1=\"9\" y2=\"21\" /> <line x1=\"15\" x2=\"15\" y1=\"9\" y2=\"21\" />", "star": "<path d=\"M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z\" />", "text": "<path d=\"M21 5H3\" /> <path d=\"M15 12H3\" /> <path d=\"M17 19H3\" />", "trash-2": "<path d=\"M10 11v6\" /> <path d=\"M14 11v6\" /> <path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6\" /> <path d=\"M3 6h18\" /> <path d=\"M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\" />", "triangle-alert": "<path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\" /> <path d=\"M12 9v4\" /> <path d=\"M12 17h.01\" />", "wifi-off": "<path d=\"M12 20h.01\" /> <path d=\"M8.5 16.429a5 5 0 0 1 7 0\" /> <path d=\"M5 12.859a10 10 0 0 1 5.17-2.69\" /> <path d=\"M19 12.859a10 10 0 0 0-2.007-1.523\" /> <path d=\"M2 8.82a15 15 0 0 1 4.177-2.643\" /> <path d=\"M22 8.82a15 15 0 0 0-11.288-3.764\" /> <path d=\"m2 2 20 20\" />", "x": "<path d=\"M18 6 6 18\" /> <path d=\"m6 6 12 12\" />"};
 
 /* ---------- Werkzeuge ---------- */
 const $ = id => document.getElementById(id);
@@ -353,12 +366,13 @@ async function post(pfad, body){
 }
 
 /* ---------- Daten ---------- */
-const D = {pos: null, wuensche: null, berichte: null, notizen: null, agenten: null, ich: null, fehler: ""};
+const D = {pos: null, wuensche: null, berichte: null, notizen: null, agenten: null, laeufe: null, ich: null, fehler: ""};
 async function laden(){
   if (!KEY) return;
   try {
-    const [pos, wuensche, berichte, notizen, agenten] = await Promise.all(["/api/pos", "/api/wuensche", "/api/berichte", "/api/notizen", "/api/agenten"].map(p => api(p)));
-    Object.assign(D, {pos, wuensche, berichte, notizen, agenten, fehler: ""});
+    const [pos, wuensche, berichte, notizen, agenten, laeufe] = await Promise.all(["/api/pos", "/api/wuensche", "/api/berichte", "/api/notizen", "/api/agenten", "/api/laeufe"].map(p => api(p)));
+    laeufe._geholt = Date.now()/1000;
+    Object.assign(D, {pos, wuensche, berichte, notizen, agenten, laeufe, fehler: ""});
   } catch(e) { D.fehler = e.message; }
   renderAll();
 }
@@ -371,6 +385,7 @@ const PRIO = {hoch: ["Hoch", "red"], mittel: ["Mittel", "orange"], niedrig: ["Ni
 /* ---------- Seiten ---------- */
 const PAGES = [
   {id: "uebersicht", title: "Übersicht", icon: "layout-grid", farbe: "blue"},
+  {id: "agenten", title: "Agenten", icon: "bot", farbe: "purple"},
   {id: "projekte", title: "Projekte", icon: "folder", farbe: "orange"},
   {id: "wuensche", title: "Wünsche", icon: "star", farbe: "yellow"},
   {id: "berichte", title: "Berichte", icon: "message-square-text", farbe: "green"},
@@ -382,6 +397,7 @@ function zaehler(id){
   if (id === "wuensche") return D.wuensche ? D.wuensche.offen.length : "";
   if (id === "projekte") return D.pos ? D.pos.projekte.filter(p => p.status === "aktiv").length : "";
   if (id === "notizen") return D.notizen ? D.notizen.notizen.length : "";
+  if (id === "agenten") return D.laeufe ? D.laeufe.aktiv.filter(x => !x.still).length || "" : "";
   return "";
 }
 const fragenOffen = () => (D.berichte?.berichte || []).reduce((n, b) => n + offeneFragen(b), 0);
@@ -415,9 +431,65 @@ function viewUebersicht(){
 function agentenListe(){
   const G = (D.agenten?.agenten || []).filter(a => a.id !== "besitzer");
   if (!G.length) return empty("<b>Noch kein Agent</b>Anlegen mit <code>py start.py agent-neu claude</code> und <code>py start.py agent-neu codex</code>", "bot");
-  return grp(G.map(a => row(`<span class="circ">${icon("bot")}</span>`, esc(a.id), "zuletzt " + esc(ago(a.zuletzt)), `<span class="dot ${a.zuletzt && Date.now()/1000 - a.zuletzt < 900 ? "ok" : ""}"></span>`)).join(""));
+  return grp(G.map(a => row(`<span class="circ">${icon("bot")}</span>`, esc(a.id), "zuletzt " + esc(ago(a.zuletzt)), `<span class="dot ${a.zuletzt && Date.now()/1000 - a.zuletzt < 900 ? "ok" : ""}"></span>`, sh("agent:" + a.id))).join(""));
 }
 
+/* Agenten: wer gerade woran arbeitet (Läufe aus laeufe.py), was zuletzt fertig wurde */
+const AG_FARBE = {claude: "purple", codex: "blue"}, AG_REST = ["teal", "pink", "indigo", "mint", "orange", "brown", "cyan", "green"];
+function agFarbe(id){ if (AG_FARBE[id]) return AG_FARBE[id]; let h = 0; for (const c of id) h = (h * 31 + c.charCodeAt(0)) >>> 0; return AG_REST[h % AG_REST.length]; }
+const agKurz = id => ({claude: "Cl", codex: "Cx"})[id] || (id.slice(0, 1).toUpperCase() + id.slice(1, 2));
+const ava = (id, cls = "") => `<span class="ava ${cls}" style="--c:var(--${agFarbe(id)})">${esc(agKurz(id))}</span>`;
+function dauer(s){ s = Math.max(0, s); return s < 90 ? "1 Min." : s < 5400 ? `${Math.round(s/60)} Min.` : s < 172800 ? `${Math.round(s/3600)} Std.` : `${Math.round(s/86400)} Tagen`; }
+const lJetzt = () => D.laeufe?.jetzt ? D.laeufe.jetzt + (Date.now()/1000 - D.laeufe._geholt) : Date.now()/1000;
+const lKey = x => `${x.agent}|${x.lauf}|${x.ende || ""}`;
+const lWunsch = x => x.wunsch ? wunschZu(x.wunsch) : null;
+const lTitel = x => x.titel || (lWunsch(x)?.titel) || (x.lauf.startsWith("chat-") ? "Chat" : x.lauf);
+const LSTAT = {fertig: ["check", "green", "Fertig"], fehler: ["triangle-alert", "red", "Fehler"], abgebrochen: ["x", "gray", "Abgebrochen"]};
+function agAlle(){
+  const L = D.laeufe || {aktiv: [], fertig: []}, ids = (D.agenten?.agenten || []).map(a => a.id).filter(i => i !== "besitzer");
+  for (const x of [...L.aktiv, ...L.fertig]) if (!ids.includes(x.agent)) ids.push(x.agent);
+  return ids.map(id => {
+    const aktiv = L.aktiv.filter(x => x.agent === id).sort((a, b) => b.t - a.t);
+    return {id, aktiv, fertig: L.fertig.filter(x => x.agent === id), zuletzt: (D.agenten?.agenten || []).find(a => a.id === id)?.zuletzt};
+  }).sort((a, b) => (b.aktiv.length > 0) - (a.aktiv.length > 0) || a.id.localeCompare(b.id));
+}
+function agZustand(a){
+  const x = a.aktiv[0];
+  if (!x) return ["Pause", ""];
+  return x.still ? ["still", "warn"] : ["arbeitet", "ok"];
+}
+function agKarte(a){
+  const x = a.aktiv[0], [zt, zc] = agZustand(a), f = a.fertig[0], jetzt = lJetzt();
+  const kopf = `<div class="top">${ava(a.id)}<b>${esc(a.id)}</b>${chip(zt, zc)}</div>`;
+  const mitte = x
+    ? `<div class="was">${esc(lTitel(x))}</div><div class="klein">${[x.wunsch ? `Wunsch Nr. ${x.wunsch}` : "", "seit " + dauer(jetzt - x.start), a.aktiv.length > 1 ? `+${a.aktiv.length - 1} weitere` : ""].filter(Boolean).join(" · ")}</div>`
+      + (x.fortschritt != null ? `<div class="balken"><i style="width:${Math.round(x.fortschritt)}%"></i></div>` : "")
+      + (x.schritt ? `<div class="klein">${esc(x.schritt)}</div>` : "")
+    : `<div class="was">Macht gerade nichts</div><div class="klein">zuletzt da ${esc(ago(a.zuletzt))}</div>`;
+  const unten = `<div class="klein unten">${f ? `Zuletzt fertig: ${esc(lTitel(f))} · ${esc(ago(f.ende))}` : "Noch nichts fertig gemeldet"}</div>`;
+  return `<button type="button" class="agc${x ? "" : " pause"}" ${sh("agent:" + a.id)}>${kopf}${mitte}${unten}</button>`;
+}
+function laufZeile(x){
+  const [ic, c] = LSTAT[x.status] || LSTAT.fertig;
+  return row(sq(ic, c), (x.wunsch ? `Wunsch Nr. ${x.wunsch} · ` : "") + esc(lTitel(x)), esc(x.agent) + (x.ergebnis ? " · " + esc(x.ergebnis) : ""), val(esc(ago(x.ende))), sh("lauf:" + lKey(x)));
+}
+function viewAgenten(){
+  const A = agAlle(), dran = A.filter(a => a.aktiv.some(x => !x.still)).length, F = D.laeufe?.fertig || [];
+  const heute0 = new Date().setHours(0, 0, 0, 0) / 1000, heuteF = F.filter(x => x.ende >= heute0 && x.status === "fertig").length;
+  return kopf("Agenten", `${dran} dran · ${heuteF} heute fertig`)
+    + (A.length ? `<div class="agk">${A.map(agKarte).join("")}</div>` : empty("<b>Noch kein Agent</b>Anlegen mit <code>py start.py agent-neu claude</code> und <code>py start.py agent-neu codex</code>", "bot"))
+    + gh("Fertig gemeldet", F.length ? `${F.length}, das neueste oben` : "")
+    + (F.length ? grp(more("lf", F, 8, laufZeile)) : empty("<b>Noch nichts fertig gemeldet</b>Claude meldet sich über den Hook von selbst, Codex mit <code>lauf start</code> und <code>lauf fertig</code>.", "check"));
+}
+function laufAngaben(x){
+  const w = lWunsch(x), jetzt = lJetzt();
+  return grp(kv("Agent", esc(x.agent))
+    + (x.wunsch ? `<button type="button" class="kv" style="width:100%" ${w ? sh("wunsch:" + w.id) : ""}>Wunsch<span>Nr. ${x.wunsch}${w ? " · " + esc(w.titel) : ""}</span></button>` : "")
+    + kv("Angefangen", esc(new Date(x.start * 1000).toLocaleString("de-DE", {dateStyle: "short", timeStyle: "short"})))
+    + kv(x.ende ? "Dauer" : "Läuft seit", esc(dauer((x.ende || jetzt) - x.start)))
+    + (x.fortschritt != null ? kv("Fortschritt", Math.round(x.fortschritt) + " %") : "")
+    + kv("Letzter Schritt", esc(x.schritt)) + kv("Gemeldet über", esc({hook: "Hook (von selbst)", hand: "Befehl lauf"}[x.quelle] || x.quelle)));
+}
 /* Projekte und Aufgaben */
 function projektZeile(p){
   const offen = aufgabenVon(p.id).filter(a => !a.erledigt).length;
@@ -479,7 +551,7 @@ function viewNotizen(){
     + `<label class="suche">${icon("search")}<input type="search" id="nsuche" placeholder="Notizen durchsuchen" value="${esc(UI.q)}" autocomplete="off"></label>` + liste;
 }
 
-const VIEWS = {uebersicht: viewUebersicht, projekte: viewProjekte, wuensche: viewWuensche, berichte: viewBerichte, notizen: viewNotizen};
+const VIEWS = {uebersicht: viewUebersicht, agenten: viewAgenten, projekte: viewProjekte, wuensche: viewWuensche, berichte: viewBerichte, notizen: viewNotizen};
 function renderPage(){
   if (!D.pos) { setHtml($("pages"), D.fehler ? empty(`<b>Zentrale nicht erreichbar</b>${esc(D.fehler)}`, "wifi-off") : ""); return; }
   setHtml($("pages"), `<section class="page on">${VIEWS[PAGE]()}</section>`);
@@ -525,6 +597,19 @@ SHEETS.wunsch = id => {
       + (S.length ? gh2(`Schritte (${S.filter(a => a.erledigt).length} von ${S.length})`) + grp(S.map(aufgabeZeile).join("")) : "")
       + gh2(`Notizen (${w.notizen.length})`) + (w.notizen.length ? `<div class="chat">${w.notizen.map(n => `<div class="bl ${n.von === "besitzer" ? "ich" : "ag"}"><small>${esc(wer(n.von))} · ${esc(ago(n.zeit))}</small>${esc(n.text)}</div>`).join("")}</div>` : "")
       + `<form class="antwort" data-form="wnotiz" data-id="${esc(w.id)}"><input class="inp" name="text" placeholder="Notiz schreiben" required><button class="btn pri" type="submit">${icon("arrow-up")}</button></form>`};
+};
+SHEETS.agent = id => {
+  const a = agAlle().find(x => x.id === id); if (!a) return null;
+  const [zt] = agZustand(a);
+  return {lead: ava(id, "xl"), title: esc(id), sub: `${esc(zt)} · zuletzt da ${esc(ago(a.zuletzt))}`,
+    body: (a.aktiv.length ? a.aktiv.map(x => gh2(esc(lTitel(x)) + (x.still ? " (still)" : "")) + laufAngaben(x)).join("") : `<div class="papier">Macht gerade nichts.</div>`)
+      + gh2(`Fertig gemeldet (${a.fertig.length})`) + (a.fertig.length ? grp(more("af-" + id, a.fertig, 6, laufZeile)) : `<div class="papier">Noch nichts.</div>`)};
+};
+SHEETS.lauf = key => {
+  const L = D.laeufe || {aktiv: [], fertig: []}, x = [...L.aktiv, ...L.fertig].find(y => lKey(y) === key); if (!x) return null;
+  const [ic, c, st] = x.ende ? LSTAT[x.status] || LSTAT.fertig : ["loader", "blue", x.still ? "still" : "läuft"];
+  return {lead: sq(ic, c, "xl"), title: esc(lTitel(x)), sub: `${esc(st)} · ${esc(x.agent)}` + (x.ende ? ` · ${esc(ago(x.ende))}` : ""),
+    body: laufAngaben(x) + (x.ergebnis ? gh2(x.status === "fehler" ? "Was schiefging" : "Ergebnis") + `<div class="papier">${esc(x.ergebnis)}</div>` : "")};
 };
 SHEETS["wunsch-neu"] = () => ({lead: sq("star", "yellow", "xl"), title: "Neuer Wunsch", sub: "Was soll dein Agent für dich tun?",
   body: `<form class="form" data-form="wunsch"><label>Was<input class="inp" name="titel" required></label><label>Genauer (optional)<textarea class="inp" name="text"></textarea></label><div class="zeile"><label>Priorität<select class="inp" name="prio"><option value="hoch">Hoch</option><option value="mittel" selected>Mittel</option><option value="niedrig">Niedrig</option></select></label><label>Gruppe (optional)<input class="inp" name="gruppe"></label></div><button class="btn pri" type="submit">Eintragen</button></form>`});

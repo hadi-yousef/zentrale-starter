@@ -9,7 +9,7 @@ T3 Code) bei dir aufräumt: sicher, in kleinen Schritten, ohne etwas zu löschen
 
 | Teil | Was es tut |
 |---|---|
-| **Zentrale** | Webseite nur auf deinem Rechner: Übersicht, Projekte mit Aufgaben, Wünsche mit Priorität und Notizen, Berichte mit Fragen zum Antippen, Notizen als Markdown-Dateien. Hell und dunkel, auf Deutsch. Nur Python, keine weiteren Pakete. |
+| **Zentrale** | Webseite nur auf deinem Rechner: Übersicht, Agenten (wer gerade woran arbeitet, was fertig ist), Projekte mit Aufgaben, Wünsche mit Priorität und Notizen, Berichte mit Fragen zum Antippen, Notizen als Markdown-Dateien. Hell und dunkel, auf Deutsch. Nur Python, keine weiteren Pakete. |
 | **Agenten** | Jeder Agent hat einen eigenen Schlüssel und trägt über `zentrale_client.py` ein, was er tut und was er fragen will. |
 | **Aufräumen** | Werkzeuge in `aufraeumen\`: Bestandsaufnahme (nur lesen), Sichern auf Stick mit Prüfung, Verschieben nur auf derselben Platte mit Protokoll, Rückgängig für jeden Schritt, Papierkorb statt Löschen. |
 | **Anleitung** | `AGENTS.md` (Codex) und `CLAUDE.md` (Claude) führen den Agenten in Phasen durch: Sichern, Bestandsaufnahme, Plan, Aufräumen, Zentrale füllen. Jede Phase endet mit deinem Ja. |

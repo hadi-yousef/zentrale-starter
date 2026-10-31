@@ -161,3 +161,4 @@ py zentrale_client.py --agent codex wunsch-erledigt 7 --ergebnis "Downloads von 
 | Abhaken | `wunsch-erledigt 7 --ergebnis "…"` |
 | Verwerfen | `wunsch-verwerfen 7 --grund "…"` |
 | Aufgabe dazu | `aufgabe "…" --projekt … --wunsch 7 [--fuer besitzer]` |
+| Arbeit zeigen (Seite „Agenten“) | `lauf start "…" --wunsch 7`, `lauf fertig "…"` (siehe `docs/AGENTEN-SEITE.md`) |

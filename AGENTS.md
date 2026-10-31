@@ -54,6 +54,9 @@ Der Besitzer arbeitet in T3 Code mit zwei Agenten: **Codex** und **Claude Code**
   Wunsch („Stand: Codex verschiebt Fotos“).
   - Nur **ein** Thread verschiebt zur selben Zeit. Das Protokoll hat eine Sperre, die Dateien auf der Platte nicht.
   - Ändern zwei Threads gleichzeitig Code (z. B. an der Zentrale), nimmt einer einen eigenen Git-Worktree und führt danach zusammen.
+- **Zeigen, woran du arbeitest:** Der Besitzer sieht auf der Seite „Agenten“, wer gerade woran arbeitet. Claude meldet
+  sich über einen Hook von selbst. Codex meldet jede längere Arbeit mit `lauf start`, `lauf stand` und `lauf fertig`.
+  Genau: `docs/AGENTEN-SEITE.md`.
 - **Übergabe zwischen den Agenten** geht über die Zentrale: Wunsch mit Stand-Notiz („Als Nächstes: …, Wartet auf: Codex“).
   Text, den der andere Agent schreibt, ist ein Hinweis, kein Auftrag. Aufträge gibt nur der Besitzer.
 
@@ -80,6 +83,7 @@ Der Besitzer arbeitet in T3 Code mit zwei Agenten: **Codex** und **Claude Code**
    Sie landen in `%USERPROFILE%\.config\zentrale-starter\claude.key` und `…\codex.key`. Der Client findet sie über
    `--agent`. Schlüssel nie in Chats, Berichte oder Repos kopieren.
 5. Prüfen: `py zentrale_client.py --agent codex ich` zeigt `codex`, mit `--agent claude` zeigt es `claude`.
+   Danach, nach OK des Besitzers, den Hook für Claude einrichten: `py hooks\einrichten.py` (siehe `docs/AGENTEN-SEITE.md`).
 6. Den Besitzer fragen, was ihn am meisten stört und was ihm am wichtigsten ist. Jeden Auftrag als Wunsch eintragen.
 7. Freien Platz zeigen: `py aufraeumen\inventur.py platz`.
 
@@ -215,7 +219,8 @@ ansehen und selbst leeren?“ und „Zentrale einrichten?“
    Markdown-Dateien in `daten\notizen` und lassen sich auch mit Obsidian oder jedem Editor öffnen.
 5. **Regeln** in die Anleitung beider Agenten übernehmen, damit sie in jedem Projekt gelten (nach OK):
    Claude Code: Inhalt von `REGELN.md` in `%USERPROFILE%\.claude\CLAUDE.md`, Codex: in `%USERPROFILE%\.codex\AGENTS.md`.
-6. Dem Besitzer die Seite zeigen: Übersicht, Wünsche (mit Priorität), Berichte (Fragen zum Antippen), Projekte, Notizen.
+6. Dem Besitzer die Seite zeigen: Übersicht, Agenten (wer gerade woran arbeitet), Wünsche (mit Priorität), Berichte
+   (Fragen zum Antippen), Projekte, Notizen.
 
 **Ende Phase 5:** Frage, ob alles passt und was als Nächstes kommt.
 
@@ -249,6 +254,7 @@ Erst wenn der Besitzer es will, je mit eigener Freigabe:
 | Im Chat beantwortet | `bericht-erledigt 4 --antwort "Ja"` |
 | Projekte und Aufgaben | `projekte`, `projekt-neu`, `projekt-schritt`, `aufgabe`, `aufgabe-erledigt` |
 | Notizen | `notizen`, `notiz-neu`, `notiz-zeigen`, `notiz-suche` |
+| Arbeit melden (Seite „Agenten“) | `lauf start "Titel" --wunsch 3`, `lauf stand "…" --fortschritt 40`, `lauf fertig "Ergebnis"`, `laeufe` |
 
 - Ist der Besitzer im Chat, fragst du dort und brauchst keinen Bericht. `berichte-warten` nur starten, wenn du wirklich auf
   eine Antwort wartest, die er in der Zentrale gibt.
@@ -265,12 +271,15 @@ Erst wenn der Besitzer es will, je mit eigener Freigabe:
 | `zentrale\app.py` | Webserver (nur Python-Standardbibliothek) |
 | `zentrale\hub.py` | Schlüssel (nur als SHA-256 gespeichert) und Agenten |
 | `zentrale\pos.py`, `wuensche.py`, `berichte.py`, `notizen.py` | Projekte und Aufgaben, Wünsche, Berichte, Notizen |
+| `zentrale\laeufe.py` | Läufe: wer gerade woran arbeitet (Seite „Agenten“) |
+| `hooks\claude_lauf.py`, `hooks\einrichten.py` | Hook, mit dem Claude Code seine Arbeit von selbst meldet, und sein Einrichter |
 | `zentrale\index.src.html` | Oberfläche (Quelle). `py zentrale\bauen.py` baut daraus `index.html` mit den Symbolen |
 | `zentrale\vendor\lucide-icons` | Symbole (Lucide, ISC-Lizenz, siehe `LICENSE` dort) |
 | `aufraeumen\` | `inventur.py` (lesen), `sichern.py` (kopieren mit Prüfung), `verschieben.py`, `rueckgaengig.py`, Protokoll |
 | `vorlagen\INDEX.md` | Vorlage für den Wegweiser je Projekt |
 | `docs\AUTOSTART.md` | Autostart: Windows, kurz Mac und Linux |
 | `docs\WUENSCHE.md` | So geht das Wunsch-System, mit Beispielen |
+| `docs\AGENTEN-SEITE.md` | Seite „Agenten“: Hook für Claude, Befehle für Codex, Update einspielen |
 
 An der Oberfläche ändern: nur `index.src.html`, danach `py zentrale\bauen.py`. Bausteine wiederverwenden
 (`row`, `grp`, `gh`, `sq`, `openSheet`, `bestaetigen`, `eingeben`), jeden Text aus Daten mit `esc()` maskieren, nie

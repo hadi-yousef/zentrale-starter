@@ -13,6 +13,7 @@ from urllib.parse import parse_qs, urlsplit
 
 import berichte
 import hub
+import laeufe
 import notizen
 import pos
 import wuensche
@@ -101,6 +102,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(200, berichte.warten(aid, arg("sitzung"), arg("sekunden", "600")))
             if url.path.startswith("/api/berichte/") and len(teile) == 1:
                 return self._json(200, berichte.lesen(aid, teile[0]))
+            if url.path == "/api/laeufe":
+                return self._json(200, laeufe.lage())
             if url.path == "/api/notizen":
                 return self._json(200, notizen.liste())
             if url.path == "/api/notizen/notiz":
@@ -177,6 +180,10 @@ class Handler(BaseHTTPRequestHandler):
                 if aid != hub.BESITZER:
                     raise PermissionError("Gelesen setzt nur der Besitzer.")
                 return berichte.gelesen(teile[0], b.get("ja", True))
+        if pfad == "/api/laeufe":
+            if aid == hub.BESITZER:
+                raise PermissionError("Läufe melden nur Agenten.")
+            return laeufe.melden(aid, b)
         if pfad == "/api/notizen/neu":
             return notizen.neu(b.get("ordner"), b.get("titel"), b.get("text"))
         if pfad == "/api/notizen/speichern":

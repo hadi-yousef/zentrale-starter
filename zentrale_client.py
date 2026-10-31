@@ -34,6 +34,12 @@ Berichte an den Besitzer, mit Fragen und Vorschlägen:
   py zentrale_client.py --agent codex berichte-warten [--sitzung <id>] [--max 600]
       wartet, bis der Besitzer in einem eigenen Bericht schreibt, gibt die Nachrichten aus und endet (Code 0, ohne Nachricht Code 3).
 
+Läufe: was du gerade machst (Seite „Agenten“). Claude meldet sich über den Hook von selbst, Codex so:
+  py zentrale_client.py --agent codex lauf start "Downloads aufräumen" --wunsch 7
+  py zentrale_client.py --agent codex lauf stand "Block 2 von 5 verschoben" --fortschritt 40
+  py zentrale_client.py --agent codex lauf fertig "412 Dateien im Papierkorb, Protokoll liegt bei"   (--fehler, wenn es schiefging)
+  py zentrale_client.py --agent codex laeufe                    (wer gerade woran arbeitet, was zuletzt fertig wurde)
+
 Notizen (Markdown-Dateien):
   py zentrale_client.py --agent codex notizen
   py zentrale_client.py --agent codex notiz-neu "Inventur" --ordner Aufräumen --text-datei INVENTUR.md
@@ -188,6 +194,26 @@ def ausfuehren(z, a):
         w = z.post(f"/api/wuensche/{q(a.nr)}", {"prio": a.prio})
         print(f"Wunsch Nr. {w['nr']}: Priorität {w['prio']}.")
 
+    elif a.befehl == "lauf":
+        feld = {"start": "titel", "stand": "schritt", "fertig": "ergebnis"}[a.aktion]
+        d = {"aktion": a.aktion, "lauf": a.lauf, feld: a.text or "", "wunsch": a.wunsch or "", "quelle": "hand"}
+        if a.fortschritt is not None:
+            d["fortschritt"] = a.fortschritt
+        if a.fehler:
+            d["fehler"] = True
+        x = z.post("/api/laeufe", d)
+        print(f"Lauf {x['lauf']}: {a.aktion}" + (f" · Wunsch Nr. {x['wunsch']}" if x.get("wunsch") else "") + (f" · {x['titel']}" if x.get("titel") else ""))
+    elif a.befehl == "laeufe":
+        d = z.get("/api/laeufe")
+        print(f"Gerade dran ({len(d['aktiv'])}):")
+        for x in d["aktiv"]:
+            print(f"  {x['agent']}: " + (f"Wunsch Nr. {x['wunsch']} · " if x.get("wunsch") else "") + (x.get("titel") or x["lauf"])
+                  + f"  seit {zeit(x['start'])}" + (f" · {x['schritt']}" if x.get("schritt") else "") + ("  (still)" if x.get("still") else ""))
+        print("Zuletzt fertig:")
+        for x in d["fertig"][:a.anzahl]:
+            print(f"  {zeit(x['ende'])} {x['agent']} [{x['status']}] " + (f"Wunsch Nr. {x['wunsch']} · " if x.get("wunsch") else "")
+                  + (x.get("titel") or x["lauf"]) + (f" → {x['ergebnis'][:120]}" if x.get("ergebnis") else ""))
+
     elif a.befehl == "projekte":
         d = z.get("/api/pos")
         offen = {}
@@ -304,6 +330,12 @@ def main():
     p = P("wunsch-erledigt", "Wunsch abhaken"); p.add_argument("nr"); p.add_argument("--ergebnis", required=True)
     p = P("wunsch-verwerfen", "Wunsch verwerfen"); p.add_argument("nr"); p.add_argument("--grund", required=True)
     p = P("wunsch-prio", "Priorität ändern"); p.add_argument("nr"); p.add_argument("prio", choices=["hoch", "mittel", "niedrig"])
+
+    p = P("lauf", "melden, woran du gerade arbeitest (Start, Zwischenstand, Fertig)")
+    p.add_argument("aktion", choices=["start", "stand", "fertig"]); p.add_argument("text", nargs="?", help="Titel, Schritt oder Ergebnis")
+    p.add_argument("--wunsch"); p.add_argument("--fortschritt", type=int, help="0 bis 100")
+    p.add_argument("--fehler", action="store_true"); p.add_argument("--lauf", default="haupt", help="eigene Kennung, wenn mehrere Arbeiten gleichzeitig laufen")
+    p = P("laeufe", "wer gerade woran arbeitet, was zuletzt fertig wurde"); p.add_argument("--anzahl", type=int, default=10)
 
     P("projekte", "Projekte mit offenen Aufgaben")
     p = P("projekt-neu", "Projekt anlegen"); p.add_argument("name"); p.add_argument("--beschreibung"); p.add_argument("--schritt")
