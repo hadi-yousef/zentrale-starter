@@ -10,16 +10,16 @@ Größere Änderungen nur nach Entwurf als Bild und OK des Besitzers (`REGELN.md
 
 | Bild | Seite | Worauf achten |
 |---|---|---|
-| ![](bilder/01-uebersicht.png) | **Übersicht** | Vier Kacheln, „Wartet auf dich“, „Wichtigste Wünsche“, Agenten. Unten links „Fassung …“, dieselbe wie `FASSUNG` in `zentrale/hub.py`. |
+| ![](bilder/01-uebersicht.png) | **Übersicht** | Oben „Guten Tag“ mit Datum und wie viel auf dich wartet. Links „Wartet auf dich“ (je Bericht die aktuelle Frage mit Vorschlägen zum Antippen) und „Heute“ (deine Aufgaben zum Abhaken, unten neu eintragen). Rechts die Agenten und vier Zahlen. Unten links „Fassung …“, dieselbe wie `FASSUNG` in `zentrale/hub.py`. |
 | ![](bilder/02-agenten.png) | **Agenten** | Eine Karte je Agent mit Arbeit, Wunsch-Nummer und Balken. Darunter „Fertig gemeldet“. |
-| ![](bilder/03-wuensche.png) | **Wünsche** | Nach Priorität, unter jedem Wunsch die letzte Stand-Notiz. |
-| ![](bilder/04-wunsch-blatt.png) | Wunsch geöffnet | Priorität, Text, Notizen der Agenten als Verlauf. |
+| ![](bilder/03-wuensche.png) | **Wünsche** | Oben die Zahl, darunter „Neuer Wunsch …“. Je Gruppe ein Abschnitt (zuklappbar) mit Karten: Nr., Priorität als !!!/!!/!, Text oder „Als Nächstes“ mit Balken, die letzte Notiz grau. Unten das Erledigte. |
+| ![](bilder/04-wunsch-blatt.png) | Wunsch geöffnet | Erledigt, Verwerfen, Titel ändern; Gruppe, Priorität, Schritte mit Balken und „Schritt hinzufügen“, Notizen, Notiz schreiben. |
 | ![](bilder/05-berichte.png) | **Berichte** | Links die Liste („Wartet auf dich“ oben, Nummer, Agent · Projekt, offene Fragen), rechts der Verlauf: Karte mit Kurzfassung und „Ganzen Bericht lesen“, dann **eine Frage nach der anderen** mit Vorschlägen zum Antippen, „noch N Fragen danach“. |
 | ![](bilder/13-handy-bericht.png) | Bericht am Handy | Öffnet als Blatt, gleiche Reihenfolge, unten das Antwortfeld. |
-| ![](bilder/06-projekte.png) | **Projekte** | Aktiv, ruht, Archiv; je Projekt „Als Nächstes“. |
-| ![](bilder/07-notizen.png) | **Notizen** | Oben die festen Ordner (Besitzer, Geräte, Projekte, Aufräumen, Anleitungen, Übergaben), darunter das zuletzt Geänderte. |
-| ![](bilder/12-notizen-ordner.png) | Ordner geöffnet | „‹ Alle Notizen“ führt zurück. |
+| ![](bilder/06-projekte.png) | **Projekte** | Aktive Projekte als Karten (Symbol, Gerät, „Als Nächstes“, Balken, offene Aufgaben, % erledigt). Darunter Aufgaben ohne Projekt, Ruht, Archiv und „Neues Projekt“. |
+| ![](bilder/07-notizen.png) | **Notizen** | Drei Spalten: links „Alle Notizen“, „Zuletzt“ und die festen Ordner (Besitzer, Geräte, Projekte, Aufräumen, Anleitungen, Übergaben), in der Mitte die Liste mit Suche und Knopf für neue Notiz, rechts die Notiz mit „Bearbeiten“ und Papierkorb. Am Handy nur die Liste, die Notiz öffnet als Blatt. |
+| ![](bilder/12-notizen-ordner.png) | Ordner gewählt | Die Liste zeigt nur diesen Ordner, links ist er markiert. |
 | ![](bilder/08-papierkorb.png) | **Papierkorb** | Oben die Summe. Je Papierkorb (C:\Papierkorb, Notizen) ein Abschnitt mit „Alles leeren“, in jeder Zeile „Löschen“, unten der Windows-Papierkorb mit „Leeren“. Löschen kann nur der Besitzer. |
-| ![](bilder/09-papierkorb-blatt.png) | Name angetippt | Herkunft, Grund, Schritt im Protokoll, „Zurücklegen“. |
+| ![](bilder/09-papierkorb-blatt.png) | Name angetippt | Herkunft und Größe, „Zurücklegen“ und „Endgültig löschen“. |
 | ![](bilder/10-uebersicht-dunkel.png) | dunkel | Folgt der Einstellung von Windows. |
 | ![](bilder/11-handy-agenten.png) | Handy | Leiste unten statt links. |

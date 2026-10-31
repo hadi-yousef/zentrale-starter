@@ -42,8 +42,8 @@ svg.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke
 [hidden]{display:none!important}
 
 /* Kopf, Seiten */
-.wrap{max-width:1080px;margin:0 auto;padding:30px 36px 72px}
-.hd{margin-bottom:18px;display:flex;align-items:flex-start;gap:12px}
+.wrap{max-width:1180px;margin:0 auto;padding:30px 36px 72px}
+.hd{margin-bottom:16px;min-height:62px;display:flex;align-items:flex-start;gap:12px}
 .hdt{flex:1;min-width:0}
 .hd h1{font:700 34px/1.08 var(--disp);letter-spacing:-.022em}
 .hd p{margin-top:5px;color:var(--ink2);font-size:14px}
@@ -62,18 +62,20 @@ body{padding-bottom:calc(64px + env(safe-area-inset-bottom))}
 @media (min-width:1000px){
   body{padding-bottom:0}
   .tabbar{display:none}
-  #app{padding-left:240px}
-  .side{display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;width:240px;z-index:30;padding:18px 12px 24px;overflow-y:auto;
+  #app{padding-left:250px}
+  .side{display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;width:250px;z-index:30;padding:18px 12px 24px;overflow-y:auto;
     background:color-mix(in srgb,var(--card) 55%,var(--bg));border-right:.5px solid var(--sep)}
   .wrap{padding-top:34px}
 }
-.slogo{display:flex;align-items:center;gap:10px;padding:2px 10px 18px;font:700 20px var(--disp);letter-spacing:-.015em}
+.slogo{display:flex;align-items:center;gap:10px;padding:2px 10px 16px;font:700 20px var(--disp);letter-spacing:-.015em}
 .side>a{display:flex;align-items:center;gap:10px;min-height:34px;padding:4px 10px;border-radius:8px;font-size:14.5px;color:var(--ink)}
 .side>a:hover:not(.on){background:var(--hover)}
 .side>a.on{background:var(--blue);color:#fff}
 .side>a .sq{width:24px;height:24px;border-radius:6px}.side>a .sq .i{width:14px;height:14px}
 .side>a .n{margin-left:auto;color:var(--ink2);font-size:13px}
 .side>a.on .n{color:rgba(255,255,255,.85)}
+.side>a .badge{margin-left:auto}
+.side>a.on .badge{background:#fff;color:var(--blue)}
 .side .grow{flex:1}
 .side .wer{padding:10px;color:var(--ink2);font-size:12.5px}
 .badge{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--red);color:#fff;font-size:11px;font-weight:600;display:grid;place-items:center}
@@ -100,9 +102,9 @@ body{padding-bottom:calc(64px + env(safe-area-inset-bottom))}
 
 /* Kacheln */
 .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:8px}
-.tile{display:flex;flex-direction:column;width:100%;background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:16px 18px;transition:transform .18s,box-shadow .18s;min-width:0}
+.tile{display:flex;flex-direction:column;align-items:stretch;width:100%;background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:18px 20px;transition:transform .18s,box-shadow .18s;min-width:0}
 button.tile:hover{transform:translateY(-1px);box-shadow:var(--shadow2)}
-.th{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:600;margin-bottom:12px}
+.th{display:flex;align-items:center;gap:9px;font-size:14.5px;font-weight:600;margin-bottom:14px}
 .big{font:600 32px/1 var(--round);letter-spacing:-.01em}
 .big small{font:500 14px var(--font);color:var(--ink2);margin-left:5px;letter-spacing:0}
 @media (max-width:760px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.wrap{padding:22px 16px 60px}.hd h1{font-size:30px}}
@@ -250,6 +252,120 @@ select.inp{padding-right:8px}
 .belk .muted{color:var(--ink2)}
 .beleer{padding:28px 16px;color:var(--ink2);text-align:center;font-size:14px;display:flex;flex-direction:column;align-items:center;gap:8px}.beleer svg{width:28px;height:28px}
 
+/* Seiten wie im Vorbild: Übersicht („Heute“), Projekte als Karten, Wünsche in Gruppen, Notizen in drei Spalten */
+.sq.sm{width:24px;height:24px;border-radius:7px}.sq.sm .i{width:14px;height:14px}
+.sq.xxl{width:54px;height:54px;border-radius:14px}.sq.xxl .i{width:28px;height:28px}
+.th .lnk{margin-left:auto;font-size:13.5px;font-weight:400;color:var(--blue)}
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;margin-top:auto;padding-top:12px;border-top:.5px solid var(--sep);font-size:13px;color:var(--ink2)}
+.muted{color:var(--ink2);font-size:13.5px}
+.tile .row{padding-left:0;padding-right:0}
+.tile .row+.row::before{left:42px}
+.tile .row.noi+.row::before,.tile .row+.row.noi::before{left:0}
+.tile .row .ava{width:32px;height:32px;font-size:12.5px}
+.hgrid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px;align-items:start}
+.hcol{display:flex;flex-direction:column;gap:16px;min-width:0}
+.hfrage{background:var(--fill);border-radius:14px;padding:12px 14px;margin-top:8px}
+.th+.hfrage{margin-top:0}
+.hfk{display:block;width:100%;text-align:left}
+.hfnr{display:block;font-size:12px;font-weight:600;color:var(--orange);margin-bottom:2px}
+.hft{display:block;font-size:14.5px;line-height:1.4;overflow-wrap:anywhere}
+.hfchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.hfchips .bechip{background:none}
+.hfchips .hfeig{box-shadow:none;color:var(--ink2);padding-left:6px}
+.hleer{padding:10px 0 2px}
+.hruhig{display:flex;align-items:center;gap:8px}.hruhig .i{color:var(--green)}
+.hneu{border-top:.5px solid var(--sep);margin-top:12px}
+.hneu .posform{width:100%}
+.hzahlen{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.hzahlen.vier{grid-template-columns:repeat(4,minmax(0,1fr))}
+.hzahl{padding:14px 16px;text-align:left}.hzahl b{font:700 26px/1 var(--round);margin-top:12px}.hzahl>span:last-child{font-size:13px;color:var(--ink2);margin-top:3px}
+@media (max-width:760px){.hgrid{grid-template-columns:minmax(0,1fr);gap:12px}.hcol{gap:12px}.hzahlen{gap:12px}.hzahlen.vier{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.posliste{display:flex;flex-direction:column;margin-top:4px}
+.tile .row.posa{padding-left:0}
+.row.posa .t b{white-space:normal}
+.wkb{display:grid;place-items:center;padding:6px;margin:-6px 2px -6px -6px;border-radius:50%;flex:none}
+.wkb:hover .wk:not(.ok){border-color:var(--orange);background:color-mix(in srgb,var(--orange) 12%,transparent)}
+.durch{color:var(--ink2)!important;text-decoration:line-through}
+.row .t span.spaet{color:var(--badink)}
+.posform{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.posform .inp[name=titel],.posform .inp[name=name],.posform .inp[name=text]{flex:1 1 220px}
+.posform select.inp{flex:0 1 180px}.posform input[type=date]{flex:0 0 150px}
+.grp.posform{padding:10px 12px}.posform.inrow{padding:10px 12px 12px;border-top:1px solid var(--sep)}
+.posbar{display:block;height:6px;border-radius:3px;background:var(--fill);overflow:hidden}.posbar i{display:block;height:100%;border-radius:3px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.card{display:flex;flex-direction:column;gap:10px;width:100%;background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:16px 16px 15px;text-align:left;transition:transform .18s,box-shadow .18s;min-width:0}
+button.card:hover{transform:translateY(-1px);box-shadow:var(--shadow2)}
+.card .top{display:flex;align-items:flex-start;gap:12px}
+.card .t{min-width:0;flex:1}
+.card .t b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:15.5px;font-weight:600;line-height:1.3;overflow:hidden;overflow-wrap:anywhere}
+.card .t span{display:block;color:var(--ink2);font-size:13px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .bot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto;font-size:13px;color:var(--ink2)}
+.card p{color:var(--ink2);font-size:13.5px}
+.card p b{color:var(--ink);font-weight:500}
+.dlhead{display:flex;flex-direction:row;align-items:center;gap:16px;margin-bottom:16px}
+.dlhead .t{flex:1}
+.dlhead b{display:block;font-size:16px;font-weight:600}
+.dlhead .t span{color:var(--ink2);font-size:13.5px}
+.todo{display:flex;gap:12px;padding:12px 16px;position:relative;align-items:flex-start}
+.todo+.todo::before{content:"";position:absolute;left:36px;right:0;top:0;height:.5px;background:var(--sep)}
+.todo .t{flex:1;min-width:0}
+.todo p{color:var(--ink2);font-size:13.5px;margin-top:2px}
+.todo .by{font-size:12.5px;margin-top:4px}
+.todo .by b{color:var(--ink)}
+.wk{width:22px;height:22px;border-radius:50%;border:2px solid var(--ink3);flex:none;display:grid;place-items:center;margin:0 4px;color:#fff}
+.wk svg{width:13px;height:13px;stroke-width:3}
+.wk.ok{background:var(--orange);border-color:var(--orange)}
+.wk.weg{background:var(--fill);border-color:transparent;color:var(--ink2)}
+.wk.xl{width:44px;height:44px;margin:0}.wk.xl svg{width:24px;height:24px}
+.wn{display:inline-flex;align-items:center;gap:4px;color:var(--ink2);font-size:13px;margin-left:8px}.wn svg{width:15px;height:15px}
+.wneu{display:flex;align-items:center;gap:10px;padding:8px 10px 8px 14px;margin-bottom:6px}
+.wneu .inp{flex:1;background:none;padding-left:4px}
+.wkarte .t b{-webkit-line-clamp:3}
+.wghead{display:flex;align-items:center;gap:10px;margin:22px 4px 10px;font-size:19px;width:calc(100% - 8px);text-align:left}.wghead b{font-weight:700}.wghead .muted{font-size:13px}.wghead>svg{width:18px;height:18px;color:var(--ink2)}
+.wgwahl{display:flex;flex-wrap:wrap;gap:6px;padding:12px}.wgwahl form{display:flex;gap:6px}.wgwahl .inp{height:32px;font-size:14px}
+.wkarte .posbar{margin-top:2px}.wkarte .wnext{font-size:13.5px}.wkarte .wnext b{font-weight:600}
+.wnr{color:var(--ink2);font-size:12.5px;font-weight:400;margin-right:6px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.wprio{color:var(--orange);font-weight:700;font-style:normal;margin-right:4px;display:inline}
+.seg.wprios{margin:0 0 4px}.seg.wprios>button{padding:5px 12px;font-size:13px}
+.wkarte .wnz{background:var(--fill);border-radius:10px;padding:8px 10px}
+.wkarte .wnz span{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.wtext{white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ink);font-size:15px;line-height:1.45}
+.wtext.top{margin:10px 4px 6px}
+.todo .wtext{color:var(--ink);font-size:14.5px;margin-top:4px}
+.wform{padding:12px}.ta{width:100%;min-height:96px;padding:10px 12px;resize:vertical;line-height:1.4;display:block}
+.wfb{display:flex;justify-content:flex-end;margin-top:10px}
+.row.wfertig .t b{color:var(--ink2)}
+.x.sm{width:28px;height:28px}
+.wx3{display:grid;grid-template-columns:210px 320px minmax(0,1fr);background:var(--card);border-radius:20px;box-shadow:var(--shadow);overflow:hidden;min-height:620px}
+.wxs{padding:14px 10px;border-right:1px solid var(--sep);background:color-mix(in srgb,var(--fill) 45%,transparent)}
+.wxsk{font-size:12px;font-weight:600;color:var(--ink2);text-transform:uppercase;letter-spacing:.04em;margin:14px 8px 6px}.wxsk:first-child{margin-top:2px}
+.wxsk.kopf{display:flex;align-items:center;justify-content:space-between}.wxsk.kopf .x{margin:-6px -4px -6px 0}.wxsk.kopf .x.on{background:color-mix(in srgb,var(--orange) 18%,transparent);color:var(--orange)}
+.wxo{display:flex;align-items:center;gap:8px;width:100%;padding:7px 8px;border-radius:9px;font-size:14px;text-align:left}
+.wxo svg{width:17px;height:17px;color:var(--orange);flex:none}.wxo span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.wxo b{font-weight:400;color:var(--ink2);font-size:13px}
+.wxo:hover{background:var(--hover)}.wxo.on{background:color-mix(in srgb,var(--orange) 18%,transparent)}.wxo.neu{color:var(--ink2);margin-top:8px}.wxo.neu svg{color:var(--ink2)}
+.wxof{margin-top:8px}.wxof .inp{width:100%;height:32px;font-size:14px}
+.wxl{border-right:1px solid var(--sep);overflow:auto;max-height:760px}
+.wxsuch{display:flex;gap:8px;align-items:center;padding:12px;position:sticky;top:0;z-index:1;background:var(--card);border-bottom:1px solid var(--sep)}.wxsuch .inp{flex:1}.wxsuch .btn{height:38px;width:38px;padding:0;justify-content:center}
+.wxmsel{display:none}
+.wxn{display:block;width:100%;text-align:left;padding:11px 16px;border-bottom:1px solid var(--sep)}
+.wxn b{display:block;font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wxn span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--ink2);font-size:13px;margin-top:2px}.wxn span i{font-style:normal;color:var(--ink);margin-right:4px}
+.wxn small{display:flex;align-items:center;gap:4px;color:var(--ink2);font-size:12px;margin-top:4px}.wxn small svg{width:12px;height:12px}
+.wxn:hover{background:var(--hover)}.wxn.on{background:color-mix(in srgb,var(--orange) 16%,transparent)}
+.wxleer{color:var(--ink2);font-size:14px;text-align:center;padding:40px 20px;line-height:1.5}.wxleer svg{width:15px;height:15px;vertical-align:-2px}
+.wxv{padding:0 28px 28px;overflow:auto;max-height:760px}
+.wxv>.wxleer{padding-top:120px}.wxv>.wxleer>svg{width:40px;height:40px;color:var(--ink3);margin-bottom:8px}
+.wxvk{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 -28px 14px;padding:14px 28px 10px;font-size:13px;position:sticky;top:0;z-index:2;background:var(--card);border-bottom:1px solid var(--sep)}
+.wxv>.wxed{padding-top:18px}.wxvk .muted{display:flex;align-items:center;gap:5px;min-width:0}.wxvk .muted svg{width:14px;height:14px;flex:none}.wxvk>span:last-child{display:flex;gap:6px;flex:none}
+.wxed{display:flex;flex-direction:column;gap:10px}
+.wxed .wxtitel{font-size:20px;font-weight:650;height:44px}
+.wxed .ta{min-height:560px;font:14px/1.55 var(--mono);resize:vertical}
+.wxedf{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12.5px}.wxedf>span:last-child{display:flex;gap:6px;flex:none}
+.wxblatt{padding:18px 20px}
+#sheet .wxed .ta{min-height:46vh}
+.wx3.ohneliste{grid-template-columns:210px minmax(0,1fr)}.wx3.ohneliste .wxl{display:none}
+@media (max-width:900px){.wx3,.wx3.ohneliste{grid-template-columns:1fr;min-height:0}.wx3 .wxl,.wx3.ohneliste .wxl{display:block}.wxs,.wxv{display:none}.wxl{border-right:0;max-height:none}.wxmsel{display:block;margin:10px 12px 2px;width:calc(100% - 24px)}.wxedf{flex-wrap:wrap}}
+
 /* Markdown */
 .mdx{font-size:15px;line-height:1.55;overflow-wrap:anywhere}
 .mdx h2,.mdx h3,.mdx h4,.mdx h5{font-family:var(--disp);margin:18px 0 6px;line-height:1.25}
@@ -288,7 +404,7 @@ select.inp{padding-right:8px}
 .login form{display:flex;flex-direction:column;gap:10px}
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:90;background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:12px;font-size:14px;box-shadow:var(--shadow2);opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.on{opacity:1}
-@media (min-width:1000px){.toast{bottom:28px;margin-left:120px}}
+@media (min-width:1000px){.toast{bottom:28px;margin-left:125px}}
 </style>
 </head>
 <body>
@@ -433,10 +549,10 @@ const PRIO = {hoch: ["Hoch", "red"], mittel: ["Mittel", "orange"], niedrig: ["Ni
 
 /* ---------- Seiten ---------- */
 const PAGES = [
-  {id: "uebersicht", title: "Übersicht", icon: "layout-grid", farbe: "blue"},
+  {id: "uebersicht", title: "Übersicht", icon: "sun", farbe: "orange"},
   {id: "agenten", title: "Agenten", icon: "bot", farbe: "purple"},
-  {id: "projekte", title: "Projekte", icon: "folder", farbe: "orange"},
-  {id: "wuensche", title: "Wünsche", icon: "star", farbe: "yellow"},
+  {id: "projekte", title: "Projekte", icon: "folder", farbe: "yellow"},
+  {id: "wuensche", title: "Wünsche", icon: "list-todo", farbe: "orange"},
   {id: "berichte", title: "Berichte", icon: "message-square-text", farbe: "green"},
   {id: "notizen", title: "Notizen", icon: "notebook-pen", farbe: "indigo"},
   {id: "papierkorb", title: "Papierkorb", icon: "trash-2", farbe: "gray"},
@@ -454,35 +570,63 @@ function zaehler(id){
 const fragenOffen = () => (D.berichte?.berichte || []).reduce((n, b) => n + offeneFragen(b), 0);
 function renderNav(){
   const f = fragenOffen();
-  setHtml($("side"), `<div class="slogo">${sq("circle-dot", "blue")}Zentrale</div>` + PAGES.map(p => `<a href="#${p.id}" class="${p.id === PAGE ? "on" : ""}">${sq(p.icon, p.farbe)}${esc(p.title)}${p.id === "berichte" && f ? `<span class="badge" style="margin-left:auto">${f}</span>` : `<span class="n">${zaehler(p.id)}</span>`}</a>`).join("")
+  setHtml($("side"), `<div class="slogo">${sq("circle-dot", "blue")}Zentrale</div>` + PAGES.map(p => `<a href="#${p.id}" class="${p.id === PAGE ? "on" : ""}">${sq(p.icon, p.farbe)}${esc(p.title)}${p.id === "uebersicht" && f ? `<span class="badge">${f}</span>` : `<span class="n">${p.id === "berichte" ? (f ? `${f} ${f === 1 ? "Frage" : "Fragen"}` : "") : zaehler(p.id)}</span>`}</a>`).join("")
     + `<div class="grow"></div><div class="wer">Angemeldet als Besitzer · <a href="#" data-act="abmelden">Abmelden</a><br>Fassung ${esc(FASSUNG)}</div>`);
-  setHtml($("tabbar"), PAGES.map(p => `<a href="#${p.id}" class="${p.id === PAGE ? "on" : ""}">${icon(p.icon)}${esc(p.title)}${p.id === "berichte" && f ? `<span class="badge">${f}</span>` : ""}</a>`).join(""));
+  setHtml($("tabbar"), PAGES.map(p => `<a href="#${p.id}" class="${p.id === PAGE ? "on" : ""}">${icon(p.icon)}${esc(p.title)}${p.id === "uebersicht" && f ? `<span class="badge">${f}</span>` : ""}</a>`).join(""));
 }
 function kopf(titel, sub, knopf){ return `<div class="hd"><div class="hdt"><h1>${esc(titel)}</h1>${sub ? `<p>${sub}</p>` : ""}</div>${knopf || ""}</div>`; }
 
-/* Übersicht: was offen ist, auf einen Blick */
-function viewUebersicht(){
-  const W = D.wuensche?.offen || [], A = (D.pos?.aufgaben || []).filter(a => !a.erledigt), P = (D.pos?.projekte || []).filter(p => p.status === "aktiv");
-  const B = (D.berichte?.berichte || []).filter(b => offeneFragen(b) || !b.gelesen);
-  const meine = A.filter(a => a.fuer === "besitzer").sort((a, b) => (a.faellig || "9999").localeCompare(b.faellig || "9999"));
-  const tag = new Date().toLocaleDateString("de-DE", {weekday: "long", day: "numeric", month: "long"});
-  const kachel = (seite, ic, farbe, titel, zahl, klein) => `<button class="tile" type="button" data-nav="${seite}"><div class="th">${sq(ic, farbe)}${titel}</div><div class="big">${zahl}<small>${klein}</small></div></button>`;
-  return kopf("Übersicht", esc(tag))
-    + `<div class="grid">${kachel("wuensche", "star", "yellow", "Wünsche", W.length, `offen, ${W.filter(w => w.prio === "hoch").length} hoch`)}`
-    + kachel("berichte", "message-square-text", "green", "Fragen", fragenOffen(), "offen")
-    + kachel("projekte", "list-checks", "orange", "Aufgaben", A.length, "offen")
-    + kachel("projekte", "folder", "blue", "Projekte", P.length, "aktiv") + `</div>`
-    + `<div class="cols"><div>`
-    + gh("Wartet auf dich") + (B.length || meine.length ? grp(B.map(berichtZeile).join("") + more("ue-meine", meine, 6, aufgabeZeile)) : empty("<b>Nichts offen</b>Keine Fragen und keine Aufgaben für dich.", "check"))
-    + `</div><div>`
-    + gh("Wichtigste Wünsche") + (W.length ? grp(more("ue-w", W, 6, wunschZeile)) : empty("<b>Noch keine Wünsche</b>Sag deinem Agenten, was du haben willst. Er trägt es hier ein.", "star"))
-    + gh("Agenten") + agentenListe()
-    + `</div></div>`;
+/* Übersicht wie „Heute“ im Vorbild: links was auf dich wartet und deine Aufgaben, rechts die Agenten und Zahlen zum Antippen */
+const th = (ic, c, t, extra = "") => `<span class="th">${sq(ic, c, "sm")}${t}${extra}</span>`;
+const tagHeute = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+const posTage = f => Math.round((new Date(f + "T12:00") - new Date(tagHeute() + "T12:00")) / 864e5);
+function posFaellig(a){
+  if (!a.faellig) return "";
+  const t = posTage(a.faellig), d = new Date(a.faellig + "T12:00").toLocaleDateString("de-DE", {day: "numeric", month: "short"});
+  return t < 0 ? `überfällig seit ${d}` : t === 0 ? "heute fällig" : t === 1 ? "morgen fällig" : `fällig ${d}`;
 }
-function agentenListe(){
-  const G = (D.agenten?.agenten || []).filter(a => a.id !== "besitzer");
-  if (!G.length) return empty("<b>Noch kein Agent</b>Anlegen mit <code>py start.py agent-neu claude</code> und <code>py start.py agent-neu codex</code>", "bot");
-  return grp(G.map(a => row(`<span class="circ">${icon("bot")}</span>`, esc(a.id), "zuletzt " + esc(ago(a.zuletzt)), `<span class="dot ${a.zuletzt && Date.now()/1000 - a.zuletzt < 900 ? "ok" : ""}"></span>`, sh("agent:" + a.id))).join(""));
+/* Offene Aufgaben: Überfälliges und Heutiges zuerst, dann nach Datum, dann ohne Datum in der Reihenfolge des Anlegens */
+const posSort = (a, b) => (a.faellig ? posTage(a.faellig) : 1e9) - (b.faellig ? posTage(b.faellig) : 1e9) || a.erstellt - b.erstellt;
+const posWer = v => v === "besitzer" ? "dich" : v;
+function posZeile(a, mitProjekt = true){
+  const p = projekt(a.projekt), f = posFaellig(a), spaet = a.faellig && !a.erledigt && posTage(a.faellig) <= 0;
+  const sub = [mitProjekt && p ? p.name : "", a.erledigt ? `erledigt ${ago(a.erledigt)}${a.erledigt_von && a.erledigt_von !== "besitzer" ? " von " + posWer(a.erledigt_von) : ""}` : f, a.fuer !== "besitzer" && !a.erledigt ? `für ${posWer(a.fuer)}` : ""].filter(Boolean).join(" · ");
+  return `<div class="row posa${a.erledigt ? " wfertig" : ""}"><button class="wkb" type="button" data-act="abhaken" data-id="${esc(a.id)}" aria-label="${a.erledigt ? "Wieder öffnen" : "Erledigt"}">${a.erledigt ? `<span class="wk ok">${icon("check")}</span>` : `<span class="wk"></span>`}</button>
+    <span class="t"><b class="${a.erledigt ? "durch" : ""}">${esc(a.titel)}</b>${sub ? `<span class="${spaet ? "spaet" : ""}">${esc(sub)}</span>` : ""}</span></div>`;
+}
+const aufgabeZeile = a => posZeile(a);
+function posNeuForm(projektId){
+  const P = (D.pos?.projekte || []).filter(p => p.status === "aktiv");
+  return `<form class="posform" data-form="aufgabe"${projektId ? ` data-projekt="${esc(projektId)}"` : ""}><input class="inp" name="titel" placeholder="Neue Aufgabe …" autocomplete="off" maxlength="200" aria-label="Neue Aufgabe" required>
+    ${projektId ? "" : `<select class="inp" name="projekt" aria-label="Projekt"><option value="">Ohne Projekt</option>${P.map(p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join("")}</select>`}
+    <input class="inp" type="date" name="faellig" aria-label="Fällig am"><button class="btn pri sm">Eintragen</button></form>`;
+}
+const fuerMich = () => (D.pos?.aufgaben || []).filter(a => !a.erledigt && a.fuer === "besitzer").sort(posSort);
+function ueWartet(){
+  const kopf = th("message-circle-question", "orange", "Wartet auf dich", `<button class="lnk" type="button" data-nav="berichte">Alle Berichte</button>`);
+  const B = beAlle().filter(b => offeneFragen(b)).sort((a, b) => a.zeit - b.zeit);
+  if (!B.length) return `<div class="tile">${kopf}<p class="muted hruhig">${icon("circle-check")}Keine offenen Fragen. Neue Berichte kommen unter Berichte.</p></div>`;
+  return `<div class="tile">${kopf}${B.slice(0, 4).map(b => { const f = b.fragen.find(x => !x.antwort);
+    return `<div class="hfrage"><button class="hfk" type="button" data-act="beoeffnen" data-id="${esc(b.id)}"><span class="hfnr">Bericht Nr. ${b.nr}${b.projekt ? " · " + esc(b.projekt) : ""}</span><span class="hft">${esc(f.text)}</span></button>
+      <div class="hfchips">${f.vorschlaege.map(v => `<button class="bechip" type="button" data-act="bechip" data-id="${esc(b.id)}" data-frage="${esc(f.id)}" data-wert="${esc(v)}">${esc(v)}</button>`).join("")}<button class="bechip hfeig" type="button" data-act="beoeffnen" data-id="${esc(b.id)}">${f.vorschlaege.length ? "Eigene Antwort" : "Antworten"}</button></div></div>`; }).join("")}
+    ${B.length > 4 ? `<span class="foot"><button class="btn sm" type="button" data-nav="berichte">${B.length - 4} weitere in Berichte</button><span></span></span>` : ""}</div>`;
+}
+function viewUebersicht(){
+  const K = fuerMich(), h = new Date().getHours(), n = fragenOffen();
+  const datum = new Date().toLocaleDateString("de-DE", {weekday: "long", day: "numeric", month: "long"});
+  const tag = `<div class="tile">${th("calendar-days", "red", "Heute", `<button class="lnk" type="button" data-nav="projekte">Projekte</button>`)}
+    <div class="posliste">${K.length ? K.slice(0, 6).map(a => posZeile(a)).join("") : `<p class="muted hleer">Für dich ist gerade nichts offen.</p>`}</div>
+    ${K.length > 6 ? `<p class="muted hleer"><button class="lnk" type="button" data-nav="projekte">und ${K.length - 6} weitere unter Projekte</button></p>` : ""}
+    <span class="foot hneu">${posNeuForm()}</span></div>`;
+  const A = agAlle();
+  const ag = `<div class="tile">${th("bot", "purple", "Agenten", `<button class="lnk" type="button" data-nav="agenten">Alle</button>`)}
+    ${A.length ? A.slice(0, 4).map(a => { const x = a.aktiv[0], [zt, zc] = agZustand(a); return row(ava(a.id), esc(a.id), x ? esc(lTitel(x)) : "zuletzt da " + esc(ago(a.zuletzt)), chip(zt, zc), sh("agent:" + a.id)); }).join("")
+      : `<p class="muted hleer">Noch kein Agent. Anlegen mit <code>py start.py agent-neu claude</code>.</p>`}</div>`;
+  const zahl = (ic, c, z, l, nav) => `<button class="tile hzahl" type="button" data-nav="${nav}">${sq(ic, c, "sm")}<b>${z}</b><span>${l}</span></button>`;
+  const P = (D.pos?.projekte || []).filter(p => p.status === "aktiv").length, W = D.wuensche?.offen.length || 0, AO = (D.pos?.aufgaben || []).filter(a => !a.erledigt).length, N = D.notizen?.notizen.length || 0;
+  const zahlen = `<div class="hzahlen vier">${zahl("list-todo", "orange", W, W === 1 ? "Wunsch offen" : "Wünsche offen", "wuensche")}${zahl("folder", "yellow", P, "Projekte aktiv", "projekte")}${zahl("list-checks", "green", AO, AO === 1 ? "Aufgabe offen" : "Aufgaben offen", "projekte")}${zahl("notebook-pen", "indigo", N, N === 1 ? "Notiz" : "Notizen", "notizen")}</div>`;
+  return kopf(h < 11 ? "Guten Morgen" : h < 18 ? "Guten Tag" : "Guten Abend", `${esc(datum)} · ${n ? `${n} ${n === 1 ? "Sache wartet" : "Sachen warten"} auf dich` : `${K.length} ${K.length === 1 ? "Aufgabe" : "Aufgaben"} für dich`}`)
+    + `<div class="hgrid"><div class="hcol">${ueWartet()}${tag}</div><div class="hcol">${ag}${zahlen}</div></div>`;
 }
 
 /* Agenten: wer gerade woran arbeitet (Läufe aus laeufe.py), was zuletzt fertig wurde */
@@ -541,41 +685,72 @@ function laufAngaben(x){
     + (x.fortschritt != null ? kv("Fortschritt", Math.round(x.fortschritt) + " %") : "")
     + kv("Letzter Schritt", esc(x.schritt)) + kv("Gemeldet über", esc({hook: "Hook (von selbst)", hand: "Befehl lauf"}[x.quelle] || x.quelle)));
 }
-/* Projekte und Aufgaben */
-function projektZeile(p){
-  const offen = aufgabenVon(p.id).filter(a => !a.erledigt).length;
-  return row(sq(p.symbol || "folder", p.farbe || "gray"), esc(p.name), p.naechster_schritt ? "Als Nächstes: " + esc(p.naechster_schritt) : esc(p.beschreibung), offen ? val(offen + " offen") : "", sh("projekt:" + p.id));
-}
-function aufgabeZeile(a){
-  const p = projekt(a.projekt), spaet = a.faellig && !a.erledigt && a.faellig < heute();
-  const sub = [p ? esc(p.name) : "", a.faellig ? (spaet ? `<span style="color:var(--red)">fällig ${datum(a.faellig)}</span>` : "fällig " + datum(a.faellig)) : "", a.fuer !== "besitzer" ? "für " + esc(a.fuer) : ""].filter(Boolean).join(" · ");
-  return `<div class="row${a.erledigt ? " done" : ""}"><button type="button" class="ck${a.erledigt ? " an" : ""}" data-act="abhaken" data-id="${esc(a.id)}" aria-label="Abhaken">${icon("check")}</button><span class="t"><b>${esc(a.titel)}</b>${sub ? `<span>${sub}</span>` : ""}</span></div>`;
+/* Projekte als Karten wie im Vorbild: Symbol, Ort, „Als Nächstes“, Fortschritt. Darunter Aufgaben ohne Projekt, Ruht, Archiv */
+const POS_SYMBOLE = ["folder", "layout-dashboard", "sparkles", "film", "palette", "zap", "globe", "server", "mic", "cpu", "gamepad-2", "book-open", "code", "camera",
+  "music", "house", "car", "heart", "briefcase", "graduation-cap", "wrench", "smartphone", "image", "bot", "rocket", "leaf", "monitor", "printer", "flask-conical", "broom"];
+const posSym = n => POS_SYMBOLE.includes(n) ? n : "folder";
+function posKarte(p){
+  const A = aufgabenVon(p.id), offen = A.filter(a => !a.erledigt).length, pc = A.length ? Math.round(100 * (A.length - offen) / A.length) : 0, c = p.farbe || "gray";
+  return `<button class="card" type="button" ${sh("projekt:" + p.id)}><span class="top">${sq(posSym(p.symbol), c, "xl")}<span class="t"><b>${esc(p.name)}</b><span>${esc((p.orte || []).map(o => o.geraet).filter((v, i, x) => v && x.indexOf(v) === i).join(", ") || "Ort noch offen")}</span></span></span>
+    ${p.naechster_schritt ? `<p><b>Als Nächstes:</b> ${esc(p.naechster_schritt)}</p>` : `<p>${esc(p.beschreibung)}</p>`}
+    <span class="posbar"><i style="width:${pc}%;background:var(--${c})"></i></span><span class="bot"><span>${offen ? `${offen} ${offen === 1 ? "Aufgabe" : "Aufgaben"} offen` : A.length ? "alles erledigt" : "noch keine Aufgaben"}</span><span>${A.length ? pc + " % erledigt" : ""}</span></span></button>`;
 }
 function viewProjekte(){
-  const P = D.pos?.projekte || [], zahl = s => P.filter(p => p.status === s).length;
-  const L = P.filter(p => p.status === UI.projektSicht).sort((a, b) => b.geaendert - a.geaendert);
-  const lose = (D.pos?.aufgaben || []).filter(a => !a.projekt && !a.erledigt);
-  return kopf("Projekte", `${zahl("aktiv")} aktiv · ${zahl("ruht")} ruhen · ${zahl("archiv")} im Archiv`, `<button class="btn pri" type="button" ${sh("projekt-neu")}>${icon("plus")}Projekt</button>`)
-    + `<div class="seg">${["aktiv", "ruht", "archiv"].map(s => `<button type="button" data-sicht="${s}" class="${UI.projektSicht === s ? "on" : ""}">${{aktiv: "Aktiv", ruht: "Ruht", archiv: "Archiv"}[s]} <span class="c">${zahl(s)}</span></button>`).join("")}</div>`
-    + (L.length ? grp(L.map(projektZeile).join("")) : empty(P.length ? "Hier ist gerade nichts." : "<b>Noch keine Projekte</b>Dein Agent trägt sie nach der Bestandsaufnahme ein.", "folder"))
-    + (lose.length ? gh("Aufgaben ohne Projekt") + grp(lose.map(aufgabeZeile).join("")) : "");
+  const P = D.pos?.projekte || [], G = st => P.filter(p => p.status === st).sort((a, b) => b.geaendert - a.geaendert);
+  const listRow = p => { const offen = aufgabenVon(p.id).filter(a => !a.erledigt).length; return row(sq(posSym(p.symbol), p.farbe || "gray"), esc(p.name), esc(p.naechster_schritt || p.beschreibung), val(offen ? `${offen} offen` : ""), sh("projekt:" + p.id)); };
+  const lose = (D.pos?.aufgaben || []).filter(a => !a.projekt && !a.erledigt).sort(posSort), K = fuerMich().length;
+  return kopf("Projekte", `${K} ${K === 1 ? "Aufgabe" : "Aufgaben"} für dich, ${G("aktiv").length} aktive Projekte`)
+    + gh("Aktiv", `${G("aktiv").length}, zuletzt bearbeitet zuerst`) + (G("aktiv").length ? `<div class="cards">${G("aktiv").map(posKarte).join("")}</div>` : empty("<b>Noch keine Projekte</b>Dein Agent trägt sie nach der Bestandsaufnahme ein.", "folder"))
+    + (lose.length ? gh("Ohne Projekt", `${lose.length} offen`) + grp(lose.map(a => posZeile(a, false)).join("")) : "")
+    + (G("ruht").length ? gh("Ruht", `${G("ruht").length}, wartet auf deine Entscheidung oder einen Anlass`) + grp(G("ruht").map(listRow).join("")) : "")
+    + (G("archiv").length ? gh("Archiv", G("archiv").length) + grp(more("posarch", G("archiv"), 5, listRow)) : "")
+    + gh("Neues Projekt") + `<form class="grp posform" data-form="projektschnell"><input class="inp" name="name" placeholder="Name des Projekts …" autocomplete="off" maxlength="80" aria-label="Name des Projekts" required><button class="btn pri sm">Anlegen</button></form>`
+    + note("Antippen öffnet ein Projekt mit allen Aufgaben. Deine Agenten sehen dieselben Projekte und tragen ihre Schritte selbst ein.");
 }
 
-/* Wünsche */
-function wunschZeile(w){
-  const S = (D.pos?.aufgaben || []).filter(a => a.wunsch === w.id), fertig = S.filter(a => a.erledigt).length;
-  const letzte = w.notizen.length ? w.notizen[w.notizen.length - 1].text : w.text;
-  const [pt, pc] = PRIO[w.prio || ""];
-  return row(sq(w.status === "offen" ? "star" : w.status === "erledigt" ? "check" : "x", w.status === "offen" ? pc : w.status === "erledigt" ? "green" : "gray"),
-    `Wunsch Nr. ${w.nr} · ${esc(w.titel)}`, esc(w.status === "offen" ? letzte : w.ergebnis || w.status), S.length ? val(`${fertig}/${S.length}`) : (w.status === "offen" && w.prio ? chip(pt, w.prio === "hoch" ? "bad" : w.prio === "mittel" ? "warn" : "") : ""), sh("wunsch:" + w.id));
+/* Wünsche wie im Vorbild: oben die Zahl, dann schnell eintragen, je Gruppe ein Abschnitt mit Karten (innen nach Priorität), unten das Erledigte */
+const WPRIO = [["hoch", "Hoch", "!!!"], ["mittel", "Mittel", "!!"], ["niedrig", "Niedrig", "!"], ["", "Ohne", ""]];
+const wDatum = t => new Date(t * 1000).toLocaleDateString("de-DE", {day: "numeric", month: "short"});
+const wAlle = () => [...(D.wuensche?.offen || []), ...(D.wuensche?.erledigt || [])];
+const wKreis = w => w.status === "erledigt" ? `<span class="wk ok">${icon("check")}</span>` : w.status === "verworfen" ? `<span class="wk weg">${icon("x")}</span>` : `<span class="wk"></span>`;
+const wNr = w => w.nr ? `<small class="wnr">Nr. ${w.nr}</small>` : "";
+const wNotizen = w => w.notizen.length ? `<span class="wn">${icon("message-square")}${w.notizen.length}</span>` : "";
+const wPrio = w => { const p = WPRIO.find(x => x[0] === (w.prio || "")); return p && p[2] && w.status === "offen" ? `<i class="wprio" aria-label="Priorität ${p[1].toLowerCase()}">${p[2]}</i>` : ""; };
+const wSchritte = w => (D.pos?.aufgaben || []).filter(a => a.wunsch === w.id).sort((a, b) => !!a.erledigt - !!b.erledigt || (a.erledigt ? b.erledigt - a.erledigt : posSort(a, b)));
+const wFort = S => { const f = S.filter(a => a.erledigt).length; return {f, n: S.length, pc: S.length ? Math.round(100 * f / S.length) : 0, naechst: S.find(a => !a.erledigt)}; };
+const WZU = new Set(); try { JSON.parse(localStorage.getItem("zentrale-wgruppen-zu") || "[]").forEach(g => WZU.add(g)); } catch(e) {}
+const wGruppeSym = g => g ? ["folder", "teal"] : ["inbox", "gray"];
+const WE = {titel: "", gruppe: ""};   // offenes Formular im Wunsch-Blatt: Titel ändern, neue Gruppe
+function wZeile(w){
+  const n = w.notizen[w.notizen.length - 1];
+  const sub = w.status === "offen" ? (n ? `${wer(n.von)}: ${n.text}` : w.text || `seit ${wDatum(w.erstellt)}`) : (w.ergebnis || (w.status === "verworfen" ? "verworfen" : "erledigt"));
+  return row(wKreis(w), wNr(w) + esc(w.titel), esc(sub), wNotizen(w) + (w.status !== "offen" && w.erledigt ? val(esc(wDatum(w.erledigt))) : ""), sh("wunsch:" + w.id), w.status !== "offen" ? "wfertig" : "");
+}
+const wunschZeile = wZeile;
+function wKarte(w){
+  const n = w.notizen[w.notizen.length - 1], S = wSchritte(w), F = wFort(S);
+  if (S.length) return `<button class="card wkarte" type="button" ${sh("wunsch:" + w.id)}><span class="top">${wKreis(w)}<span class="t"><b>${wNr(w)}${wPrio(w)}${esc(w.titel)}</b></span></span>
+    <p class="wnext">${F.naechst ? `<b>Als Nächstes:</b> ${esc(F.naechst.titel)} <span class="muted">(${F.naechst.fuer === "besitzer" ? "du" : esc(posWer(F.naechst.fuer))})</span>` : "Alle Schritte erledigt."}</p>
+    <span class="posbar"><i style="width:${F.pc}%;background:var(--orange)"></i></span>
+    <span class="bot"><span>${F.f} von ${F.n} Schritten erledigt</span>${wNotizen(w)}</span></button>`;
+  return `<button class="card wkarte" type="button" ${sh("wunsch:" + w.id)}><span class="top">${wKreis(w)}<span class="t"><b>${wNr(w)}${wPrio(w)}${esc(w.titel)}</b></span></span>
+    ${w.text ? `<p>${esc(w.text)}</p>` : ""}${n ? `<p class="wnz"><span><b>${esc(wer(n.von))}</b> ${esc(n.text)}</span></p>` : ""}
+    <span class="bot"><span>seit ${esc(wDatum(w.erstellt))}</span>${wNotizen(w)}</span></button>`;
 }
 function viewWuensche(){
-  const W = D.wuensche?.offen || [], E = D.wuensche?.erledigt || [];
-  let h = kopf("Wünsche", `${W.length} offen · ${E.length} erledigt`, `<button class="btn pri" type="button" ${sh("wunsch-neu")}>${icon("plus")}Wunsch</button>`);
-  if (!W.length) h += empty("<b>Keine offenen Wünsche</b>Alles, was du haben willst, kommt hierher, immer mit Priorität.", "star");
-  for (const p of ["hoch", "mittel", "niedrig", ""]) { const L = W.filter(w => (w.prio || "") === p); if (L.length) h += gh(PRIO[p][0], L.length) + grp(more("w-" + p, L, 8, wunschZeile)); }
-  if (E.length) h += gh("Erledigt", E.length) + grp(more("w-fertig", E, 5, wunschZeile));
-  return h;
+  const O = D.wuensche?.offen || [], F = D.wuensche?.erledigt || [], letzt = F[0];
+  const neu = `<form class="grp wneu" data-form="wunschschnell"><span class="wk"></span><input class="inp" name="titel" placeholder="Neuer Wunsch …" autocomplete="off" aria-label="Neuer Wunsch" maxlength="200" required><button class="btn pri sm">Eintragen</button></form>`;
+  const kopfK = `<div class="tile dlhead">${sq("list-todo", "orange", "xl")}<div class="t"><b>${O.length ? `${O.length} ${O.length === 1 ? "Wunsch ist" : "Wünsche sind"} offen` : "Alles erledigt"}</b>
+    <span>${F.length} erledigt${letzt ? `, zuletzt „${esc(letzt.titel)}“ ${esc(ago(letzt.erledigt))}` : ""}</span></div></div>`;
+  const rang = w => WPRIO.findIndex(p => p[0] === (w.prio || ""));
+  const gruppen = [...new Set(O.map(w => w.gruppe || ""))].sort((a, b) => !a - !b || Math.min(...O.filter(w => (w.gruppe || "") === a).map(rang)) - Math.min(...O.filter(w => (w.gruppe || "") === b).map(rang)) || a.localeCompare(b, "de"));
+  const offen = !O.length ? gh("Offen") + empty("<b>Gerade ist nichts offen</b>Alles, was du haben willst, kommt hierher, immer mit Priorität.", "circle-check")
+    : gruppen.map(g => { const G = O.filter(w => (w.gruppe || "") === g).sort((a, b) => rang(a) - rang(b) || b.erstellt - a.erstellt), [ic, c] = wGruppeSym(g), zu = WZU.has(g);
+      return `<button class="wghead" type="button" data-act="wzu" data-wert="${esc(g)}" aria-expanded="${!zu}">${sq(ic, c)}<b>${esc(g || "Ohne Gruppe")}</b><span class="muted">${G.length} offen</span><span style="flex:1"></span>${icon(zu ? "chevron-right" : "chevron-down")}</button>` +
+        (zu ? "" : `<div class="cards">${G.map(wKarte).join("")}</div>`); }).join("");
+  return kopf("Wünsche", `${O.length} offen, ${F.length} erledigt`) + kopfK + neu + offen
+    + (F.length ? gh("Erledigt", `${F.length}, das zuletzt erledigte oben`) + grp(more("wfertig", F, 6, wZeile)) : "")
+    + note("Dein Agent schreibt jeden Wunsch hier hinein, sobald du ihn äußerst, und hakt ihn ab, wenn er erledigt ist. Antippen zeigt die Schritte, die Priorität und die Notizen. Der Agent liest deine Notizen, bevor er weitermacht.");
 }
 
 /* Berichte: links die Liste (offene Fragen oben, älteste zuerst), rechts der Verlauf wie in einer Nachrichten-App.
@@ -676,31 +851,124 @@ function viewBerichte(){
     + note("Deine Agenten schicken hier Berichte mit Fragen. Die Fragen kommen nacheinander, die nächste erst nach deiner Antwort. Der Agent bekommt deine Antwort sofort.");
 }
 
-/* Notizen */
-function notizZeile(n){ return row(sq("file-text", "indigo"), esc(n.titel), `${n.ordner ? esc(n.ordner) + " · " : ""}${esc(ago(n.zeit))}${n.vorschau ? " · " + esc(n.vorschau) : ""}`, "", sh("notiz:" + n.pfad)); }
-/* Notizen: oben die festen Ordner (wie im Grundgerüst), darunter das zuletzt Geänderte */
+/* Notizen wie im Vorbild: links die Ordner, in der Mitte die Liste mit Suche, rechts die Notiz. Am Handy die Liste, die Notiz als Blatt.
+   Die festen Ordner (Grundgerüst) stehen oben mit eigenem Symbol. */
 const N_ORDNER = {"Besitzer": ["user-round", "orange", "Fakten über dich"], "Geräte": ["monitor", "blue", "je Gerät eine Notiz"], "Projekte": ["folder", "orange", "je Projekt ein Ordner"],
   "Aufräumen": ["broom", "green", "Inventur, Plan, neue Ordnung"], "Anleitungen": ["book-open", "teal", "wie etwas geht"], "Übergaben": ["arrow-right-left", "purple", "wo der nächste Thread weitermacht"]};
-const nOben = n => n.pfad.includes("/") ? n.pfad.split("/")[0] : "";
-function notizStart(N){
-  const zahl = {}; for (const n of N) { const o = nOben(n); if (o) zahl[o] = (zahl[o] || 0) + 1; }
-  const ordner = [...new Set([...Object.keys(N_ORDNER), ...(D.notizen?.ordner || []).map(o => o.split("/")[0])])];
-  const lose = N.filter(n => !nOben(n));
-  return gh("Ordner") + grp(ordner.map(o => { const [ic, c, txt] = N_ORDNER[o] || ["folder", "gray", ""]; return row(sq(ic, c), esc(o), esc(txt), val(zahl[o] || 0), `data-act="nordner" data-wert="${esc(o)}"`); }).join(""))
-    + gh("Zuletzt geändert") + grp(more("nz", N, 8, notizZeile))
-    + (lose.length ? note(`${lose.length} Notizen liegen ohne Ordner. Besser in einen der Ordner oben.`) : "");
+const WX = {sicht: "alle", pfad: "", notiz: null, edit: null, q: "", treffer: null, weg: {}, neueOrdner: [], ordnerForm: false, listeZu: false};
+try { WX.listeZu = localStorage.getItem("zentrale-wx-liste") === "zu"; } catch(e) {}
+const wxMerke = () => { try { localStorage.setItem("zentrale-wx-liste", WX.listeZu ? "zu" : "auf"); } catch(e) {} };
+const wxSchmal = () => matchMedia("(max-width:900px)").matches;
+const wxAlle = () => (D.notizen?.notizen || []).filter(n => !WX.weg[n.pfad]);
+const wxInfo = p => p ? wxAlle().find(n => n.pfad === p) : null;
+const wxIn = (n, o) => n.ordner === o || n.ordner.startsWith(o + "/");
+const wxZuletzt = n => Date.now() / 1000 - n.zeit < 7 * 86400;
+const wxGefiltert = () => { const A = wxAlle(); return WX.sicht === "alle" ? A : WX.sicht === "zuletzt" ? A.filter(wxZuletzt) : A.filter(n => wxIn(n, WX.sicht)); };
+const wxOrt = o => o || "Notizen";
+const wxOrdner = () => { const fest = Object.keys(N_ORDNER), rest = [...new Set([...(D.notizen?.ordner || []), ...WX.neueOrdner])].filter(o => !fest.includes(o)).sort((a, b) => a.localeCompare(b, "de"));
+  /* Unterordner stehen gleich unter ihrem Hauptordner */
+  const oben = [...fest, ...rest.filter(o => !o.includes("/") )];
+  return oben.flatMap(o => [o, ...rest.filter(x => x.startsWith(o + "/"))]); };
+function wxDatum(t){
+  const d = new Date(t * 1000), h = new Date();
+  if (d.toDateString() === h.toDateString()) return d.toLocaleTimeString("de-DE", {hour: "2-digit", minute: "2-digit"});
+  return d.toLocaleDateString("de-DE", d.getFullYear() === h.getFullYear() ? {day: "numeric", month: "short"} : {day: "numeric", month: "short", year: "numeric"});
 }
-function notizOrdner(N){
-  const L = N.filter(n => n.pfad.startsWith(UI.nordner + "/"));
-  return L.length ? grp(more("nz-" + UI.nordner, L, 25, notizZeile)) : empty("<b>Noch leer</b>" + esc((N_ORDNER[UI.nordner] || [])[2] || ""), "notebook-pen");
+async function wxOeffnen(pfad){
+  WX.pfad = pfad;
+  try { const d = await api("/api/notizen/notiz?pfad=" + encodeURIComponent(pfad)); if (WX.pfad === pfad) WX.notiz = d; }
+  catch(e) { if (WX.pfad === pfad) { WX.notiz = null; WX.pfad = ""; meldung("Die Notiz lässt sich nicht öffnen", e.message); } }
+  wxZeichnen();
+}
+/* Neu zeichnen und dabei die Scroll-Stellen von Liste und Notiz behalten. Solange die Suche den Fokus hat, nur die Liste tauschen. */
+function wxZeichnen(){
+  const fe = document.activeElement; if (!WX.edit && fe && fe.matches && fe.matches("[data-wxta], [data-wxtitel]")) fe.blur();
+  const q = sel => document.querySelector("#pages " + sel), l = q(".wxl"), v = q(".wxv"), lt = l ? l.scrollTop : 0, vt = v && v.dataset.pfad === WX.pfad ? v.scrollTop : 0;
+  $("sheet")._h = null; renderPage(); renderSheet();
+  const l2 = q(".wxl"), v2 = q(".wxv");
+  if (l2 && l2 !== l) l2.scrollTop = lt;
+  if (v2 && v2 !== v) v2.scrollTop = vt;
+  const ae = document.activeElement, liste = q(".wxliste");
+  if (liste && ae && ae.id === "wxq") liste.innerHTML = wxListeHtml();
+}
+function wxSeite(){
+  const A = wxAlle(), O = wxOrdner(), anz = o => A.filter(n => wxIn(n, o)).length;
+  const knopf = (sicht, ic, t, n, tiefe = 0) => `<button class="wxo${WX.sicht === sicht ? " on" : ""}" type="button" data-act="wxsicht" data-wert="${esc(sicht)}"${tiefe ? ` style="padding-left:${8 + 14 * tiefe}px"` : ""}>${icon(ic)}<span>${esc(t)}</span><b>${n || ""}</b></button>`;
+  return `<div class="wxs"><div class="wxsk kopf"><span>Notizen</span><button class="x sm${WX.listeZu ? " on" : ""}" type="button" data-act="wxlistezu" title="${WX.listeZu ? "Notizliste einblenden" : "Notizliste zuklappen"}" aria-label="${WX.listeZu ? "Notizliste einblenden" : "Notizliste zuklappen"}" aria-pressed="${WX.listeZu}">${icon(WX.listeZu ? "panel-left-open" : "panel-left-close")}</button></div>${knopf("alle", "notebook-pen", "Alle Notizen", A.length)}${knopf("zuletzt", "clock", "Zuletzt", A.filter(wxZuletzt).length)}
+    <div class="wxsk">Ordner</div>${O.map(o => knopf(o, (N_ORDNER[o] || ["folder"])[0], o.split("/").pop(), anz(o), o.split("/").length - 1)).join("")}
+    ${WX.ordnerForm ? `<form class="wxof" data-form="wxordner"><input class="inp" name="name" placeholder="Name, dann Eingabe" maxlength="60" autocomplete="off" aria-label="Name des neuen Ordners"></form>`
+      : `<button class="wxo neu" type="button" data-act="wxneuordner">${icon("folder-plus")}<span>Neuer Ordner</span></button>`}</div>`;
+}
+const wxZeile = (n, aus) => `<button class="wxn${n.pfad === WX.pfad ? " on" : ""}" type="button" data-act="wxnotiz" data-wert="${esc(n.pfad)}"><b>${esc(n.titel)}</b><span><i>${esc(wxDatum(n.zeit))}</i> ${esc(aus ? aus.replace(/[#*_`>\[\]]|(^|\s)-{3,}(?=\s|$)/g, " ").replace(/\s+/g, " ") : n.vorschau)}</span><small>${icon("folder")}${esc(wxOrt(n.ordner))}</small></button>`;
+function wxListeHtml(){
+  if (WX.treffer) { const T = WX.treffer.filter(n => !WX.weg[n.pfad]); return T.length ? T.map(n => wxZeile(n, n.ausschnitt)).join("") : `<p class="wxleer">Nichts gefunden für „${esc(WX.q)}“.</p>`; }
+  const L = wxGefiltert();
+  return L.length ? L.map(n => wxZeile(n)).join("")
+    : `<p class="wxleer">${WX.sicht === "alle" ? "Noch keine Notizen." : WX.sicht === "zuletzt" ? "Diese Woche wurde nichts geändert." : (N_ORDNER[WX.sicht] ? `Noch leer: ${esc(N_ORDNER[WX.sicht][2])}.` : "In diesem Ordner liegt noch nichts.")}<br>Mit ${icon("square-pen")} legst du eine neue Notiz an.</p>`;
+}
+const wxKnoepfe = gross => `<button class="btn${gross ? "" : " sm"}" type="button" data-act="wxbearbeiten">${icon("pencil")}Bearbeiten</button>` +
+  (gross ? `<button class="btn" type="button" data-act="wxweg">${icon("trash-2")}In den Papierkorb</button>` : `<button class="x sm" type="button" data-act="wxweg" title="In den Papierkorb" aria-label="In den Papierkorb">${icon("trash-2")}</button>`);
+function wxEditorHtml(){
+  const e = WX.edit;
+  return `<div class="wxed">${e.neu ? `<input class="inp wxtitel" data-wxtitel value="${esc(e.titel)}" placeholder="Titel" maxlength="80" autocomplete="off" aria-label="Titel">` : ""}
+    <textarea class="inp ta" data-wxta aria-label="Text der Notiz" placeholder="${e.neu ? "Text …" : ""}">${esc(e.text)}</textarea>
+    <div class="wxedf"><span class="muted">${e.neu ? `Kommt in ${esc(wxOrt(e.ordner))}. ` : ""}# Überschrift, - Liste, - [ ] zum Abhaken, **fett**</span>
+    <span><button class="btn sm" type="button" data-act="wxabbrechen">Abbrechen</button><button class="btn sm pri" type="button" data-act="wxspeichern">${e.neu ? "Anlegen" : "Fertig"}</button></span></div></div>`;
+}
+function wxAnsichtHtml(){
+  if (WX.edit) return wxEditorHtml();
+  const n = wxInfo(WX.pfad), d = n && WX.notiz && WX.notiz.pfad === n.pfad ? WX.notiz : null;
+  if (!n) return `<div class="wxleer">${icon("notebook-pen")}<p>${wxAlle().length ? "Wähle eine Notiz aus." : "Hier erscheint deine erste Notiz."}</p></div>`;
+  return `<div class="wxvk"><span class="muted">${icon("folder")}<span>${esc(wxOrt(n.ordner))} · geändert ${esc(wxDatum(n.zeit))}</span></span><span>${wxKnoepfe(false)}</span></div>` + (d ? md(d.text) : `<p class="muted">Wird geladen …</p>`);
 }
 function viewNotizen(){
-  const N = D.notizen?.notizen || [];
-  const liste = UI.treffer ? (UI.treffer.length ? grp(UI.treffer.map(t => row(sq("search", "gray"), esc(t.titel), esc(t.ausschnitt), "", sh("notiz:" + t.pfad))).join("")) : empty("Nichts gefunden.", "search"))
-    : UI.nordner ? notizOrdner(N)
-    : N.length ? notizStart(N) : empty("<b>Noch keine Notizen</b>Notizen sind Markdown-Dateien. Du kannst sie auch mit Obsidian oder jedem Editor öffnen.", "notebook-pen");
-  return kopf(UI.nordner && !UI.treffer ? UI.nordner : "Notizen", UI.nordner && !UI.treffer ? `<a href="#notizen" data-act="nordner" data-wert="">‹ Alle Notizen</a>` : `${N.length} Notizen in ${D.notizen?.ordner.length || 0} Ordnern`, `<button class="btn pri" type="button" ${sh("notiz-neu")}>${icon("plus")}Notiz</button>`)
-    + `<label class="suche">${icon("search")}<input type="search" id="nsuche" placeholder="Notizen durchsuchen" value="${esc(UI.q)}" autocomplete="off"></label>` + liste;
+  for (const [p, t] of Object.entries(WX.weg)) if (!wxAlle().length || Date.now() - t > 120000) delete WX.weg[p];
+  if (!wxInfo(WX.pfad) && !WX.edit && !wxSchmal()) { const f = wxGefiltert()[0]; if (f) { WX.pfad = f.pfad; WX.notiz = null; setTimeout(() => wxOeffnen(f.pfad)); } }
+  const O = wxOrdner(), opt = (v, t) => `<option value="${esc(v)}"${WX.sicht === v ? " selected" : ""}>${esc(t)}</option>`;
+  const liste = `<div class="wxl"><div class="wxsuch"><input class="inp" type="search" id="wxq" value="${esc(WX.q)}" placeholder="Suchen in allen Notizen …" autocomplete="off" aria-label="Suchen in allen Notizen">
+      <button class="btn pri" type="button" data-act="wxneu" title="Neue Notiz" aria-label="Neue Notiz">${icon("square-pen")}</button></div>
+    <select class="inp wxmsel" data-wxmsel aria-label="Ordner">${opt("alle", `Alle Notizen (${wxAlle().length})`)}${opt("zuletzt", "Zuletzt")}${O.map(o => opt(o, o)).join("")}</select>
+    <div class="wxliste">${wxListeHtml()}</div></div>`;
+  const N = wxAlle().length;
+  return kopf("Notizen", `${N} ${N === 1 ? "Notiz" : "Notizen"} in ${O.length} Ordnern`)
+    + `<div class="wx3${WX.listeZu ? " ohneliste" : ""}">${wxSeite()}${liste}<div class="wxv" data-pfad="${esc(WX.pfad)}">${wxAnsichtHtml()}</div></div>`
+    + note("Notizen sind Markdown-Dateien im Ordner <code>daten\\notizen</code>. Du kannst sie auch mit Obsidian oder jedem Editor öffnen. Entfernte Notizen landen im Papierkorb.");
+}
+/* Am Handy zeigt ein Blatt die Notiz, am großen Bildschirm die rechte Spalte */
+function wxBlatt(){ if (!wxSchmal()) return; if (SHEET === "wxnotiz") { $("sheet")._h = null; renderSheet(); } else openSheet("wxnotiz"); }
+function wxFokus(sel){ const f = document.querySelector((wxSchmal() ? "#sheet " : "#pages ") + sel); if (f) { f.focus(); if (f.tagName === "TEXTAREA") f.setSelectionRange(0, 0); } }
+async function wxVerwerfen(){
+  const e = WX.edit; if (!e) return true;
+  if ((e.text !== e.anfang || e.titel.trim()) && !(await bestaetigen("Änderungen verwerfen?", "Was du an dieser Notiz geändert hast, geht verloren.", "Verwerfen", true))) return false;
+  WX.edit = null; return true;
+}
+async function wxNeu(ordner, titel = ""){
+  if (!(await wxVerwerfen())) return;
+  WX.edit = {neu: true, ordner, titel, text: "", anfang: ""};
+  wxZeichnen(); wxBlatt(); wxFokus(titel ? "[data-wxta]" : "[data-wxtitel]");
+}
+const wxTitelAus = t => { const z = t.split("\n").map(x => x.trim()).filter(Boolean)[0] || ""; return z.replace(/^#+\s*/, "").slice(0, 80); };
+async function wxSpeichern(b){
+  const e = WX.edit; if (!e) return;
+  if (e.neu ? !e.titel.trim() && !e.text.trim() : e.text === e.anfang) { WX.edit = null; wxZeichnen(); return; }
+  if (b) b.disabled = true;
+  if (document.activeElement) document.activeElement.blur();
+  const ok = e.neu ? await post("/api/notizen/neu", {ordner: e.ordner, titel: e.titel.trim() || wxTitelAus(e.text), text: e.text})
+                   : await post("/api/notizen/speichern", {pfad: e.pfad, text: e.text, version: e.version});
+  if (b) b.disabled = false;
+  if (!ok) return;
+  WX.edit = null; WX.q = ""; WX.treffer = null;
+  WX.neueOrdner = WX.neueOrdner.filter(o => o !== e.ordner);
+  await wxOeffnen(ok.pfad);
+  if (wxSchmal()) wxBlatt();
+}
+let wxSuchUhr = 0;
+function wxSuchen(v){
+  WX.q = v; clearTimeout(wxSuchUhr);
+  if (!v.trim()) { WX.treffer = null; wxZeichnen(); return; }
+  wxSuchUhr = setTimeout(async () => {
+    try { const d = await api("/api/notizen/suche?q=" + encodeURIComponent(v)); if (WX.q === v) { WX.treffer = d.treffer; wxZeichnen(); } } catch(e) {}
+  }, 250);
 }
 
 /* Papierkorb: was die Agenten weggeräumt haben. Zurücklegen dürfen alle, endgültig löschen nur der Besitzer. */
@@ -750,35 +1018,42 @@ function renderSheet(){
   const i = SHEET.indexOf(":"), art = i < 0 ? SHEET : SHEET.slice(0, i), arg = i < 0 ? "" : SHEET.slice(i + 1);
   const s = SHEETS[art] && SHEETS[art](arg);
   if (!s) { closeSheet(); return; }
-  setHtml($("sheet"), `<div class="sh-head">${s.lead || ""}<div class="sh-t"><h2>${s.title}</h2>${s.sub ? `<p>${s.sub}</p>` : ""}</div><button class="x" type="button" data-act="zu" aria-label="Schließen">${icon("x")}</button></div><div class="sh-body">${s.body}</div>`);
+  setHtml($("sheet"), `<div class="sh-head">${s.lead || ""}<div class="sh-t"><h2>${s.title}</h2>${s.sub ? `<p>${s.sub}</p>` : ""}</div><button class="x" type="button" data-act="zu" aria-label="Schließen">${icon("x")}</button></div><div class="sh-body">${s.actions ? `<div class="acts">${s.actions}</div>` : ""}${s.body}</div>`);
 }
 
 SHEETS.projekt = id => {
   const p = projekt(id); if (!p) return null;
-  const A = aufgabenVon(id), offen = A.filter(a => !a.erledigt), fertig = A.filter(a => a.erledigt);
-  return {lead: sq(p.symbol || "folder", p.farbe || "gray", "xl"), title: esc(p.name), sub: `${{aktiv: "Aktiv", ruht: "Ruht", archiv: "Archiv"}[p.status]} · geändert ${esc(ago(p.geaendert))}`,
+  const A = aufgabenVon(id), offen = A.filter(a => !a.erledigt).sort(posSort), fertig = A.filter(a => a.erledigt);
+  return {lead: sq(posSym(p.symbol), p.farbe || "gray", "xl"), title: esc(p.name), sub: `${{aktiv: "Aktiv", ruht: "Ruht", archiv: "Archiv"}[p.status]} · geändert ${esc(ago(p.geaendert))}`,
     body: `<div class="acts"><button class="btn" type="button" data-act="schritt" data-id="${esc(id)}">${icon("arrow-right")}Als Nächstes</button>${["aktiv", "ruht", "archiv"].filter(s => s !== p.status).map(s => `<button class="btn" type="button" data-act="pstatus" data-id="${esc(id)}" data-wert="${s}">${{aktiv: "Aktiv setzen", ruht: "Ruhen lassen", archiv: "Ins Archiv"}[s]}</button>`).join("")}</div>`
       + gh2("Angaben") + grp(kv("Als Nächstes", esc(p.naechster_schritt || "–")) + kv("Beschreibung", esc(p.beschreibung)) + (p.orte || []).map(o => kv(esc(o.geraet || "Ort"), `<code>${esc(o.pfad)}</code>`)).join("") + (p.repos || []).map(r => kv("Repo", esc(r))).join(""))
-      + gh2(`Aufgaben (${offen.length} offen)`) + (A.length ? grp(offen.map(aufgabeZeile).join("") + more("pf-" + id, fertig, 0, aufgabeZeile).replace("Alle ", "Erledigte ")) : "")
-      + `<form class="form" data-form="aufgabe" data-projekt="${esc(id)}" style="margin-top:10px"><input class="inp" name="titel" placeholder="Neue Aufgabe" required><div class="zeile"><label>Fällig<input class="inp" type="date" name="faellig"></label><label>Für<input class="inp" name="fuer" value="besitzer"></label></div><button class="btn pri" type="submit">Hinzufügen</button></form>`};
+      + gh2(`Aufgaben (${offen.length} offen)`) + (A.length ? grp(offen.map(a => posZeile(a, false)).join("") + more("pf-" + id, fertig, 0, a => posZeile(a, false)).replace("Alle ", "Erledigte ")) : "")
+      + `<div class="grp posform inrow" style="margin-top:10px">${posNeuForm(id)}</div>`};
 };
 SHEETS["projekt-neu"] = () => ({lead: sq("folder-plus", "orange", "xl"), title: "Neues Projekt", sub: "Ordnung: ein Ordner je Projekt, mit INDEX.md und Git",
   body: `<form class="form" data-form="projekt"><label>Name<input class="inp" name="name" required></label><label>Beschreibung<textarea class="inp" name="beschreibung"></textarea></label><label>Ordner auf diesem Rechner<input class="inp" name="pfad" placeholder="z. B. C:\Users\Name\Projekte\Projektname"></label><label>Als Nächstes<input class="inp" name="naechster_schritt"></label><button class="btn pri" type="submit">Anlegen</button></form>`});
 
 SHEETS.wunsch = id => {
   const w = wunschZu(id); if (!w) return null;
-  const S = (D.pos?.aufgaben || []).filter(a => a.wunsch === w.id), [pt, pc] = PRIO[w.prio || ""];
-  const knoepfe = w.status === "offen"
-    ? `<button class="btn pri" type="button" data-act="werledigt" data-id="${esc(w.id)}">${icon("check")}Erledigt</button><button class="btn" type="button" data-act="wverwerfen" data-id="${esc(w.id)}">Verwerfen</button>`
-    : `<button class="btn" type="button" data-act="woffen" data-id="${esc(w.id)}">${icon("rotate-ccw")}Wieder öffnen</button>`;
-  return {lead: sq(w.status === "erledigt" ? "check" : "star", w.status === "erledigt" ? "green" : pc, "xl"), title: `Wunsch Nr. ${w.nr}`, sub: `${esc(w.titel)} · von ${esc(wer(w.von))} · ${esc(ago(w.erstellt))}`,
-    body: `<div class="acts">${knoepfe}</div>`
-      + gh2("Priorität") + `<div class="seg">${["hoch", "mittel", "niedrig"].map(p => `<button type="button" data-act="wprio" data-id="${esc(w.id)}" data-wert="${p}" class="${w.prio === p ? "on" : ""}">${PRIO[p][0]}</button>`).join("")}</div>`
-      + (w.text ? `<div class="papier">${md(w.text)}</div>` : "")
-      + (w.ergebnis ? gh2(w.status === "erledigt" ? "Ergebnis" : "Begründung") + `<div class="papier">${esc(w.ergebnis)}</div>` : "")
-      + (S.length ? gh2(`Schritte (${S.filter(a => a.erledigt).length} von ${S.length})`) + grp(S.map(aufgabeZeile).join("")) : "")
-      + gh2(`Notizen (${w.notizen.length})`) + (w.notizen.length ? `<div class="chat">${w.notizen.map(n => `<div class="bl ${n.von === "besitzer" ? "ich" : "ag"}"><small>${esc(wer(n.von))} · ${esc(ago(n.zeit))}</small>${esc(n.text)}</div>`).join("")}</div>` : "")
-      + `<form class="antwort" data-form="wnotiz" data-id="${esc(w.id)}"><input class="inp" name="text" placeholder="Notiz schreiben" required><button class="btn pri" type="submit">${icon("arrow-up")}</button></form>`};
+  const st = (w.nr ? `Wunsch Nr. ${w.nr} · ` : "") + (w.status === "offen" ? `offen seit ${wDatum(w.erstellt)}` : `${w.status === "verworfen" ? "verworfen" : "erledigt"}${w.erledigt ? " am " + wDatum(w.erledigt) : ""}${w.erledigt_von ? " von " + wer(w.erledigt_von) : ""}`);
+  const notiz = n => `<div class="todo">${sq(n.von === "besitzer" ? "user-round" : "bot", n.von === "besitzer" ? "blue" : "purple")}<div class="t"><p class="by"><b>${esc(wer(n.von))}</b>, ${esc(ago(n.zeit))}</p><p class="wtext">${esc(n.text)}</p></div>
+    <button class="x sm" type="button" data-act="wnweg" data-id="${esc(w.id)}" data-wert="${esc(n.id)}" aria-label="Notiz entfernen">${icon("trash-2")}</button></div>`;
+  const S = wSchritte(w), F = wFort(S), O = S.filter(a => !a.erledigt);
+  const schritte = gh2(S.length ? `Schritte, ${F.f} von ${F.n} erledigt` : "Schritte") + `<div class="grp">${S.length ? `<div style="padding:12px 16px 4px"><span class="posbar"><i style="width:${F.pc}%;background:var(--orange)"></i></span></div>` : ""}${O.map(a => posZeile(a)).join("")}`
+    + (w.status === "offen" ? `<form class="posform inrow" data-form="wschritt" data-id="${esc(w.id)}"><input class="inp" name="titel" placeholder="Schritt hinzufügen …" autocomplete="off" maxlength="200" aria-label="Schritt hinzufügen" required><button class="btn pri sm">Eintragen</button></form>` : "") + `</div>`;
+  const gruppen = [...new Set(wAlle().map(x => x.gruppe).filter(Boolean))].sort((a, b) => a.localeCompare(b, "de"));
+  return {lead: `<span class="wk xl ${w.status === "erledigt" ? "ok" : w.status === "verworfen" ? "weg" : ""}">${w.status === "erledigt" ? icon("check") : w.status === "verworfen" ? icon("x") : ""}</span>`, title: esc(w.titel), sub: esc(st),
+    actions: (w.status === "offen" ? `<button class="btn pri" type="button" data-act="werledigt" data-id="${esc(w.id)}">${icon("check")}Erledigt</button><button class="btn" type="button" data-act="wverwerfen" data-id="${esc(w.id)}">Verwerfen</button>`
+      : `<button class="btn" type="button" data-act="woffen" data-id="${esc(w.id)}">${icon("rotate-ccw")}Wieder öffnen</button>`) + `<button class="btn" type="button" data-act="wtitel" data-id="${esc(w.id)}">${icon("pencil")}Titel ändern</button>`,
+    body: (WE.titel === w.id ? `<form class="grp posform" data-form="wtitel" data-id="${esc(w.id)}" style="margin-bottom:12px"><input class="inp" name="text" value="${esc(w.titel)}" maxlength="200" aria-label="Titel" required><button class="btn pri sm">Speichern</button></form>` : "")
+      + (w.text ? `<p class="wtext top">${esc(w.text)}</p>` : "")
+      + gh2("Gruppe") + `<div class="grp wgwahl">${gruppen.map(g => `<button class="bechip${(w.gruppe || "") === g ? " on" : ""}" type="button" data-act="wgruppe" data-id="${esc(w.id)}" data-wert="${esc(g)}">${esc(g)}</button>`).join("")}<button class="bechip${!w.gruppe ? " on" : ""}" type="button" data-act="wgruppe" data-id="${esc(w.id)}" data-wert="">Ohne</button>
+        ${WE.gruppe === w.id ? `<form data-form="wgruppe" data-id="${esc(w.id)}"><input class="inp" name="text" maxlength="40" placeholder="Name der Gruppe" aria-label="Neue Gruppe" required><button class="btn pri sm">Anlegen</button></form>` : `<button class="bechip" type="button" data-act="wneugruppe" data-id="${esc(w.id)}">${icon("plus")} Neue Gruppe</button>`}</div>`
+      + (w.status === "offen" ? gh2("Priorität") + `<div class="seg wprios" role="group" aria-label="Priorität">${WPRIO.map(([p, t, z]) => `<button type="button" class="${(w.prio || "") === p ? "on" : ""}" data-act="wprio" data-id="${esc(w.id)}" data-wert="${p}">${z ? `<span class="wprio">${z}</span>` : ""}${t}</button>`).join("")}</div>` : "")
+      + schritte + (w.ergebnis ? gh2(w.status === "verworfen" ? "Warum nicht" : "Ergebnis") + grp(`<div class="todo"><div class="t"><p class="wtext">${esc(w.ergebnis)}</p></div></div>`) : "")
+      + gh2(`Notizen${w.notizen.length ? ", " + w.notizen.length : ""}`) + (w.notizen.length ? grp(w.notizen.map(notiz).join("")) : "")
+      + `<form class="grp wform" data-form="wnotiz" data-id="${esc(w.id)}"><textarea class="inp ta" name="text" placeholder="Notiz schreiben …" aria-label="Notiz" maxlength="4000" required></textarea><div class="wfb"><button class="btn pri">Notiz speichern</button></div></form>`
+      + note(`Eingetragen ${esc(wDatum(w.erstellt))} von ${esc(wer(w.von))}. Dein Agent liest deine Notizen, bevor er weitermacht.`)};
 };
 SHEETS.agent = id => {
   const a = agAlle().find(x => x.id === id); if (!a) return null;
@@ -807,8 +1082,6 @@ SHEETS.pkn = pfad => {
     body: `<div class="acts"><button class="btn pri" type="button" data-act="pknzurueck" data-id="${esc(pfad)}">${icon("rotate-ccw")}Zurücklegen</button><button class="btn rot" type="button" data-act="pknweg" data-id="${esc(pfad)}">${icon("trash-2")}Endgültig löschen</button></div>`
       + gh2("Angaben") + grp(kv("Vorher", `<code>${esc(n.von)}</code>`) + kv("Größe", esc(gr(n.bytes))))};
 };
-SHEETS["wunsch-neu"] = () => ({lead: sq("star", "yellow", "xl"), title: "Neuer Wunsch", sub: "Was soll dein Agent für dich tun?",
-  body: `<form class="form" data-form="wunsch"><label>Was<input class="inp" name="titel" required></label><label>Genauer (optional)<textarea class="inp" name="text"></textarea></label><div class="zeile"><label>Priorität<select class="inp" name="prio"><option value="hoch">Hoch</option><option value="mittel" selected>Mittel</option><option value="niedrig">Niedrig</option></select></label><label>Gruppe (optional)<input class="inp" name="gruppe"></label></div><button class="btn pri" type="submit">Eintragen</button></form>`});
 
 SHEETS.bericht = id => {
   const b = beInfo(id); if (!b) return null;
@@ -822,22 +1095,12 @@ SHEETS.berichttext = id => {
     body: `<div class="acts"><button class="btn" type="button" data-act="betextzurueck" data-id="${esc(b.id)}">${icon("arrow-left")}Zurück zu den Fragen</button></div><div class="papier">${md(b.text)}</div>`};
 };
 
-const NZ = {pfad: "", n: null, edit: false, laden: false};
-SHEETS.notiz = pfad => {
-  if (NZ.pfad !== pfad) { Object.assign(NZ, {pfad, n: null, edit: false}); notizLaden(pfad); }
-  const n = NZ.n;
-  if (!n) return {lead: sq("file-text", "indigo", "xl"), title: "Notiz", sub: esc(pfad), body: note("Wird geladen …")};
-  return {lead: sq("file-text", "indigo", "xl"), title: esc(n.titel), sub: `${esc(n.pfad)} · ${esc(ago(n.zeit))}`,
-    body: NZ.edit
-      ? `<form class="form" data-form="nspeichern"><textarea class="inp lang" name="text">${esc(n.text)}</textarea><div class="btns"><button class="btn pri" type="submit">Speichern</button><button class="btn" type="button" data-act="nabbrechen">Abbrechen</button></div></form>`
-      : `<div class="acts"><button class="btn" type="button" data-act="nbearbeiten">${icon("pencil")}Bearbeiten</button><button class="btn danger" type="button" data-act="nweg">${icon("trash-2")}Papierkorb</button></div><div class="papier">${md(n.text)}</div>`};
+SHEETS.wxnotiz = () => {
+  if (WX.edit) { const n = wxInfo(WX.edit.pfad); return {lead: sq("notebook-pen", "yellow", "xxl"), title: WX.edit.neu ? "Neue Notiz" : n ? esc(n.titel) : "Notiz", sub: WX.edit.neu ? esc(wxOrt(WX.edit.ordner)) : "bearbeiten", body: wxEditorHtml()}; }
+  const n = wxInfo(WX.pfad), d = n && WX.notiz && WX.notiz.pfad === n.pfad ? WX.notiz : null; if (!n) return null;
+  return {lead: sq("notebook-pen", "yellow", "xxl"), title: esc(n.titel), sub: `${esc(wxOrt(n.ordner))} · geändert ${esc(wxDatum(n.zeit))}`, actions: wxKnoepfe(true),
+    body: `<div class="grp wxblatt">${d ? md(d.text) : `<p class="muted">Wird geladen …</p>`}</div>`};
 };
-async function notizLaden(pfad){
-  try { NZ.n = await api("/api/notizen/notiz?pfad=" + encodeURIComponent(pfad)); } catch(e) { NZ.n = {titel: "Fehler", pfad, zeit: 0, text: e.message}; }
-  $("sheet")._h = null; renderSheet();
-}
-SHEETS["notiz-neu"] = () => ({lead: sq("notebook-pen", "indigo", "xl"), title: "Neue Notiz", sub: "Wird als Markdown-Datei gespeichert",
-  body: `<form class="form" data-form="notiz"><div class="zeile"><label>Titel<input class="inp" name="titel" required></label><label>Ordner (optional)<input class="inp" name="ordner" list="ordnerliste" value="${esc(UI.nordner)}"></label></div><datalist id="ordnerliste">${(D.notizen?.ordner || []).map(o => `<option value="${esc(o)}">`).join("")}</datalist><label>Text<textarea class="inp lang" name="text"></textarea></label><button class="btn pri" type="submit">Anlegen</button></form>`});
 
 /* ---------- Klicks und Formulare ---------- */
 document.addEventListener("click", async e => {
@@ -850,7 +1113,6 @@ document.addEventListener("click", async e => {
   const id = t.dataset.id, w = t.dataset.wert;
   switch (t.dataset.act) {
     case "zu": return closeSheet();
-    case "nordner": e.preventDefault(); UI.nordner = w || ""; UI.q = ""; UI.treffer = null; renderPage(); return scrollTo(0, 0);
     case "abmelden": e.preventDefault(); return abmelden();
     case "abhaken": { const a = (D.pos?.aufgaben || []).find(x => x.id === id); if (a) await post(`/api/pos/aufgaben/${id}`, {erledigt: !a.erledigt}); return; }
     case "schritt": { const p = projekt(id), v = await eingeben("Als Nächstes", "Der nächste Schritt in diesem Projekt.", p?.naechster_schritt || ""); if (v !== null) await post(`/api/pos/projekte/${id}`, {naechster_schritt: v}); return; }
@@ -880,9 +1142,23 @@ document.addEventListener("click", async e => {
       if (!(await bestaetigen("Bericht erledigt?", "Alle offenen Fragen werden als beantwortet markiert.", "Erledigt"))) return;
       t.disabled = true; if (await post(`/api/berichte/${id}/erledigt`, {})) { $("sheet")._h = null; renderAll(); } else t.disabled = false;
       return;
-    case "nbearbeiten": NZ.edit = true; $("sheet")._h = null; return renderSheet();
-    case "nabbrechen": NZ.edit = false; $("sheet")._h = null; return renderSheet();
-    case "nweg": if (await bestaetigen("In den Papierkorb?", "Die Notiz wird nicht gelöscht, sondern in den Papierkorb im Notizen-Ordner verschoben.", "Verschieben", true)) { if (await post("/api/notizen/papierkorb", {pfad: NZ.pfad})) { closeSheet(); toast("Im Papierkorb"); } } return;
+    case "wzu": WZU.has(w) ? WZU.delete(w) : WZU.add(w); try { localStorage.setItem("zentrale-wgruppen-zu", JSON.stringify([...WZU])); } catch(e) {} return renderPage();
+    case "wtitel": WE.titel = WE.titel === id ? "" : id; $("sheet")._h = null; renderSheet(); { const i = document.querySelector('#sheet [data-form="wtitel"] input'); if (i) i.focus(); } return;
+    case "wneugruppe": WE.gruppe = id; $("sheet")._h = null; renderSheet(); { const i = document.querySelector('#sheet [data-form="wgruppe"] input'); if (i) i.focus(); } return;
+    case "wgruppe": t.disabled = true; if (await post(`/api/wuensche/${id}`, {gruppe: w})) { $("sheet")._h = null; renderAll(); } else t.disabled = false; return;
+    case "wnweg": if (await bestaetigen("Diese Notiz entfernen?", "", "Entfernen", true) && await post(`/api/wuensche/${id}/notizen/${w}/loeschen`, {})) { $("sheet")._h = null; renderAll(); } return;
+    case "wxsicht": WX.sicht = w; WX.q = ""; WX.treffer = null; if (!WX.edit) WX.pfad = ""; if (WX.listeZu) { WX.listeZu = false; wxMerke(); } return wxZeichnen();
+    case "wxnotiz": if (!(await wxVerwerfen())) return; if (w !== WX.pfad) WX.notiz = null; WX.pfad = w; wxZeichnen(); wxBlatt(); return wxOeffnen(w);
+    case "wxlistezu": WX.listeZu = !WX.listeZu; wxMerke(); return wxZeichnen();
+    case "wxneu": return wxNeu(WX.sicht === "alle" || WX.sicht === "zuletzt" ? "" : WX.sicht);
+    case "wxneuordner": WX.ordnerForm = true; wxZeichnen(); return wxFokus('[data-form="wxordner"] input');
+    case "wxbearbeiten": { const d = WX.notiz; if (!d) return; WX.edit = {neu: false, pfad: d.pfad, version: d.version, text: d.text, anfang: d.text, titel: ""}; wxZeichnen(); wxBlatt(); return wxFokus("[data-wxta]"); }
+    case "wxabbrechen": if (await wxVerwerfen()) { wxZeichnen(); if (wxSchmal() && !WX.pfad) closeSheet(); } return;
+    case "wxspeichern": return wxSpeichern(t);
+    case "wxweg": { const n = wxInfo(WX.pfad); if (!n) return;
+      if (!(await bestaetigen("In den Papierkorb?", `„${n.titel}“ wird nicht gelöscht, sondern in den Papierkorb im Notizen-Ordner verschoben.`, "Verschieben", true))) return;
+      if (await post("/api/notizen/papierkorb", {pfad: n.pfad})) { WX.weg[n.pfad] = Date.now(); WX.pfad = ""; WX.notiz = null; if (SHEET === "wxnotiz") closeSheet(); toast("Im Papierkorb"); wxZeichnen(); }
+      return; }
   }
 });
 document.addEventListener("submit", async e => {
@@ -892,27 +1168,34 @@ document.addEventListener("submit", async e => {
   f.querySelectorAll("button").forEach(b => b.disabled = true);
   let ok = null;
   if (art === "login") return anmelden(v.schluessel);
-  if (art === "aufgabe") ok = await post("/api/pos/aufgaben", {titel: v.titel, faellig: v.faellig, fuer: v.fuer || "besitzer", projekt: f.dataset.projekt});
+  if (art === "aufgabe") ok = await post("/api/pos/aufgaben", {titel: v.titel, faellig: v.faellig, fuer: v.fuer || "besitzer", projekt: f.dataset.projekt || v.projekt || undefined});
+  if (art === "projektschnell") { ok = await post("/api/pos/projekte", {name: v.name}); if (ok) { f.reset(); document.activeElement?.blur(); return openSheet("projekt:" + ok.id); } }
+  if (art === "wunschschnell") ok = await post("/api/wuensche", {titel: v.titel, prio: "mittel"});
+  if (art === "wtitel") { ok = await post(`/api/wuensche/${f.dataset.id}`, {titel: v.text}); if (ok) WE.titel = ""; }
+  if (art === "wgruppe") { ok = await post(`/api/wuensche/${f.dataset.id}`, {gruppe: v.text}); if (ok) WE.gruppe = ""; }
+  if (art === "wschritt") ok = await post("/api/pos/aufgaben", {titel: v.titel, wunsch: f.dataset.id});
+  if (art === "wxordner") { const n = String(v.name || "").trim().replace(/[\\/]+/g, " "); WX.ordnerForm = false; if (n) { if (!wxOrdner().includes(n)) WX.neueOrdner.push(n); WX.sicht = n; WX.q = ""; WX.treffer = null; if (!WX.edit) { WX.pfad = ""; WX.notiz = null; } } document.activeElement?.blur(); return wxZeichnen(); }
   if (art === "projekt") { ok = await post("/api/pos/projekte", {name: v.name, beschreibung: v.beschreibung, naechster_schritt: v.naechster_schritt, orte: v.pfad ? [{geraet: "Dieser Rechner", pfad: v.pfad}] : []}); if (ok) return openSheet("projekt:" + ok.id); }
   if (art === "wunsch") { ok = await post("/api/wuensche", v); if (ok) return openSheet("wunsch:" + ok.id); }
   if (art === "wnotiz") ok = await post(`/api/wuensche/${f.dataset.id}/notizen`, {text: v.text});
   if (art === "bnachricht") { ok = await beSenden(f.dataset.id, v.text, f.dataset.frage || ""); if (!ok) f.querySelectorAll("button").forEach(b => b.disabled = false); return; }
-  if (art === "notiz") { ok = await post("/api/notizen/neu", v); if (ok) return openSheet("notiz:" + ok.pfad); }
-  if (art === "nspeichern") { ok = await post("/api/notizen/speichern", {pfad: NZ.pfad, text: v.text, version: NZ.n.version}); if (ok) { NZ.n = ok; NZ.edit = false; toast("Gespeichert"); } }
   f.querySelectorAll("button").forEach(b => b.disabled = false);
-  if (ok) { $("sheet")._h = null; renderSheet(); }
+  if (ok) { f.reset(); if (document.activeElement) document.activeElement.blur(); $("sheet")._h = null; renderAll(); }
 });
-let suchT = 0;
-document.addEventListener("change", e => { if (e.target.matches("[data-beproj]")) { BER.projekt = e.target.value; BER.mehr = false; e.target.blur(); renderPage(); } });
+document.addEventListener("change", e => {
+  if (e.target.matches("[data-beproj]")) { BER.projekt = e.target.value; BER.mehr = false; e.target.blur(); renderPage(); }
+  if (e.target.matches("[data-wxmsel]")) { WX.sicht = e.target.value; WX.q = ""; WX.treffer = null; e.target.blur(); wxZeichnen(); }
+});
 document.addEventListener("input", e => {
-  if (e.target.matches("[data-betext]")) { BER.text[e.target.dataset.betext] = e.target.value; return; }
-  if (e.target.id !== "nsuche") return;
-  UI.q = e.target.value; clearTimeout(suchT);
-  suchT = setTimeout(async () => {
-    UI.treffer = UI.q.trim() ? (await api("/api/notizen/suche?q=" + encodeURIComponent(UI.q)).catch(() => ({treffer: []}))).treffer : null;
-    const el = $("pages"); el._h = null; el.innerHTML = `<section class="page on">${viewNotizen()}</section>`; el._h = null;
-    const i = $("nsuche"); i.focus(); i.setSelectionRange(i.value.length, i.value.length);
-  }, 250);
+  const t = e.target;
+  if (t.matches("[data-betext]")) BER.text[t.dataset.betext] = t.value;
+  else if (WX.edit && t.matches("[data-wxta]")) WX.edit.text = t.value;
+  else if (WX.edit && t.matches("[data-wxtitel]")) WX.edit.titel = t.value;
+  else if (t.id === "wxq") wxSuchen(t.value);
+});
+document.addEventListener("keydown", e => {
+  if (WX.edit && (e.metaKey || e.ctrlKey) && e.key === "s") { e.preventDefault(); wxSpeichern(document.querySelector("[data-act=wxspeichern]")); return; }
+  if (e.key === "Escape" && WX.ordnerForm && e.target.closest && e.target.closest('[data-form="wxordner"]')) { WX.ordnerForm = false; e.target.blur(); wxZeichnen(); }
 });
 document.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey && !e.isComposing && e.target.matches("[data-betext]")) { e.preventDefault(); e.target.form.requestSubmit(); } });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && SHEET && !$("dlg").classList.contains("open")) closeSheet(); });

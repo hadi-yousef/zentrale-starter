@@ -23,6 +23,7 @@ BESITZER = "besitzer"
 MAX_BODY = 64 * 1024
 FASSUNG = "2026-11-02"   # bei jedem Update hochsetzen, auch FASSUNG in index.src.html; der Client und die Seite vergleichen
 ORDNER = Path(__file__).resolve().parent.parent   # der Ordner dieser Zentrale (zentrale-starter)
+ORDNER_ID = hashlib.sha256(str(ORDNER).lower().encode("utf-8")).hexdigest()[:12]   # Kennung ohne Pfad, für /api/lebt
 
 _lock = threading.Lock()
 _cache = {"mtime": None, "map": {}}

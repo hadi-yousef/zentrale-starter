@@ -84,7 +84,8 @@ class Handler(BaseHTTPRequestHandler):
         teile = url.path.split("/")[3:]
         try:
             if url.path == "/api/lebt":
-                return self._json(200, {"ok": True})
+                # ohne Schlüssel: Fassung und Kennung des Ordners (Prüfsumme, kein Pfad), damit einrichten.py alte Zentralen erkennt
+                return self._json(200, {"ok": True, "zentrale": "starter", "fassung": hub.FASSUNG, "ordner_id": hub.ORDNER_ID})
             if url.path == "/api/ich":
                 return self._json(200, {"id": aid, "besitzer": aid == hub.BESITZER, "fassung": hub.FASSUNG, "ordner": str(hub.ORDNER)})
             if url.path == "/api/agenten":

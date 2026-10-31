@@ -39,6 +39,9 @@ py start.py
    gelten deine Regeln in jedem Projekt: Die Agenten sagen offen, wenn ein Weg falsch ist, und suchen vor dem Bauen
    nach fertigem Open Source.
 
+**Hattest du schon eine andere Zentrale?** Sag deinem Agenten: **„Richte die Zentrale nach docs/EINRICHTEN.md ein.“**
+Er hält die alte an, lässt sie unverändert liegen und fragt dich einzeln, was du daraus mitnehmen willst.
+
 Autostart nach der Anmeldung: `docs\AUTOSTART.md`. **Mac und Linux:** `python3` statt `py`, sonst gleich.
 
 ## Sicherheit

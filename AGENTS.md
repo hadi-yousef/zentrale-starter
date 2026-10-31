@@ -48,8 +48,11 @@ Es gibt genau **eine** Zentrale: die aus diesem Ordner (`zentrale-starter`), ges
 http://127.0.0.1:8090. So sieht sie aus: `docs/REFERENZ.md` (Bilder).
 
 - Findest du eine andere Zentrale (älterer Ordner, eigene Bastelei, anderer Port), arbeitest du **nicht** daran weiter.
-  Sag es dem Besitzer, übernimm nach seinem OK ihre Einträge in diese Zentrale (mit den Befehlen unten) und leg den alten
-  Ordner danach mit `aufraeumen\verschieben.py --papierkorb` weg. Nichts davon löschen.
+  Dann richtest du diese Zentrale nach **`docs/EINRICHTEN.md`** ein: die alte anhalten und unverändert liegen lassen,
+  die neue mit eigenen Daten und Schlüsseln starten, `py einrichten.py pruefen` muss „Alles getrennt“ zeigen.
+  Aus der alten übernimmst du nur, was der Besitzer einzeln mit Ja auswählt, und nur mit den Befehlen des Clients.
+  Den alten Ordner nicht verschieben und nicht löschen.
+- Finden: `py einrichten.py suchen` (liest nur).
 - Den Code der Zentrale änderst du nicht, um sie „wie das Vorbild“ zu machen. Neue Fassungen kommen über `git pull`.
 - Unten links auf der Seite steht die Fassung. Sie muss gleich sein wie `FASSUNG` in `zentrale\hub.py`.
 
@@ -94,6 +97,8 @@ Der Besitzer arbeitet in T3 Code mit zwei Agenten: **Codex** und **Claude Code**
 
 ## Phase 0: Ankommen (nichts ändern)
 
+0. **Gibt es schon eine Zentrale?** `py einrichten.py suchen` (liest nur). Findet es eine andere, zuerst
+   `docs/EINRICHTEN.md` ganz durchgehen, dann hier weiter ab Schritt 7.
 1. Python prüfen: `py --version`. Python 3.9 oder neuer genügt, sonst wird nichts installiert. Fehlt Python, frag den
    Besitzer, ob er es von python.org installieren will (Haken bei „Add python.exe to PATH“).
 2. Ordner: Dieses Starterpaket liegt am besten unter `C:\Users\<Name>\Projekte\zentrale-starter`.
@@ -340,6 +345,7 @@ Quelle, nie Passwörter, Kontonummern oder Gesundheitsdaten.
 | Datei | Zweck |
 |---|---|
 | `start.py` | startet die Zentrale, legt Schlüssel an |
+| `einrichten.py` | findet alte Zentralen, zeigt ihre Einträge, prüft, dass die neue getrennt läuft (`docs/EINRICHTEN.md`) |
 | `zentrale_client.py` | Befehle für die Agenten |
 | `zentrale\app.py` | Webserver (nur Python-Standardbibliothek) |
 | `zentrale\hub.py` | Schlüssel (nur als SHA-256 gespeichert) und Agenten |
