@@ -8,6 +8,8 @@ r"""Zentrale starten und Schlüssel verwalten. Braucht nur Python 3.9 oder neuer
   py start.py agenten               alle Schlüssel mit letztem Kontakt
   py start.py agent-weg codex       Schlüssel eines Agenten ungültig machen
   py start.py schluessel-neu        neuer Schlüssel für den Besitzer (der alte gilt dann nicht mehr)
+  py start.py --heimnetz            auch für andere Geräte im Heimnetz und über Tailscale (nur mit Schlüssel)
+  py start.py geraet-neu "Alter-PC" Schlüssel für ein Gerät im Homelab (darf nur melden), zeigt den Melder-Befehl
   (Mac und Linux: python3 statt py)
 
 Beim ersten Start wird der Schlüssel des Besitzers erzeugt und EINMAL angezeigt. Er wird nur als Prüfsumme gespeichert.
@@ -71,6 +73,35 @@ def agent_neu(aid):
     print(f"Der Agent nutzt ihn so: {PY} zentrale_client.py --agent {aid} wuensche")
 
 
+def geraet_neu(name, port):
+    """Schlüssel für ein Gerät: „geraet-<name>“, darf nur melden. Landet als Datei im Schlüssel-Ordner, nicht am Bildschirm."""
+    import re
+    kurz = re.sub(r"[^a-z0-9-]+", "-", name.strip().lower().replace("ä", "ae").replace("ö", "oe").replace("ü", "ue").replace("ß", "ss")).strip("-")[:32]
+    if not kurz:
+        sys.exit("Der Name braucht Buchstaben oder Ziffern.")
+    aid = "geraet-" + kurz
+    s = hub.schluessel_neu(aid)
+    SCHLUESSEL_ORDNER.mkdir(parents=True, exist_ok=True)
+    datei = SCHLUESSEL_ORDNER / f"{aid}.key"
+    datei.write_bytes((s + "\n").encode("utf-8"))
+    try:
+        os.chmod(datei, 0o600)
+    except OSError:
+        pass
+    sys.path.insert(0, str(HIER / "zentrale"))
+    import geraete
+    hub.PORT = port
+    adr = (geraete.adressen() or [f"http://<Adresse dieses Rechners>:{port}"])[0].rstrip("/")
+    print(f"Schlüssel für das Gerät „{name}“ angelegt: {datei}")
+    print("Er darf nur den Zustand melden, sonst nichts. Bring die Datei auf das Gerät (USB-Stick, Netzwerkordner), nicht per Chat.")
+    print()
+    print("Auf dem Gerät (Python 3.6 oder neuer):")
+    print(f"  1. Melder holen:   curl -o melder.py {adr}/melder.py      (Windows: py -c \"import urllib.request as u; u.urlretrieve('{adr}/melder.py', 'melder.py')\")")
+    print(f"  2. Einrichten:     python3 melder.py einrichten --zentrale {adr} --name \"{name}\" --schluessel-datei <Pfad zu {datei.name}>")
+    print("  3. Autostart:      python3 melder.py autostart      (zeigt die fertigen Befehle für dieses System)")
+    print("Die Zentrale muss dafür mit --heimnetz laufen. Ablauf: docs/HOMELAB.md.")
+
+
 def port_frei(bind, port):
     """Antwortet schon etwas auf dem Port? (Verbinden statt Binden: geht auf allen Systemen gleich.)"""
     try:
@@ -82,13 +113,19 @@ def port_frei(bind, port):
 
 def main():
     ap = argparse.ArgumentParser(description="Zentrale starten und Schlüssel verwalten.")
-    ap.add_argument("befehl", nargs="?", default="start", choices=["start", "agent-neu", "agenten", "agent-weg", "schluessel-neu"])
+    ap.add_argument("befehl", nargs="?", default="start", choices=["start", "agent-neu", "agenten", "agent-weg", "schluessel-neu", "geraet-neu"])
     ap.add_argument("name", nargs="?", help="Name des Agenten, z. B. claude oder codex")
     ap.add_argument("--port", type=int, default=int(os.environ.get("ZENTRALE_PORT", "8090")))
     ap.add_argument("--bind", default=os.environ.get("ZENTRALE_BIND", "127.0.0.1"),
-                    help="Adresse. Standard 127.0.0.1 = nur dieser Rechner. Andere Geräte erst mit Phase 6 (siehe AGENTS.md).")
+                    help="Adresse. Standard 127.0.0.1 = nur dieser Rechner. Für andere Geräte: --heimnetz (docs/HOMELAB.md).")
+    ap.add_argument("--heimnetz", action="store_true", default=os.environ.get("ZENTRALE_HEIMNETZ") == "1",
+                    help="auch auf andere Geräte im Heimnetz und über Tailscale hören (nur private Adressen, nur mit Schlüssel)")
     a = ap.parse_args()
 
+    if a.befehl == "geraet-neu":
+        if not a.name:
+            ap.error("Bitte einen Namen für das Gerät angeben, z. B. MacBook-Air-2015")
+        return geraet_neu(a.name, a.port)
     if a.befehl == "agent-neu":
         if not a.name or a.name == hub.BESITZER:
             ap.error("Bitte einen Namen für den Agenten angeben, z. B. claude")
@@ -106,6 +143,16 @@ def main():
     if a.befehl == "schluessel-neu":
         return besitzer_zeigen(hub.schluessel_neu(hub.BESITZER))
 
+    if a.heimnetz and a.bind == "127.0.0.1":
+        a.bind = "0.0.0.0"
+    try:   # läuft schon eine andere Zentrale? Dann nicht still daneben eine zweite (docs/EINRICHTEN.md)
+        import einrichten
+        andere = [f"127.0.0.1:{p} ({art})" for p, art, _ in einrichten.ports() if art != "diese"]
+        if andere:
+            print("ACHTUNG: Auf diesem Rechner läuft schon eine andere Zentrale: " + ", ".join(andere) + ". Es darf nur eine geben. "
+                  f"Erst `{PY} einrichten.py suchen` und docs/EINRICHTEN.md, nicht beide nebeneinander benutzen.", flush=True)
+    except Exception:
+        pass
     if not port_frei(a.bind, a.port):
         sys.exit(f"Port {a.port} ist belegt. Läuft die Zentrale schon? Sonst mit --port einen anderen wählen.")
     if not hub.hat_besitzer():
@@ -113,7 +160,8 @@ def main():
             sys.exit(f"Noch kein Schlüssel für den Besitzer. Bitte einmal von Hand starten: {PY} start.py")
         besitzer_zeigen(hub.schluessel_neu(hub.BESITZER), neu=False)
     if a.bind not in ("127.0.0.1", "localhost", "::1"):
-        print(f"Achtung: Die Zentrale hört auf {a.bind}, also auch auf andere Geräte im Netz. Nur in einem vertrauten Netz tun.")
+        print(f"Die Zentrale hört auch auf andere Geräte im Heimnetz und über Tailscale (Adresse {a.bind}). Fremde Netze und das "
+              "Internet weist sie ab, und ohne Schlüssel gibt es keine Daten. Firewall: docs/HOMELAB.md, Schritt 2.")
     import app
     print(f"Zentrale läuft: http://{'127.0.0.1' if a.bind == '0.0.0.0' else a.bind}:{a.port}   (beenden mit Strg+C)", flush=True)
     app.starten(a.bind, a.port)

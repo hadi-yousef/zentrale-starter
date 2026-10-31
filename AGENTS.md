@@ -10,6 +10,8 @@ Codex liest diese Datei direkt, Claude Code über `CLAUDE.md`.
 2. `wuensche` und `berichte` ansehen, dann `laeufe` (arbeitet gerade ein anderer Thread daran?).
 3. Die Notiz `Besitzer/INDEX.md` und die letzte Übergabe in `Übergaben/` lesen (`notiz-zeigen`).
 
+**Neu auf einem Rechner?** Lies zuerst `docs/STOLPERSTEINE.md`: Das ist bei anderen schon schiefgegangen.
+
 **Zuerst lesen: `REGELN.md`.** Sie gelten immer und gehen dieser Anleitung vor. Die wichtigsten in einem Satz:
 nie löschen (nur auf derselben Platte verschieben, mit Protokoll; Ausnahme: was sich neu erzeugt, nur mit
 `aufraeumen\putzen.py`), Passwörter nie anfassen, riskante Dinge nur mit Freigabe,
@@ -60,14 +62,14 @@ http://127.0.0.1:8090. So sieht sie aus: `docs/REFERENZ.md` (Bilder).
 ## Update einspielen
 
 Wenn der Besitzer sagt „Update holen“ oder `ich` eine ACHTUNG-Zeile zur Fassung zeigt:
-1. `git pull` in diesem Ordner. Hat jemand hier etwas geändert, nicht überschreiben, sondern dem Besitzer zeigen.
-   Danach `py regeln_verteilen.py`, damit neue Regeln in allen Projekten gelten.
-2. Die Zentrale **neu starten**: das Fenster bzw. den Hintergrund-Befehl mit `py start.py` beenden und neu starten. Läuft
-   sie über die Aufgabenplanung: `Stop-ScheduledTask -TaskName Zentrale` und `Start-ScheduledTask -TaskName Zentrale`.
-   Ohne Neustart läuft die alte Fassung weiter, die Seite zeigt dann oben einen orangen Hinweis.
-3. `py zentrale_client.py --agent codex ich` zeigt die neue Fassung ohne ACHTUNG.
-4. Seite im Browser neu laden und mit `docs/REFERENZ.md` vergleichen.
-5. Neues aus dem Update in `docs/` lesen (z. B. `docs/AGENTEN-SEITE.md`: Hook für Claude einrichten, nach OK).
+1. `py einrichten.py update`. Es holt die neue Fassung (`git pull`, nur wenn hier nichts geändert wurde), verteilt die
+   Regeln in alle Projekte, startet die Zentrale über die Aufgabenplanung neu und prüft, ob die neue Fassung läuft.
+   Zeigt es geänderte Dateien: nicht überschreiben, dem Besitzer zeigen. Läuft die Zentrale ohne Aufgabenplanung, sagt
+   es dir, dass du sie selbst neu starten musst (mit denselben Schaltern, z. B. `--heimnetz`).
+2. `py zentrale_client.py --agent codex ich` zeigt die neue Fassung ohne ACHTUNG.
+3. Seite im Browser neu laden und mit `docs/REFERENZ.md` vergleichen.
+4. Neues aus dem Update lesen: `git log --oneline -10` und die genannten Dateien in `docs/`. Neue Teile (z. B. Homelab,
+   Putzrunde) richtest du nur nach OK des Besitzers ein.
 
 ## Arbeiten in T3 Code
 
@@ -272,16 +274,15 @@ Erst wenn der Besitzer es will, je mit eigener Freigabe:
   Vorher prüfen, dass keine Schlüssel, `.env` oder privaten Daten im Repo stehen.
 - **Echte Sicherung:** sobald Platz da ist (externe Platte oder zweites Gerät), versioniert sichern. Vorschlag: restic
   (Open Source, BSD-2-Clause, eine Datei, läuft unter Windows). Regel 3-2-1: drei Kopien, zwei Medien, eine außer Haus.
-- **Zweites Gerät oder kleiner Server:** Die Zentrale kann dorthin umziehen (Ordner kopieren, `daten\` mitnehmen).
-- **Zugriff vom Handy:** über Tailscale (Client Open Source, BSD-3-Clause; Server-Alternative Headscale). Dann
-  `py start.py --bind <Tailscale-Adresse>` und `$env:ZENTRALE_HOSTS = "<Name im Tailnet>"`. Die Windows-Firewall fragt
-  dann nach; nur „Privates Netzwerk“ erlauben. Nie ins offene Internet stellen.
+- **Weitere Geräte, ein Server, Zugriff vom Handy:** alles nach `docs/HOMELAB.md` (Melder auf jedem Gerät, Zentrale mit
+  `--heimnetz`, Umzug auf einen Server ohne Vermischung, Tailscale, Ablage, nächtliche Sicherung). Nie ins offene
+  Internet stellen.
 
 ---
 
 ## Die Zentrale für Agenten
 
-- Läuft unter http://127.0.0.1:8090, nur auf diesem Rechner. Daten in `daten\` (JSON und Markdown, in `.gitignore`).
+- Läuft unter http://127.0.0.1:8090, nur auf diesem Rechner (mit `--heimnetz` auch fürs Heimnetz und Tailscale, `docs/HOMELAB.md`). Daten in `daten\` (JSON und Markdown, in `.gitignore`).
 - Alle Befehle: `py zentrale_client.py --help`. Immer mit `--agent claude` bzw. `--agent codex`. Wünsche genau: `docs/WUENSCHE.md`. Die wichtigsten:
 
 | Zweck | Befehl (nach `py zentrale_client.py --agent codex`) |
@@ -343,6 +344,16 @@ Quelle, nie Passwörter, Kontonummern oder Gesundheitsdaten.
   PowerShell sicherer als lange Texte in Anführungszeichen.
 - Schnittstelle für eigene Skripte: alles unter `/api/…` mit `Authorization: Bearer <schlüssel>`, JSON. Siehe `zentrale\app.py`.
 
+## Homelab
+
+Hat der Besitzer mehrere Geräte (alte Laptops, Rechner, einen Server), richtest du sie mit ihm nach **`docs/HOMELAB.md`**
+ein: Geräte erfassen, Zentrale fürs Heimnetz öffnen (`py start.py --heimnetz`), auf jedem Gerät den Melder
+(`py start.py geraet-neu "<Name>"`, dann `melder.py einrichten`), dann Vorschlag, welches Gerät der Server wird, Umzug der
+Zentrale ohne Vermischung, Tailscale, Ablage und nächtliche Sicherung, Putzen je Gerät. Jeder Schritt mit Ja.
+In der Zentrale: Homelab → Geräte, Dienste, Netzwerk, Speicher. `zentrale_client.py geraete` zeigt Zustand und Warnungen.
+Geräte-Schlüssel dürfen nur melden; nie per Chat verschicken. Linux installieren, Platten formatieren und Anmeldungen
+(Tailscale) macht der Besitzer selbst.
+
 ## Finanzen
 
 Seite „Finanzen“: Haushaltsbuch, Verträge und Abos, Sparziele, offene Rechnungen, Tipps. Privat und Firma getrennt
@@ -360,7 +371,9 @@ Dritte oder Repos kopieren; sie liegen nur in `daten\` (Ablage `daten\finanzen`)
 | Datei | Zweck |
 |---|---|
 | `start.py` | startet die Zentrale, legt Schlüssel an |
-| `einrichten.py` | findet alte Zentralen, zeigt ihre Einträge, prüft, dass die neue getrennt läuft (`docs/EINRICHTEN.md`) |
+| `melder\melder.py` | Melder für jedes Gerät im Homelab (Windows, Mac, Linux), meldet jede Minute (`docs/HOMELAB.md`) |
+| `zentrale\geraete.py` | Geräte, Warnungen und Seiten unter Homelab; Geräte-Schlüssel dürfen nur melden |
+| `einrichten.py` | findet alte Zentralen, zeigt ihre Einträge, prüft, dass die neue getrennt läuft (`docs/EINRICHTEN.md`), spielt Updates ein (`update`) |
 | `zentrale_client.py` | Befehle für die Agenten |
 | `zentrale\app.py` | Webserver (nur Python-Standardbibliothek) |
 | `zentrale\hub.py` | Schlüssel (nur als SHA-256 gespeichert) und Agenten |

@@ -7,12 +7,14 @@ Start über ../start.py.
 import ipaddress
 import json
 import os
+import socket
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
 import berichte
 import finanzen
+import geraete
 import hub
 import laeufe
 import notizen
@@ -22,10 +24,24 @@ import wuensche
 
 HIER = Path(__file__).resolve().parent
 SEITE = HIER / "index.html"
+MELDER = HIER.parent / "melder" / "melder.py"   # frei abrufbar (kein Schlüssel, keine Daten), damit ein Gerät ihn holen kann
 API_OFFEN = {"/api/lebt"}
 GROSS = 600 * 1024   # Berichte und Notizen dürfen größer sein als andere Anfragen
 # Nur eigene Namen annehmen (Schutz vor DNS-Rebinding): Eine fremde Webseite im Browser schickt ihren eigenen Namen als Host.
 EIGENE_NAMEN = {"localhost"} | {n.strip().lower() for n in os.environ.get("ZENTRALE_HOSTS", "").split(",") if n.strip()}
+# Im Heimnetz-Betrieb nur Geräte aus dem eigenen Netz: private Adressen, Tailscale (Shared Address Space), dieser Rechner.
+# „nicht global“ heißt: nicht aus dem Internet erreichbar (ipaddress kennt die Bereiche selbst).
+
+
+def absender_ok(ip):
+    if not hub.HEIMNETZ:
+        return True
+    try:
+        a = ipaddress.ip_address(ip)
+        a = a.ipv4_mapped or a if a.version == 6 else a
+        return not a.is_global and not a.is_multicast and not a.is_unspecified
+    except ValueError:
+        return False
 
 
 def host_ok(host):
@@ -66,12 +82,19 @@ class Handler(BaseHTTPRequestHandler):
     def _vorab(self):
         """Host prüfen und Schlüssel lesen. Gibt (url, aid) zurück oder None, wenn schon geantwortet wurde."""
         url = urlsplit(self.path)
+        if not absender_ok(self.client_address[0]):
+            self._json(403, {"fehler": "Nur aus dem Heimnetz oder über Tailscale."})
+            return None
         if not host_ok(self.headers.get("Host")):
             self._json(403, {"fehler": "Unbekannte Adresse."})
             return None
         aid = hub.who(self.headers.get("Authorization"))
         if url.path.startswith("/api/") and url.path not in API_OFFEN and not aid:
             self._json(401, {"fehler": "Schlüssel fehlt oder ist falsch."})
+            return None
+        # Ein Geräte-Schlüssel darf nur melden (und fragen, wer er ist), sonst nichts
+        if geraete.ist_geraet(aid) and url.path.startswith("/api/") and url.path not in API_OFFEN | {"/api/ich", "/api/geraete/melden"}:
+            self._json(403, {"fehler": "Geräte-Schlüssel dürfen nur melden."})
             return None
         return url, aid
 
@@ -89,6 +112,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(200, {"ok": True, "zentrale": "starter", "fassung": hub.FASSUNG, "ordner_id": hub.ORDNER_ID})
             if url.path == "/api/ich":
                 return self._json(200, {"id": aid, "besitzer": aid == hub.BESITZER, "fassung": hub.FASSUNG, "ordner": str(hub.ORDNER)})
+            if url.path == "/api/geraete":
+                return self._json(200, geraete.liste())
             if url.path == "/api/agenten":
                 return self._json(200, hub.agenten())
             if url.path == "/api/pos":
@@ -122,6 +147,11 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(200, r[1]) if r[0] == "json" else self._send(200, r[1], r[2])
         except ValueError as e:
             return self._json(400, {"fehler": str(e)})
+        if url.path == "/melder.py":
+            try:
+                return self._send(200, MELDER.read_bytes(), "text/x-python; charset=utf-8")
+            except FileNotFoundError:
+                return self._json(404, {"fehler": "melder.py fehlt"})
         if url.path in ("/", "/index.html"):
             try:
                 return self._send(200, SEITE.read_bytes(), "text/html; charset=utf-8")
@@ -160,6 +190,12 @@ class Handler(BaseHTTPRequestHandler):
         self._json(200, r)
 
     def _post(self, aid, pfad, teile, b):
+        if pfad == "/api/geraete/melden":
+            return geraete.melden(aid, b)
+        if pfad.startswith("/api/geraete/") and len(teile) == 2 and teile[1] == "vergessen":
+            if aid != hub.BESITZER:
+                raise PermissionError("Ein Gerät vergessen darf nur der Besitzer.")
+            return geraete.vergessen(teile[0])
         if pfad.startswith("/api/finanzen/"):
             return finanzen.api_post(aid, teile, b)
         if pfad.startswith("/api/pos/"):
@@ -217,6 +253,11 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def starten(bind="127.0.0.1", port=8090):
+    hub.PORT = port
+    hub.HEIMNETZ = bind not in ("127.0.0.1", "localhost", "::1")
+    if hub.HEIMNETZ:   # den eigenen Rechnernamen als Adresse annehmen (http://<name>:8090, http://<name>.local:8090)
+        n = socket.gethostname().lower()
+        EIGENE_NAMEN.update({n, n.split(".")[0], n.split(".")[0] + ".local"})
     try:
         notizen.grundgeruest()
     except OSError as e:

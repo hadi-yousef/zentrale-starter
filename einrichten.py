@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-r"""Neue Zentrale einrichten, ohne dass sie sich mit einer alten vermischt. Ändert selbst nichts, liest und zeigt nur.
+r"""Neue Zentrale einrichten, ohne dass sie sich mit einer alten vermischt, und Updates einspielen.
+suchen, alt-zeigen und pruefen ändern nichts, sie lesen und zeigen nur.
 
   py einrichten.py suchen          alte Zentralen finden: laufende Programme, Ports, Autostart, Ordner, Schlüssel,
                                    Umgebungsvariablen, Hinweise in den Anleitungen der Agenten
@@ -8,6 +9,8 @@ r"""Neue Zentrale einrichten, ohne dass sie sich mit einer alten vermischt. Änd
                                    mit dem Besitzer. Nur lesen.
   py einrichten.py pruefen         nach dem Einrichten: läuft genau diese Zentrale, mit eigenen Daten und Schlüsseln?
                                    Ende mit Code 0 = alles getrennt, 1 = etwas ist noch vermischt.
+  py einrichten.py update          neue Fassung holen: git pull (nur wenn hier nichts geändert ist), Regeln verteilen,
+                                   Zentrale neu starten (Aufgabenplanung) und prüfen, ob die neue Fassung läuft
   (Mac und Linux: python3 statt py)
 
 Ablauf und was der Agent dabei tut: docs/EINRICHTEN.md.
@@ -19,6 +22,7 @@ import re
 import socket
 import subprocess
 import sys
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
@@ -172,8 +176,8 @@ def umgebung():
     for k in ("ZENTRALE_DATEN", "ZENTRALE_URL", "ZENTRALE_PORT", "ZENTRALE_NOTIZEN", "ZENTRALE_SCHLUESSEL_ORDNER"):
         v = os.environ.get(k)
         if v:
-            fremd = k in ("ZENTRALE_DATEN", "ZENTRALE_NOTIZEN") and str(HIER).lower() not in v.lower() or \
-                    k in ("ZENTRALE_URL", "ZENTRALE_PORT") and "8090" not in v
+            # ZENTRALE_URL darf auf einen Server im Homelab zeigen (docs/HOMELAB.md); welche Zentrale dort läuft, prüft `pruefen`
+            fremd = k in ("ZENTRALE_DATEN", "ZENTRALE_NOTIZEN") and str(HIER).lower() not in v.lower()
             aus.append((k, v, fremd))
     return aus
 
@@ -296,7 +300,11 @@ def pruefen():
     try:
         _, t = holen(url + "/api/lebt", zeit=3)
         d = json.loads(t)
-        if d.get("ordner_id") != ID:
+        # Läuft die Zentrale auf einem anderen Gerät (Homelab-Server), lässt sich der Ordner nicht vergleichen, nur die Fassung
+        lokal = urllib.parse.urlsplit(url).hostname in ("127.0.0.1", "localhost", "::1")
+        if d.get("zentrale") != "starter":
+            fehler.append(f"Auf {url} läuft keine Zentrale aus diesem Repo (oder eine sehr alte).")
+        elif lokal and d.get("ordner_id") != ID:
             fehler.append(f"Auf {url} läuft eine andere Zentrale (nicht aus {HIER}).")
         elif d.get("fassung") != fassung():
             fehler.append(f"Auf {url} läuft Fassung {d.get('fassung')}, dieser Ordner hat {fassung()}: neu starten.")
@@ -332,8 +340,55 @@ def pruefen():
         for x in fehler:
             print("   • " + x)
         return 1
-    print(f"Alles getrennt: Es läuft nur die Zentrale aus {HIER} (Fassung {fassung()}), mit eigenen Daten und Schlüsseln.")
+    if urllib.parse.urlsplit(url).hostname in ("127.0.0.1", "localhost", "::1"):
+        print(f"Alles getrennt: Es läuft nur die Zentrale aus {HIER} (Fassung {fassung()}), mit eigenen Daten und Schlüsseln.")
+    else:
+        print(f"Alles getrennt: Die Zentrale auf {url} (Fassung {fassung()}) nimmt die Schlüssel dieses Geräts, hier läuft keine andere.")
     return 0
+
+
+def update():
+    """git pull, Regeln verteilen, Zentrale neu starten, neue Fassung prüfen. Bricht ab, wenn hier etwas geändert wurde."""
+    def git(*a):
+        return subprocess.run(["git", "-C", str(HIER), *a], capture_output=True, text=True, encoding="utf-8", errors="replace")
+    if not (HIER / ".git").exists():
+        sys.exit("Dieser Ordner ist kein Git-Klon. Update: neu klonen (README.md), dann nach docs/EINRICHTEN.md einrichten.")
+    geaendert = [z for z in git("status", "--porcelain").stdout.splitlines() if z.strip()]
+    if geaendert:
+        print("Hier wurde etwas geändert. Nicht überschreiben, erst dem Besitzer zeigen:")
+        for z in geaendert[:30]:
+            print("   " + z)
+        print("Eigene Wünsche an die Zentrale gehören nicht in den Code, sondern als Wunsch an den, der das Repo pflegt.")
+        return 1
+    alt = fassung()
+    r = git("pull", "--ff-only")
+    print((r.stdout + r.stderr).strip())
+    if r.returncode:
+        print("git pull hat nicht geklappt. Nichts weiter geändert.")
+        return 1
+    neu = fassung()
+    print(f"Fassung: {alt} → {neu}")
+    subprocess.run([sys.executable, str(HIER / "regeln_verteilen.py")])
+    aufgabe = [x for x in autostart() if x[3] and x[1].lower() != "disabled"]
+    if WIN and aufgabe:
+        for n, *_ in aufgabe:
+            ps(f"Stop-ScheduledTask -TaskName '{n}'; Start-Sleep 2; Start-ScheduledTask -TaskName '{n}'")
+            print(f"Zentrale über die Aufgabenplanung „{n}“ neu gestartet.")
+    else:
+        print(f"Jetzt die Zentrale neu starten: `{PY} start.py` beenden und wieder starten (mit denselben Schaltern, z. B. --heimnetz).")
+        return 0
+    import time
+    url = (os.environ.get("ZENTRALE_URL") or "http://127.0.0.1:8090").rstrip("/")
+    for _ in range(15):
+        time.sleep(1)
+        try:
+            if json.loads(holen(url + "/api/lebt")[1]).get("fassung") == neu:
+                print(f"Die Zentrale läuft mit Fassung {neu}. Neu in dieser Fassung: `git log --oneline` und docs/.")
+                return 0
+        except Exception:
+            pass
+    print("Die neue Fassung antwortet noch nicht. `py einrichten.py pruefen` zeigt, was los ist.")
+    return 1
 
 
 if __name__ == "__main__":
@@ -346,5 +401,7 @@ if __name__ == "__main__":
         alt_zeigen(a[1])
     elif a[0] == "pruefen":
         sys.exit(pruefen())
+    elif a[0] == "update":
+        sys.exit(update())
     else:
         sys.exit(__doc__)

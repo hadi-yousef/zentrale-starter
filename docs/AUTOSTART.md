@@ -71,3 +71,7 @@ Restart=on-failure
 WantedBy=default.target
 ```
 Einschalten: `systemctl --user daemon-reload && systemctl --user enable --now zentrale`. Log: `journalctl --user -u zentrale`.
+
+**Als Server im Homelab** (läuft ohne Anmeldung, auch für andere Geräte): `ExecStart=/usr/bin/python3 start.py --heimnetz`
+und einmal `sudo loginctl enable-linger $USER`, damit der Dienst nach dem Hochfahren startet, ohne dass sich jemand
+anmeldet. Ablauf und Firewall: `docs/HOMELAB.md`.

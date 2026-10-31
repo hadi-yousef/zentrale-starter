@@ -10,7 +10,7 @@ Größere Änderungen nur nach Entwurf als Bild und OK des Besitzers (`REGELN.md
 
 | Bild | Seite | Worauf achten |
 |---|---|---|
-| ![](bilder/01-uebersicht.png) | **Übersicht** | Oben „Guten Tag“ mit Datum und wie viel auf dich wartet. Links „Wartet auf dich“ (je Bericht die aktuelle Frage mit Vorschlägen zum Antippen) und „Heute“ (deine Aufgaben zum Abhaken, unten neu eintragen). Rechts die Agenten und vier Zahlen. Unten links „Fassung …“, dieselbe wie `FASSUNG` in `zentrale/hub.py`. |
+| ![](bilder/01-uebersicht.png) | **Übersicht** | Oben „Guten Tag“ mit Datum und wie viel auf dich wartet. Links „Wartet auf dich“ (je Bericht die aktuelle Frage mit Vorschlägen zum Antippen) und „Heute“ (deine Aufgaben zum Abhaken, unten neu eintragen). Rechts die Agenten, die Kachel Homelab (Geräte online, freier Platz, was zu tun ist) und vier Zahlen. Unten links „Fassung …“, dieselbe wie `FASSUNG` in `zentrale/hub.py`. |
 | ![](bilder/02-agenten.png) | **Agenten** | Eine Karte je Agent mit Arbeit, Wunsch-Nummer und Balken. Darunter „Fertig gemeldet“. |
 | ![](bilder/03-wuensche.png) | **Wünsche** | Oben die Zahl, darunter „Neuer Wunsch …“. Je Gruppe ein Abschnitt (zuklappbar) mit Karten: Nr., Priorität als !!!/!!/!, Text oder „Als Nächstes“ mit Balken, die letzte Notiz grau. Unten das Erledigte. |
 | ![](bilder/04-wunsch-blatt.png) | Wunsch geöffnet | Erledigt, Verwerfen, Titel ändern; Gruppe, Priorität, Schritte mit Balken und „Schritt hinzufügen“, Notizen, Notiz schreiben. |
@@ -24,6 +24,9 @@ Größere Änderungen nur nach Entwurf als Bild und OK des Besitzers (`REGELN.md
 | ![](bilder/10-uebersicht-dunkel.png) | dunkel | Folgt der Einstellung von Windows. |
 | ![](bilder/11-handy-agenten.png) | Handy | Leiste unten statt links, bei vielen Seiten zum Wischen. |
 | ![](bilder/14-finanzen.png) | **Finanzen** | Privat/Firma, Auge (Beträge sind verdeckt, bis man es antippt), Überblick/Haushaltsbuch. Vier Zahlen, Bald kündbar, Offen zu zahlen, Berater, Ein- und Ausgaben, Verträge und Abos, Sparziele. |
+| ![](bilder/15-geraete.png) | **Homelab → Geräte** | Oben die Warnungen als Pillen (rot dringend, orange bald, grau Hinweise). Je Gerät eine Karte mit grünem bzw. grauem Punkt (online/offline), Ringen für Prozessor, Arbeitsspeicher und Platte, unten Akku und Laufzeit. Offline-Geräte blass. |
+| ![](bilder/16-geraet-blatt.png) | Gerät angetippt | Warnungen, Ringe (auch Temperatur und Akku), Laufwerke mit Balken und Papierkorb, Akku, System, Netzwerk, Dienste. „Vergessen“ nur bei offline. |
+| ![](bilder/17-speicher.png) | **Homelab → Speicher** | Oben alle Laufwerke zusammen, je Gerät eine Farbe. Darunter je Gerät die Laufwerke mit belegt, Papierkorb (orange) und frei. Fast volle in Rot. |
 
-Die Leiste hat diese Seiten: Übersicht, Agenten, Projekte, Wünsche, Berichte, Notizen, Finanzen, Papierkorb. Einige ältere Bilder
-oben zeigen die Leiste noch ohne „Finanzen“; das ist kein Fehler.
+Die Leiste hat oben Übersicht, Agenten, Berichte, Wünsche, unter „Persönlich“ Projekte, Finanzen, Notizen und unter
+„Homelab“ Geräte, Dienste (nur wenn ein Linux-Gerät meldet), Netzwerk, Speicher, Papierkorb.

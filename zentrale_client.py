@@ -65,6 +65,10 @@ Finanzen (Seite „Finanzen“, Privat und Firma getrennt, alles mit --bereich f
   py zentrale_client.py --agent claude finanz-tipp "Streaming seit 2 Monaten ungenutzt, Kündigen spart 168 € im Jahr."
   py zentrale_client.py --agent claude fristen                        (Abos, die in den nächsten 30 Tagen kündbar sind)
 
+Homelab (Seiten „Geräte“, „Speicher“, „Netzwerk“, „Dienste“; Ablauf in docs/HOMELAB.md):
+  py zentrale_client.py --agent codex geraete                  (alle Geräte mit Zustand und Warnungen)
+  py start.py geraet-neu "MacBook-Air-2015"                    (Schlüssel für ein Gerät, darf nur melden)
+
 Sonst:
   py zentrale_client.py --agent codex ich                      (wer bin ich für die Zentrale?)
   py zentrale_client.py --agent codex agenten
@@ -418,7 +422,7 @@ def groesse(b):
         b /= 1024
 
 
-FASSUNG = "2026-11-02"   # gleich wie hub.FASSUNG; weicht die laufende Zentrale ab, kommt eine Warnung
+FASSUNG = "2026-11-03"   # gleich wie hub.FASSUNG; weicht die laufende Zentrale ab, kommt eine Warnung
 
 
 def pruefen(z):
@@ -442,7 +446,9 @@ def pruefen(z):
     if d.get("fassung") != FASSUNG:
         w.append(f"Die laufende Zentrale hat Fassung {d.get('fassung') or 'alt (ohne Fassung)'}, dieser Ordner {FASSUNG}. "
                  f"Sie wurde nach dem Update nicht neu gestartet: `{PY} start.py` beenden und neu starten.")
-    if d.get("ordner") and Path(d["ordner"]).resolve() != hier:
+    # Läuft die Zentrale auf einem anderen Gerät (ZENTRALE_URL, Homelab), lässt sich der Ordner nicht vergleichen
+    lokal = urllib.parse.urlsplit(z.url).hostname in ("127.0.0.1", "localhost", "::1")
+    if lokal and d.get("ordner") and Path(d["ordner"]).resolve() != hier:
         w.append(f"Die laufende Zentrale kommt aus {d['ordner']}, nicht aus {hier}. Es darf nur eine Zentrale geben: "
                  "die aus diesem Ordner. Nicht an der anderen weiterarbeiten, den Besitzer fragen (AGENTS.md, „Nur eine Zentrale“).")
     for x in w:
@@ -612,6 +618,22 @@ def ausfuehren(z, a):
         text = n["text"].rstrip("\n") + f"\n\n## {time.strftime('%d.%m.%Y')} ({a.agent or 'Agent'})\n\n{zusatz}\n"
         z.post("/api/notizen/speichern", {"pfad": n["pfad"], "text": text, "version": n["version"]})
         print(f"Notiz ergänzt: {n['pfad']}")
+    elif a.befehl == "geraete":
+        d = z.get("/api/geraete")
+        if not d["geraete"]:
+            print(f"Noch kein Gerät. Anlegen: {PY} start.py geraet-neu \"<Name>\" (docs/HOMELAB.md).")
+        for g in d["geraete"]:
+            i = g.get("info") or {}
+            lw = ", ".join(f"{l['lw']} {groesse(l['frei'])} frei von {groesse(l['gesamt'])}" for l in i.get("laufwerke") or [] if l.get("frei") is not None)
+            print(f"{g['name']}  ({i.get('system') or g.get('art')}, {'online' if g['online'] else 'offline, zuletzt ' + zeit(g['zuletzt'])})")
+            print(f"  Prozessor {i.get('cpu') or 0:.0f} %, Arbeitsspeicher {groesse(i.get('ram_belegt') or 0)} von {groesse(i.get('ram_gesamt') or 0)}" +
+                  (f", Akku {i['akku']['prozent']:.0f} %" if (i.get("akku") or {}).get("prozent") is not None else "") + (f", IP {', '.join(i['ip'])}" if i.get("ip") else ""))
+            if lw:
+                print(f"  {lw}")
+        if d["warnungen"]:
+            print("\nZu tun:")
+            for w in d["warnungen"]:
+                print(f"  [{ {'bad': 'dringend', 'warn': 'bald', 'info': 'Hinweis'}[w['stufe']] }] {w['titel']} ({w['text']})")
     elif a.befehl == "papierkorb":
         d = z.get("/api/papierkorb")
         print(f"Im Papierkorb: {len(d['eintraege'])} aus dem Aufräumen, {len(d['notizen'])} Notizen, zusammen {groesse(d['bytes'])}")
@@ -687,6 +709,7 @@ def main():
     p = P("notiz-ergaenzen", "Text unten an eine Notiz anhängen (mit Datum)"); p.add_argument("pfad"); p.add_argument("--text"); p.add_argument("--text-datei")
     p = P("notiz-zeigen", "Notiz lesen"); p.add_argument("pfad")
     P("papierkorb", "was im Papierkorb liegt (Aufräumen und Notizen)")
+    P("geraete", "Geräte im Homelab mit Zustand und Warnungen")
     p = P("notiz-suche", "Notizen durchsuchen"); p.add_argument("suche")
 
     finanz_parser(sub, gemeinsam)
