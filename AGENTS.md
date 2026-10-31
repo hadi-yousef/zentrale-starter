@@ -62,10 +62,14 @@ http://127.0.0.1:8090. So sieht sie aus: `docs/REFERENZ.md` (Bilder).
 ## Update einspielen
 
 Wenn der Besitzer sagt „Update holen“ oder `ich` eine ACHTUNG-Zeile zur Fassung zeigt:
-1. `py einrichten.py update`. Es holt die neue Fassung (`git pull`, nur wenn hier nichts geändert wurde), verteilt die
-   Regeln in alle Projekte, startet die Zentrale über die Aufgabenplanung neu und prüft, ob die neue Fassung läuft.
-   Zeigt es geänderte Dateien: nicht überschreiben, dem Besitzer zeigen. Läuft die Zentrale ohne Aufgabenplanung, sagt
-   es dir, dass du sie selbst neu starten musst (mit denselben Schaltern, z. B. `--heimnetz`).
+1. `py einrichten.py update`. Es zählt die Einträge, legt eigene Änderungen am Code (auch committete und neue Dateien)
+   in einen Zweig `sicherung-vor-update-…`, holt die neue Fassung (auch wenn die Geschichte neu geschrieben wurde),
+   verteilt die Regeln, startet die Zentrale über die Aufgabenplanung neu und vergleicht die Einträge vorher und nachher.
+   `daten\` fasst es nie an. Gab es eine Sicherung: dem Besitzer zeigen, was darin ist (`git diff --stat`), Gewolltes als
+   Wunsch neu einbauen, den Zweig nicht löschen. Läuft die Zentrale ohne Aufgabenplanung, startest du sie selbst neu
+   (mit denselben Schaltern, z. B. `--heimnetz`).
+   Kennt deine Fassung `update` noch nicht: `git fetch origin`, `git worktree add $env:TEMP\zs-neu origin/main`,
+   `py $env:TEMP\zs-neu\einrichten.py update --ordner .`, danach `git worktree remove --force $env:TEMP\zs-neu`.
 2. `py zentrale_client.py --agent codex ich` zeigt die neue Fassung ohne ACHTUNG.
 3. Seite im Browser neu laden und mit `docs/REFERENZ.md` vergleichen.
 4. Neues aus dem Update lesen: `git log --oneline -10` und die genannten Dateien in `docs/`. Neue Teile (z. B. Homelab,

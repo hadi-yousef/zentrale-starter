@@ -9,8 +9,9 @@ suchen, alt-zeigen und pruefen ändern nichts, sie lesen und zeigen nur.
                                    mit dem Besitzer. Nur lesen.
   py einrichten.py pruefen         nach dem Einrichten: läuft genau diese Zentrale, mit eigenen Daten und Schlüsseln?
                                    Ende mit Code 0 = alles getrennt, 1 = etwas ist noch vermischt.
-  py einrichten.py update          neue Fassung holen: git pull (nur wenn hier nichts geändert ist), Regeln verteilen,
-                                   Zentrale neu starten (Aufgabenplanung) und prüfen, ob die neue Fassung läuft
+  py einrichten.py update          neue Fassung holen, ohne dass etwas verloren geht: Daten zählen, eigene Änderungen in
+                                   einen Sicherungszweig, holen (auch nach neu geschriebener Geschichte), Regeln verteilen,
+                                   Zentrale neu starten, Fassung und Daten prüfen. --ordner <Zentrale>, wenn von woanders gestartet
   (Mac und Linux: python3 statt py)
 
 Ablauf und was der Agent dabei tut: docs/EINRICHTEN.md.
@@ -347,52 +348,130 @@ def pruefen():
     return 0
 
 
+def daten_zaehlen():
+    """Wie viele Einträge die Zentrale hat (aus den Dateien in daten\\), zum Vergleich vor und nach dem Update."""
+    d = Path(os.environ.get("ZENTRALE_DATEN") or HIER / "daten")
+    def lade(n):
+        try:
+            return json.loads((d / n).read_text(encoding="utf-8"))
+        except Exception:
+            return {}
+    pos = lade("pos.json")
+    z = {"Wünsche": len(lade("wuensche.json").get("wuensche", [])), "Berichte": len(lade("berichte.json").get("berichte", [])),
+         "Projekte": len(pos.get("projekte", [])), "Aufgaben": len(pos.get("aufgaben", [])),
+         "Notizen": sum(1 for x in (d / "notizen").rglob("*.md")) if (d / "notizen").is_dir() else 0}
+    return d, z
+
+
 def update():
-    """git pull, Regeln verteilen, Zentrale neu starten, neue Fassung prüfen. Bricht ab, wenn hier etwas geändert wurde."""
+    """Neue Fassung holen, ohne dass etwas verloren geht:
+    1. Daten zählen, eigene Änderungen (nicht hochgeladen, auch committete) in einen Sicherungszweig legen
+    2. neue Fassung holen: vorspulen, oder, wenn die Geschichte neu geschrieben wurde, auf den neuen Stand setzen
+    3. Regeln verteilen, Zentrale neu starten, Fassung und Daten prüfen."""
+    import time
     def git(*a):
         return subprocess.run(["git", "-C", str(HIER), *a], capture_output=True, text=True, encoding="utf-8", errors="replace")
     if not (HIER / ".git").exists():
         sys.exit("Dieser Ordner ist kein Git-Klon. Update: neu klonen (README.md), dann nach docs/EINRICHTEN.md einrichten.")
-    geaendert = [z for z in git("status", "--porcelain").stdout.splitlines() if z.strip()]
-    if geaendert:
-        print("Hier wurde etwas geändert. Nicht überschreiben, erst dem Besitzer zeigen:")
-        for z in geaendert[:30]:
-            print("   " + z)
-        print("Eigene Wünsche an die Zentrale gehören nicht in den Code, sondern als Wunsch an den, der das Repo pflegt.")
-        return 1
+    ordner_daten, vorher = daten_zaehlen()
     alt = fassung()
-    r = git("pull", "--ff-only")
-    print((r.stdout + r.stderr).strip())
+    print(f"Zentrale in {HIER}, Fassung {alt}, Daten in {ordner_daten}")
+    print("Einträge vorher: " + ", ".join(f"{k} {v}" for k, v in vorher.items()))
+
+    # 1. Eigenes sichern (daten\\ ist nicht in Git und bleibt sowieso unberührt)
+    offen = [z for z in git("status", "--porcelain").stdout.splitlines() if z.strip()]
+    # Eigene Commits: nicht auf GitHub. Commits, die es dort mit gleichem Text gibt, sind alte Fassungen vor einem Umschreiben.
+    git("fetch", "-q", "origin")
+    oben = set(git("log", "--format=%s", "--remotes").stdout.splitlines())
+    eigene = [z for z in git("log", "--format=%h %s", "HEAD", "--not", "--remotes").stdout.splitlines()
+              if z.strip() and z.split(" ", 1)[-1] not in oben]
+    sicherung = ""
+    if offen or eigene:
+        sicherung = "sicherung-vor-update-" + time.strftime("%Y%m%d-%H%M")
+        print(f"Eigene Änderungen gefunden ({len(offen)} Dateien geändert, {len(eigene)} eigene Commits). Sichere sie in Zweig {sicherung}:")
+        for z in (offen + eigene)[:20]:
+            print("   " + z)
+        if offen:
+            # Schnappschuss aller Dateien (ohne daten\\ und anderes aus .gitignore) als Commit, ohne den Ordner anzufassen
+            import tempfile
+            with tempfile.TemporaryDirectory() as tmp:
+                env = dict(os.environ, GIT_INDEX_FILE=str(Path(tmp) / "index"), GIT_AUTHOR_NAME="Zentrale",
+                           GIT_AUTHOR_EMAIL="zentrale@localhost", GIT_COMMITTER_NAME="Zentrale", GIT_COMMITTER_EMAIL="zentrale@localhost")
+                g = lambda *a: subprocess.run(["git", "-C", str(HIER), *a], capture_output=True, text=True, env=env)
+                g("read-tree", "HEAD")
+                g("add", "-A")
+                baum = g("write-tree").stdout.strip()
+                stand = g("commit-tree", baum, "-p", "HEAD", "-m", f"Sicherung vor Update ({len(offen)} geänderte Dateien)").stdout.strip()
+            if not stand:
+                sys.exit("Sichern hat nicht geklappt. Nichts geändert.")
+            git("branch", sicherung, stand)
+        else:
+            git("branch", sicherung, "HEAD")
+        if not git("rev-parse", "--verify", "-q", sicherung).stdout.strip():
+            sys.exit("Sicherungszweig fehlt. Nichts geändert.")
+
+    # 2. Neue Fassung holen
+    r = git("fetch", "origin")
     if r.returncode:
-        print("git pull hat nicht geklappt. Nichts weiter geändert.")
-        return 1
+        print((r.stdout + r.stderr).strip())
+        sys.exit("Holen hat nicht geklappt (Netz?). Nichts geändert" + (f"; deine Änderungen liegen in {sicherung}." if sicherung else "."))
+    zweig = git("rev-parse", "--abbrev-ref", "HEAD").stdout.strip() or "main"
+    ziel = f"origin/{zweig if zweig != 'HEAD' else 'main'}"
+    if git("merge-base", "--is-ancestor", "HEAD", ziel).returncode == 0 and not offen:
+        r = git("merge", "--ff-only", ziel)
+        wie = "vorgespult"
+    else:
+        if not sicherung:   # Geschichte neu geschrieben: der alte Stand bekommt trotzdem einen Zweig
+            sicherung = "sicherung-vor-update-" + time.strftime("%Y%m%d-%H%M")
+            git("branch", sicherung, "HEAD")
+        r = git("reset", "--hard", ziel)
+        wie = "auf den neuen Stand gesetzt (" + ("eigene Änderungen liegen in der Sicherung" if offen else "die Geschichte wurde neu geschrieben") + ")"
+    if r.returncode:
+        print((r.stdout + r.stderr).strip())
+        sys.exit("Update hat nicht geklappt. Dein Stand ist unverändert" + (f", Sicherung in {sicherung}." if sicherung else "."))
     neu = fassung()
-    print(f"Fassung: {alt} → {neu}")
+    print(f"Fassung {alt} → {neu}: {wie}.")
+
+    # 3. Regeln, Neustart, Prüfung
     subprocess.run([sys.executable, str(HIER / "regeln_verteilen.py")])
     aufgabe = [x for x in autostart() if x[3] and x[1].lower() != "disabled"]
+    lief = False
     if WIN and aufgabe:
         for n, *_ in aufgabe:
             ps(f"Stop-ScheduledTask -TaskName '{n}'; Start-Sleep 2; Start-ScheduledTask -TaskName '{n}'")
             print(f"Zentrale über die Aufgabenplanung „{n}“ neu gestartet.")
+        url = (os.environ.get("ZENTRALE_URL") or "http://127.0.0.1:8090").rstrip("/")
+        for _ in range(15):
+            time.sleep(1)
+            try:
+                if json.loads(holen(url + "/api/lebt")[1]).get("fassung") == neu:
+                    lief = True
+                    break
+            except Exception:
+                pass
+        print(f"Die Zentrale läuft mit Fassung {neu}." if lief else "Die neue Fassung antwortet noch nicht: `py einrichten.py pruefen`.")
     else:
         print(f"Jetzt die Zentrale neu starten: `{PY} start.py` beenden und wieder starten (mit denselben Schaltern, z. B. --heimnetz).")
-        return 0
-    import time
-    url = (os.environ.get("ZENTRALE_URL") or "http://127.0.0.1:8090").rstrip("/")
-    for _ in range(15):
-        time.sleep(1)
-        try:
-            if json.loads(holen(url + "/api/lebt")[1]).get("fassung") == neu:
-                print(f"Die Zentrale läuft mit Fassung {neu}. Neu in dieser Fassung: `git log --oneline` und docs/.")
-                return 0
-        except Exception:
-            pass
-    print("Die neue Fassung antwortet noch nicht. `py einrichten.py pruefen` zeigt, was los ist.")
-    return 1
+    _, nachher = daten_zaehlen()
+    print("Einträge nachher: " + ", ".join(f"{k} {v}" for k, v in nachher.items()))
+    weniger = [k for k in vorher if nachher.get(k, 0) < vorher[k]]
+    if weniger:
+        print("ACHTUNG: weniger Einträge als vorher bei " + ", ".join(weniger) + ". Nichts weiter tun, dem Besitzer zeigen.")
+    if sicherung:
+        print(f"\nDein alter Stand mit allen eigenen Änderungen liegt im Zweig {sicherung}. Was davon die neue Fassung noch nicht kann:")
+        print(f"   git diff --stat {ziel} {sicherung}")
+        print("Dem Besitzer als Tabelle zeigen. Was er behalten will: als Wunsch eintragen und nach seinem Ja neu einbauen. Den Zweig nicht löschen.")
+    print("Neu in dieser Fassung: `git log --oneline -15` und docs/STOLPERSTEINE.md.")
+    return 1 if weniger else 0
 
 
 if __name__ == "__main__":
     a = sys.argv[1:]
+    if "--ordner" in a:   # z. B. aus einem Nebenordner gestartet: py <neu>\\einrichten.py update --ordner <Zentrale>
+        k = a.index("--ordner")
+        HIER = Path(a[k + 1]).expanduser().resolve()
+        ID = hashlib.sha256(str(HIER).lower().encode("utf-8")).hexdigest()[:12]
+        del a[k:k + 2]
     if not a or a[0] in ("-h", "--help", "hilfe"):
         print(__doc__)
     elif a[0] == "suchen":
