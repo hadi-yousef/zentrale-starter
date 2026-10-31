@@ -46,8 +46,5 @@ Für Codex gibt es hier keinen Hook. Deshalb gilt: **Jede Arbeit, die länger al
 
 ## Nach einem Update einspielen
 
-Wer die Zentrale schon laufen hat und dieses Repo neu holt (`git pull`):
-1. Zentrale neu starten (Fenster mit `py start.py` schließen und neu starten, oder die Aufgabe in der Aufgabenplanung
-   beenden und neu ausführen). Sonst kennt sie `/api/laeufe` noch nicht.
-2. Seite im Browser neu laden. Links steht jetzt „Agenten“.
-3. Hook für Claude einrichten (siehe oben), nach OK des Besitzers.
+Siehe `AGENTS.md`, Abschnitt „Update einspielen“ (git pull, Zentrale neu starten, prüfen). Danach den Hook für Claude
+einrichten (siehe oben), nach OK des Besitzers.

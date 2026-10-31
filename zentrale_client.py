@@ -44,6 +44,10 @@ Notizen (Markdown-Dateien):
   py zentrale_client.py --agent codex notizen
   py zentrale_client.py --agent codex notiz-neu "Inventur" --ordner Aufräumen --text-datei INVENTUR.md
   py zentrale_client.py --agent codex notiz-zeigen "Aufräumen/Inventur.md"
+  py zentrale_client.py --agent codex notiz-ergaenzen "Besitzer/INDEX.md" --text "Mag kurze Antworten (Chat, 2.11.)"
+
+Papierkorb (Seite „Papierkorb“; endgültig löschen darf nur der Besitzer):
+  py zentrale_client.py --agent codex papierkorb
   py zentrale_client.py --agent codex notiz-suche "sicherung stick"
 
 Sonst:
@@ -146,6 +150,35 @@ class VorschlaegeDazu(argparse.Action):
         ns.fragen[-1]["vorschlaege"] = [v.strip() for v in wert.split("|") if v.strip()]
 
 
+def groesse(b):
+    for e in ("Byte", "KB", "MB", "GB"):
+        if b < 1024 or e == "GB":
+            return f"{b:.0f} {e}" if e == "Byte" else f"{b:.1f} {e}".replace(".", ",")
+        b /= 1024
+
+
+FASSUNG = "2026-11-01"   # gleich wie hub.FASSUNG; weicht die laufende Zentrale ab, kommt eine Warnung
+
+
+def pruefen(z):
+    """Warnt, wenn die laufende Zentrale älter ist oder aus einem anderen Ordner kommt als dieser Client.
+    Dann arbeitet der Agent sonst an der falschen (alten) Zentrale weiter."""
+    try:
+        d = z.get("/api/ich", timeout=3)
+    except Fehler:
+        return
+    hier = Path(__file__).resolve().parent
+    w = []
+    if d.get("fassung") != FASSUNG:
+        w.append(f"Die laufende Zentrale hat Fassung {d.get('fassung') or 'alt (ohne Fassung)'}, dieser Ordner {FASSUNG}. "
+                 f"Sie wurde nach dem Update nicht neu gestartet: `{PY} start.py` beenden und neu starten.")
+    if d.get("ordner") and Path(d["ordner"]).resolve() != hier:
+        w.append(f"Die laufende Zentrale kommt aus {d['ordner']}, nicht aus {hier}. Es darf nur eine Zentrale geben: "
+                 "die aus diesem Ordner. Nicht an der anderen weiterarbeiten, den Besitzer fragen (AGENTS.md, „Nur eine Zentrale“).")
+    for x in w:
+        print("ACHTUNG: " + x, file=sys.stderr)
+
+
 def wunsch_zeile(w):
     prio = f"[{w['prio']}] " if w.get("prio") else ""
     gruppe = f"  ({w['gruppe']})" if w.get("gruppe") else ""
@@ -155,7 +188,8 @@ def wunsch_zeile(w):
 def ausfuehren(z, a):
     q = urllib.request.quote
     if a.befehl == "ich":
-        print(z.get("/api/ich")["id"])
+        d = z.get("/api/ich")
+        print(d["id"] + (f"  (Zentrale Fassung {d['fassung']}, Ordner {d['ordner']})" if d.get("fassung") else ""))
     elif a.befehl == "agenten":
         for x in z.get("/api/agenten")["agenten"]:
             print(f"{x['id']:<20} zuletzt: {zeit(x['zuletzt']) or 'noch nie'}")
@@ -297,6 +331,22 @@ def ausfuehren(z, a):
     elif a.befehl == "notiz-neu":
         n = z.post("/api/notizen/neu", {"ordner": a.ordner or "", "titel": a.titel, "text": text_aus(a)})
         print(f"Notiz angelegt: {n['pfad']}")
+    elif a.befehl == "notiz-ergaenzen":
+        n = z.get(f"/api/notizen/notiz?pfad={q(a.pfad)}")
+        zusatz = text_aus(a).strip()
+        if not zusatz:
+            raise Fehler("Text fehlt (--text oder --text-datei).")
+        text = n["text"].rstrip("\n") + f"\n\n## {time.strftime('%d.%m.%Y')} ({a.agent or 'Agent'})\n\n{zusatz}\n"
+        z.post("/api/notizen/speichern", {"pfad": n["pfad"], "text": text, "version": n["version"]})
+        print(f"Notiz ergänzt: {n['pfad']}")
+    elif a.befehl == "papierkorb":
+        d = z.get("/api/papierkorb")
+        print(f"Im Papierkorb: {len(d['eintraege'])} aus dem Aufräumen, {len(d['notizen'])} Notizen, zusammen {groesse(d['bytes'])}")
+        for e in d["eintraege"]:
+            print(f"  Schritt {e['nr']}: {e['name']}  ({groesse(e['bytes'])}, {e['zeit'][:10]})  aus {e['von']}" + ("" if e["da"] else "  [fehlt]"))
+        for n in d["notizen"]:
+            print(f"  Notiz {n['pfad']}")
+        print(f"Zurücklegen: {PY} aufraeumen{os.sep}rueckgaengig.py <Schritt>. Endgültig löschen darf nur der Besitzer (Seite Papierkorb).")
     elif a.befehl == "notiz-zeigen":
         print(z.get(f"/api/notizen/notiz?pfad={q(a.pfad)}")["text"])
     elif a.befehl == "notiz-suche":
@@ -361,12 +411,16 @@ def main():
 
     p = P("notizen", "Notizen zeigen"); p.add_argument("--anzahl", type=int, default=50)
     p = P("notiz-neu", "Notiz anlegen"); p.add_argument("titel"); p.add_argument("--ordner"); p.add_argument("--text"); p.add_argument("--text-datei")
+    p = P("notiz-ergaenzen", "Text unten an eine Notiz anhängen (mit Datum)"); p.add_argument("pfad"); p.add_argument("--text"); p.add_argument("--text-datei")
     p = P("notiz-zeigen", "Notiz lesen"); p.add_argument("pfad")
+    P("papierkorb", "was im Papierkorb liegt (Aufräumen und Notizen)")
     p = P("notiz-suche", "Notizen durchsuchen"); p.add_argument("suche")
 
     a = ap.parse_args()
     try:
-        ausfuehren(Zentrale(a.url, a.schluessel, a.agent), a)
+        z = Zentrale(a.url, a.schluessel, a.agent)
+        pruefen(z)
+        ausfuehren(z, a)
     except Fehler as e:
         sys.exit(f"Fehler: {e}")
 

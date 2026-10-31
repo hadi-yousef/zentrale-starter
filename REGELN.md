@@ -21,6 +21,20 @@ Projekt gelten.
   Erledigtes im selben Arbeitsschritt abhaken (`wunsch-erledigt <nr> --ergebnis "…"`). Wie das genau geht: `docs/WUENSCHE.md`.
 - Eigene Aufgaben hakt der Agent selbst ab, nicht der Besitzer.
 
+## Gedächtnis: Notizen und Übergaben
+- **Was du lernst, schreibst du auf.** Fakten über den Besitzer nach `Besitzer/`, Geräte nach `Geräte/`, was geklappt hat
+  nach `Anleitungen/`. Immer mit Datum und Quelle. Erst suchen und ergänzen, nur sonst neu anlegen. Wie: `AGENTS.md`, „Notizen“.
+- **Am Ende jeder längeren Sitzung** eine Übergabe in `Übergaben/<JJJJ-MM-TT>.md`: was gemacht, was offen, wo es weitergeht,
+  mit Wunsch-Nummern. Dazu die Stand-Notiz am Wunsch.
+- Zu Beginn jeder Sitzung zuerst `Besitzer/INDEX.md` und die letzte Übergabe lesen.
+- Nie Passwörter, Schlüssel, Kontonummern oder Gesundheitsdaten in Notizen.
+
+## Nur eine Zentrale
+- Es gibt genau eine Zentrale: die aus dem Ordner `zentrale-starter`. So sieht sie aus: `docs/REFERENZ.md`.
+- Zeigt `zentrale_client.py … ich` eine Zeile mit ACHTUNG (alte Fassung oder anderer Ordner), löst du das zuerst.
+  An einer anderen oder alten Zentrale arbeitest du nicht weiter, du sagst es dem Besitzer.
+- Den Code der Zentrale baust du nicht um. Neue Fassungen kommen mit `git pull` und einem Neustart.
+
 ## Mitdenken und offen sagen
 - **Fehler und schlechtes Vorgehen ansprechen:** Siehst du, dass der Besitzer (oder ein anderer Agent, oder du selbst)
   etwas falsch, umständlich oder riskant macht, sag es offen und kurz. Schlag vor, wie es besser geht.
@@ -38,7 +52,9 @@ Projekt gelten.
 
 ## Was dem Besitzer vorbehalten ist
 - **Nie endgültig löschen.** Was weg soll, wird auf derselben Platte in den Papierkorb **verschoben**
-  (`py aufraeumen\verschieben.py --papierkorb …`, landet in `C:\Papierkorb`). Den Papierkorb leert nur der Besitzer.
+  (`py aufraeumen\verschieben.py --papierkorb …`, landet in `C:\Papierkorb`). Der Besitzer sieht alles auf der Seite
+  „Papierkorb“ in der Zentrale und kann es dort zurücklegen. Endgültig löschen kann nur er, die Zentrale lässt Agenten
+  dort nicht löschen. Auch nie mit `del`, `Remove-Item`, `rm` oder `rmdir` an diesen Regeln vorbei.
 - Passwörter, Schlüssel, Kontonummern und Zugangsdaten nie eintippen, speichern, kopieren oder wiederholen.
   Passwort-Manager, Schlüsselbund und Ordner wie `.ssh` fasst du nicht an.
 - Riskante Änderungen (System, Treiber, Platten, Firewall, Konten, Programme installieren) nur nach direkter Freigabe des

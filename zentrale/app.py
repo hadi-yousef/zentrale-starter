@@ -15,6 +15,7 @@ import berichte
 import hub
 import laeufe
 import notizen
+import papierkorb
 import pos
 import wuensche
 
@@ -85,7 +86,7 @@ class Handler(BaseHTTPRequestHandler):
             if url.path == "/api/lebt":
                 return self._json(200, {"ok": True})
             if url.path == "/api/ich":
-                return self._json(200, {"id": aid, "besitzer": aid == hub.BESITZER})
+                return self._json(200, {"id": aid, "besitzer": aid == hub.BESITZER, "fassung": hub.FASSUNG, "ordner": str(hub.ORDNER)})
             if url.path == "/api/agenten":
                 return self._json(200, hub.agenten())
             if url.path == "/api/pos":
@@ -104,6 +105,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(200, berichte.lesen(aid, teile[0]))
             if url.path == "/api/laeufe":
                 return self._json(200, laeufe.lage())
+            if url.path == "/api/papierkorb":
+                return self._json(200, papierkorb.liste())
             if url.path == "/api/notizen":
                 return self._json(200, notizen.liste())
             if url.path == "/api/notizen/notiz":
@@ -184,6 +187,12 @@ class Handler(BaseHTTPRequestHandler):
             if aid == hub.BESITZER:
                 raise PermissionError("Läufe melden nur Agenten.")
             return laeufe.melden(aid, b)
+        if pfad == "/api/papierkorb/zurueck":
+            return papierkorb.zuruecklegen(b)
+        if pfad == "/api/papierkorb/loeschen":
+            if aid != hub.BESITZER:
+                raise PermissionError("Endgültig löschen darf nur der Besitzer. Agenten verschieben nur in den Papierkorb.")
+            return papierkorb.loeschen(b)
         if pfad == "/api/notizen/neu":
             return notizen.neu(b.get("ordner"), b.get("titel"), b.get("text"))
         if pfad == "/api/notizen/speichern":
@@ -197,6 +206,10 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def starten(bind="127.0.0.1", port=8090):
+    try:
+        notizen.grundgeruest()
+    except OSError as e:
+        print(f"Grundgerüst der Notizen nicht angelegt: {e}", flush=True)
     ThreadingHTTPServer.daemon_threads = True
     # Unter Windows erlaubt SO_REUSEADDR, dass zwei Programme denselben Port belegen. Das wollen wir nicht.
     ThreadingHTTPServer.allow_reuse_address = os.name != "nt"

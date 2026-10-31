@@ -4,6 +4,8 @@ Die Notizen sind einfache Markdown-Dateien in einem Ordner (Standard: DATEN/noti
 Sie lassen sich auch mit Obsidian oder jedem Texteditor öffnen; die Zentrale zeigt, sucht und bearbeitet dieselben Dateien.
 Ordner sind frei; Notizen unter Projekte/<Name>/ gehören zu diesem Projekt.
 Versteckte Dateien und Ordner (.obsidian, .DS_Store) bleiben außen vor.
+Beim ersten Start legt grundgeruest() die festen Ordner mit je einer Startseite an (siehe GRUNDGERUEST, nie überschrieben;
+löscht der Besitzer eine davon, kommt sie nicht wieder, dafür sorgt die Merkdatei .grundgeruest).
 Entfernen löscht nie: Die Datei wandert in den versteckten Ordner .papierkorb/<datum>/ im Notizen-Ordner (gleiche Platte,
 kostet keinen Platz). Leeren tut nur der Besitzer.
 """
@@ -160,6 +162,69 @@ def neu(ordner, titel, text=""):
             raise ValueError("Die Notiz ist zu groß (höchstens 512 KB).")
         p.write_bytes(inhalt.encode("utf-8"))
     return lesen(str(p.relative_to(WURZEL)).replace(os.sep, "/"))
+
+
+GRUNDGERUEST = {
+    "So funktionieren die Notizen.md": """# So funktionieren die Notizen
+
+Das Gedächtnis von Besitzer und Agenten. Ein Chat vergisst alles, die Notizen nicht. Jede Notiz ist eine Markdown-Datei
+in `daten\\notizen`, lesbar mit der Zentrale, mit Obsidian oder jedem Editor.
+
+| Ordner | Was hinein gehört |
+|---|---|
+| `Besitzer/` | Fakten über den Besitzer: was er sagt, was ihm wichtig ist, wie er arbeitet. Start: `Besitzer/INDEX.md` |
+| `Geräte/` | je Gerät eine Notiz: Rechner, Platten, Sticks, Drucker, Router (Modell, Größe, wofür) |
+| `Projekte/<Name>/` | was zu einem Projekt gehört und nicht ins Repo passt (Ideen, Entscheidungen, Links) |
+| `Aufräumen/` | Inventur, Plan, „So ist es jetzt geordnet“ |
+| `Anleitungen/` | wie etwas geht, sobald es einmal geklappt hat (Schritt für Schritt) |
+| `Übergaben/` | am Ende jeder längeren Sitzung: was gemacht wurde, was offen ist, wo es weitergeht (eine Notiz je Tag) |
+
+Regeln:
+- Nur Fakten, mit Datum und Quelle („Besitzer im Chat, 2.11.“). Nichts raten.
+- Nie Passwörter, Schlüssel, Kontonummern oder Gesundheitsdaten.
+- Erst suchen (`notiz-suche`), dann ergänzen (`notiz-ergaenzen`), nur wenn es nichts gibt, neu anlegen (`notiz-neu`).
+- Wird eine Notiz länger als etwa 200 Zeilen, aufteilen und im INDEX des Ordners verlinken.
+""",
+    "Besitzer/INDEX.md": """# Besitzer (Wegweiser)
+
+Alles, was Agenten über den Besitzer wissen sollen. **Zuerst diese Seite lesen**, dann nur die Datei öffnen, die man braucht.
+Nur Fakten, die er gesagt hat oder die belegt sind, mit Datum und Quelle. Keine Passwörter, Kontonummern, Gesundheitsdaten.
+
+## Steckbrief
+
+| Punkt | Stand | Quelle |
+|---|---|---|
+| Anrede | | |
+| Rechner | | |
+| Was ihn am meisten stört | | |
+| Was ihm am wichtigsten ist | | |
+
+## Dateien in diesem Ordner
+
+(noch keine)
+""",
+    "Übergaben/INDEX.md": """# Übergaben
+
+Am Ende jeder längeren Sitzung eine Notiz `Übergaben/<JJJJ-MM-TT>.md` (gibt es sie schon: ergänzen):
+was gemacht wurde, was offen ist, worauf gewartet wird, wo der nächste Thread weitermacht. Mit Wunsch-Nummern.
+""",
+}
+
+
+def grundgeruest():
+    """Feste Ordner mit Startseiten anlegen, einmal (Merkdatei .grundgeruest). Vorhandenes wird nie überschrieben."""
+    merk = WURZEL / ".grundgeruest"
+    if merk.exists():
+        return
+    with _sperre:
+        for rel, text in GRUNDGERUEST.items():
+            p = WURZEL / rel
+            if not p.exists():
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.write_bytes(text.encode("utf-8"))
+        for ordner in ("Geräte", "Projekte", "Aufräumen", "Anleitungen"):
+            (WURZEL / ordner).mkdir(parents=True, exist_ok=True)
+        merk.write_text("Grundgerüst angelegt. Diese Datei verhindert, dass gelöschte Startseiten wiederkommen.\n", encoding="utf-8")
 
 
 def suche(q, n=50):

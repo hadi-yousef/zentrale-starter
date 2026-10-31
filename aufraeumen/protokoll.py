@@ -1,8 +1,9 @@
 """Gemeinsamer Teil von verschieben.py und rueckgaengig.py: Protokoll, Prüfsummen, Platten und Papierkorb.
 
 Jeder Schritt steht als eine Zeile JSON in aufraeumen/protokoll.jsonl (oder AUFRAEUMEN_PROTOKOLL):
-  {"nr": 1, "zeit": "…", "art": "verschieben" | "papierkorb" | "zurueck", "von": "…", "nach": "…", "typ": "datei" | "ordner",
-   "bytes": 123, "dateien": 1, "sha256": "…" (nur Dateien unter 100 MB), "grund": "…", "zurueck_von": 7 (nur bei „zurueck“)}
+  {"nr": 1, "zeit": "…", "art": "verschieben" | "papierkorb" | "zurueck" | "geloescht", "von": "…", "nach": "…", "typ": "datei" | "ordner",
+   "bytes": 123, "dateien": 1, "sha256": "…" (nur Dateien unter 100 MB), "grund": "…", "zurueck_von": 7 (nur bei „zurueck“),
+   "geloescht_von": 7 (nur bei „geloescht“: der Besitzer hat Schritt 7 in der Zentrale endgültig aus dem Papierkorb gelöscht)}
 Die Datei wird nur ergänzt, nie umgeschrieben.
 """
 import datetime

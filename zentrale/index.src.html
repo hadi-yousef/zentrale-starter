@@ -129,6 +129,9 @@ button.row:hover{background:var(--hover)}
 .kv+.kv::before{content:"";position:absolute;left:16px;right:0;top:0;height:.5px;background:var(--sep)}
 .kv>span{color:var(--ink2);text-align:right;min-width:0;overflow-wrap:anywhere;white-space:pre-line}
 .note{color:var(--ink2);font-size:13px;margin:10px 16px 0;line-height:1.45}
+.alt{display:flex;gap:12px;align-items:flex-start;background:color-mix(in srgb,var(--orange) 14%,var(--grp));border-radius:14px;padding:12px 16px;margin-bottom:18px;font-size:14px}
+.alt .i{color:var(--orange);width:20px;height:20px;margin-top:1px}.alt b{display:block}
+.btn.rot{color:var(--red)}
 .empty{background:var(--grp);border-radius:14px;padding:26px 22px;color:var(--ink2);text-align:center;font-size:14.5px;box-shadow:var(--shadow)}
 .empty b{color:var(--ink);font-weight:600;display:block;margin-bottom:2px}
 .empty .i{width:28px;height:28px;display:block;margin:0 auto 8px;color:var(--ink3)}
@@ -366,13 +369,15 @@ async function post(pfad, body){
 }
 
 /* ---------- Daten ---------- */
-const D = {pos: null, wuensche: null, berichte: null, notizen: null, agenten: null, laeufe: null, ich: null, fehler: ""};
+const FASSUNG = "2026-11-01";   // gleich wie hub.FASSUNG
+const D = {pos: null, wuensche: null, berichte: null, notizen: null, agenten: null, laeufe: null, papierkorb: null, ich: null, fehler: ""};
 async function laden(){
   if (!KEY) return;
   try {
-    const [pos, wuensche, berichte, notizen, agenten, laeufe] = await Promise.all(["/api/pos", "/api/wuensche", "/api/berichte", "/api/notizen", "/api/agenten", "/api/laeufe"].map(p => api(p)));
+    const [pos, wuensche, berichte, notizen, agenten, laeufe, ich] = await Promise.all(["/api/pos", "/api/wuensche", "/api/berichte", "/api/notizen", "/api/agenten", "/api/laeufe", "/api/ich"].map(p => api(p)));
+    const papierkorb = await api("/api/papierkorb").catch(() => null);   // fehlt bei einer alten Zentrale
     laeufe._geholt = Date.now()/1000;
-    Object.assign(D, {pos, wuensche, berichte, notizen, agenten, laeufe, fehler: ""});
+    Object.assign(D, {pos, wuensche, berichte, notizen, agenten, laeufe, ich, papierkorb, fehler: ""});
   } catch(e) { D.fehler = e.message; }
   renderAll();
 }
@@ -390,13 +395,15 @@ const PAGES = [
   {id: "wuensche", title: "Wünsche", icon: "star", farbe: "yellow"},
   {id: "berichte", title: "Berichte", icon: "message-square-text", farbe: "green"},
   {id: "notizen", title: "Notizen", icon: "notebook-pen", farbe: "indigo"},
+  {id: "papierkorb", title: "Papierkorb", icon: "trash-2", farbe: "gray"},
 ];
 let PAGE = "uebersicht";
-const UI = {projektSicht: "aktiv", q: "", treffer: null};
+const UI = {projektSicht: "aktiv", q: "", treffer: null, nordner: ""};
 function zaehler(id){
   if (id === "wuensche") return D.wuensche ? D.wuensche.offen.length : "";
   if (id === "projekte") return D.pos ? D.pos.projekte.filter(p => p.status === "aktiv").length : "";
   if (id === "notizen") return D.notizen ? D.notizen.notizen.length : "";
+  if (id === "papierkorb") return D.papierkorb ? (D.papierkorb.eintraege.length + D.papierkorb.notizen.length) || "" : "";
   if (id === "agenten") return D.laeufe ? D.laeufe.aktiv.filter(x => !x.still).length || "" : "";
   return "";
 }
@@ -404,7 +411,7 @@ const fragenOffen = () => (D.berichte?.berichte || []).reduce((n, b) => n + offe
 function renderNav(){
   const f = fragenOffen();
   setHtml($("side"), `<div class="slogo">${sq("circle-dot", "blue")}Zentrale</div>` + PAGES.map(p => `<a href="#${p.id}" class="${p.id === PAGE ? "on" : ""}">${sq(p.icon, p.farbe)}${esc(p.title)}${p.id === "berichte" && f ? `<span class="badge" style="margin-left:auto">${f}</span>` : `<span class="n">${zaehler(p.id)}</span>`}</a>`).join("")
-    + `<div class="grow"></div><div class="wer">Angemeldet als Besitzer · <a href="#" data-act="abmelden">Abmelden</a></div>`);
+    + `<div class="grow"></div><div class="wer">Angemeldet als Besitzer · <a href="#" data-act="abmelden">Abmelden</a><br>Fassung ${esc(FASSUNG)}</div>`);
   setHtml($("tabbar"), PAGES.map(p => `<a href="#${p.id}" class="${p.id === PAGE ? "on" : ""}">${icon(p.icon)}${esc(p.title)}${p.id === "berichte" && f ? `<span class="badge">${f}</span>` : ""}</a>`).join(""));
 }
 function kopf(titel, sub, knopf){ return `<div class="hd"><div class="hdt"><h1>${esc(titel)}</h1>${sub ? `<p>${sub}</p>` : ""}</div>${knopf || ""}</div>`; }
@@ -543,18 +550,54 @@ function viewBerichte(){
 
 /* Notizen */
 function notizZeile(n){ return row(sq("file-text", "indigo"), esc(n.titel), `${n.ordner ? esc(n.ordner) + " · " : ""}${esc(ago(n.zeit))}${n.vorschau ? " · " + esc(n.vorschau) : ""}`, "", sh("notiz:" + n.pfad)); }
+/* Notizen: oben die festen Ordner (wie im Grundgerüst), darunter das zuletzt Geänderte */
+const N_ORDNER = {"Besitzer": ["user-round", "orange", "Fakten über dich"], "Geräte": ["monitor", "blue", "je Gerät eine Notiz"], "Projekte": ["folder", "orange", "je Projekt ein Ordner"],
+  "Aufräumen": ["broom", "green", "Inventur, Plan, neue Ordnung"], "Anleitungen": ["book-open", "teal", "wie etwas geht"], "Übergaben": ["arrow-right-left", "purple", "wo der nächste Thread weitermacht"]};
+const nOben = n => n.pfad.includes("/") ? n.pfad.split("/")[0] : "";
+function notizStart(N){
+  const zahl = {}; for (const n of N) { const o = nOben(n); if (o) zahl[o] = (zahl[o] || 0) + 1; }
+  const ordner = [...new Set([...Object.keys(N_ORDNER), ...(D.notizen?.ordner || []).map(o => o.split("/")[0])])];
+  const lose = N.filter(n => !nOben(n));
+  return gh("Ordner") + grp(ordner.map(o => { const [ic, c, txt] = N_ORDNER[o] || ["folder", "gray", ""]; return row(sq(ic, c), esc(o), esc(txt), val(zahl[o] || 0), `data-act="nordner" data-wert="${esc(o)}"`); }).join(""))
+    + gh("Zuletzt geändert") + grp(more("nz", N, 8, notizZeile))
+    + (lose.length ? note(`${lose.length} Notizen liegen ohne Ordner. Besser in einen der Ordner oben.`) : "");
+}
+function notizOrdner(N){
+  const L = N.filter(n => n.pfad.startsWith(UI.nordner + "/"));
+  return L.length ? grp(more("nz-" + UI.nordner, L, 25, notizZeile)) : empty("<b>Noch leer</b>" + esc((N_ORDNER[UI.nordner] || [])[2] || ""), "notebook-pen");
+}
 function viewNotizen(){
   const N = D.notizen?.notizen || [];
   const liste = UI.treffer ? (UI.treffer.length ? grp(UI.treffer.map(t => row(sq("search", "gray"), esc(t.titel), esc(t.ausschnitt), "", sh("notiz:" + t.pfad))).join("")) : empty("Nichts gefunden.", "search"))
-    : N.length ? grp(more("nz", N, 25, notizZeile)) : empty("<b>Noch keine Notizen</b>Notizen sind Markdown-Dateien. Du kannst sie auch mit Obsidian oder jedem Editor öffnen.", "notebook-pen");
-  return kopf("Notizen", `${N.length} Notizen in ${D.notizen?.ordner.length || 0} Ordnern`, `<button class="btn pri" type="button" ${sh("notiz-neu")}>${icon("plus")}Notiz</button>`)
+    : UI.nordner ? notizOrdner(N)
+    : N.length ? notizStart(N) : empty("<b>Noch keine Notizen</b>Notizen sind Markdown-Dateien. Du kannst sie auch mit Obsidian oder jedem Editor öffnen.", "notebook-pen");
+  return kopf(UI.nordner && !UI.treffer ? UI.nordner : "Notizen", UI.nordner && !UI.treffer ? `<a href="#notizen" data-act="nordner" data-wert="">‹ Alle Notizen</a>` : `${N.length} Notizen in ${D.notizen?.ordner.length || 0} Ordnern`, `<button class="btn pri" type="button" ${sh("notiz-neu")}>${icon("plus")}Notiz</button>`)
     + `<label class="suche">${icon("search")}<input type="search" id="nsuche" placeholder="Notizen durchsuchen" value="${esc(UI.q)}" autocomplete="off"></label>` + liste;
 }
 
-const VIEWS = {uebersicht: viewUebersicht, agenten: viewAgenten, projekte: viewProjekte, wuensche: viewWuensche, berichte: viewBerichte, notizen: viewNotizen};
+/* Papierkorb: was die Agenten weggeräumt haben. Zurücklegen dürfen alle, endgültig löschen nur der Besitzer. */
+function gr(b){ b = +b || 0; for (const e of ["Byte", "KB", "MB", "GB", "TB"]) { if (b < 1024 || e === "TB") return e === "Byte" ? `${b} Byte` : `${b.toFixed(1).replace(".", ",")} ${e}`; b /= 1024; } }
+const pkZeit = e => e.zeit ? new Date(e.zeit).getTime() / 1000 : e.zeit_s;
+const pkOrt = p => /[\\/]/.test(p || "") ? String(p).replace(/[\\/][^\\/]*$/, "") : "";
+function pkZeile(e){
+  return row(sq(e.typ === "ordner" ? "folder" : "file", e.da ? "gray" : "red"), esc(e.name), (e.da ? "aus " + esc(pkOrt(e.von)) : "fehlt im Papierkorb") + (e.grund ? " · " + esc(e.grund) : ""), val(esc(gr(e.bytes))), sh("pk:" + e.nr));
+}
+function pkNotizZeile(n){ return row(sq("file-text", "indigo"), esc(n.name), "Notiz aus " + esc(pkOrt(n.von) || "Notizen") + " · " + esc(ago(n.zeit_s)), "", sh("pkn:" + n.pfad)); }
+function viewPapierkorb(){
+  const K = D.papierkorb;
+  if (!K) return kopf("Papierkorb", "") + empty("<b>Papierkorb nicht verfügbar</b>Die Zentrale läuft noch mit einer alten Fassung. Bitte neu starten.", "trash-2");
+  const E = K.eintraege, N = K.notizen;
+  return kopf("Papierkorb", `${E.length + N.length} Einträge · ${esc(gr(K.bytes))}`)
+    + (E.length ? gh("Aus dem Aufräumen", E.length) + grp(more("pk", E, 10, pkZeile)) : "")
+    + (N.length ? gh("Notizen", N.length) + grp(more("pkn", N, 6, pkNotizZeile)) : "")
+    + (!E.length && !N.length ? empty("<b>Der Papierkorb ist leer</b>Was weg soll, verschieben die Agenten hierher. Gelöscht wird nichts.", "trash-2") : "")
+    + note("Die Agenten löschen nie, sie verschieben nur hierher (auf derselben Platte, z. B. C:\\Papierkorb). Zurücklegen geht immer. Endgültig löschen kannst nur du.");
+}
+const VIEWS = {uebersicht: viewUebersicht, agenten: viewAgenten, projekte: viewProjekte, wuensche: viewWuensche, berichte: viewBerichte, notizen: viewNotizen, papierkorb: viewPapierkorb};
 function renderPage(){
   if (!D.pos) { setHtml($("pages"), D.fehler ? empty(`<b>Zentrale nicht erreichbar</b>${esc(D.fehler)}`, "wifi-off") : ""); return; }
-  setHtml($("pages"), `<section class="page on">${VIEWS[PAGE]()}</section>`);
+  const alt = D.ich && D.ich.fassung !== FASSUNG ? `<div class="alt">${icon("triangle-alert")}<span><b>Die Zentrale läuft noch mit der alten Fassung</b>Diese Seite ist neu (${esc(FASSUNG)}), die laufende Zentrale ${esc(D.ich.fassung || "alt")}. Sag deinem Agenten: „Zentrale neu starten“.</span></div>` : "";
+  setHtml($("pages"), `<section class="page on">${alt}${VIEWS[PAGE]()}</section>`);
 }
 function renderAll(){ renderNav(); renderPage(); renderSheet(); }
 
@@ -611,6 +654,20 @@ SHEETS.lauf = key => {
   return {lead: sq(ic, c, "xl"), title: esc(lTitel(x)), sub: `${esc(st)} · ${esc(x.agent)}` + (x.ende ? ` · ${esc(ago(x.ende))}` : ""),
     body: laufAngaben(x) + (x.ergebnis ? gh2(x.status === "fehler" ? "Was schiefging" : "Ergebnis") + `<div class="papier">${esc(x.ergebnis)}</div>` : "")};
 };
+SHEETS.pk = nr => {
+  const e = (D.papierkorb?.eintraege || []).find(x => String(x.nr) === nr); if (!e) return null;
+  return {lead: sq(e.typ === "ordner" ? "folder" : "file", "gray", "xl"), title: esc(e.name), sub: `im Papierkorb seit ${esc(ago(pkZeit(e)))} · ${esc(gr(e.bytes))}`,
+    body: `<div class="acts"><button class="btn pri" type="button" data-act="pkzurueck" data-id="${esc(nr)}">${icon("rotate-ccw")}Zurücklegen</button><button class="btn rot" type="button" data-act="pkweg" data-id="${esc(nr)}">${icon("trash-2")}Endgültig löschen</button></div>`
+      + gh2("Angaben") + grp(kv("Vorher", `<code>${esc(e.von)}</code>`) + kv("Jetzt", `<code>${esc(e.nach)}</code>`) + kv("Größe", esc(gr(e.bytes)) + (e.typ === "ordner" ? `, ${e.dateien} Dateien` : ""))
+        + kv("Warum", esc(e.grund)) + kv("Wann", esc(new Date(pkZeit(e) * 1000).toLocaleString("de-DE", {dateStyle: "short", timeStyle: "short"}))) + kv("Schritt im Protokoll", "Nr. " + e.nr))
+      + (e.da ? "" : note("Am Platz im Papierkorb liegt nichts mehr. Vielleicht hat es jemand von Hand verschoben."))};
+};
+SHEETS.pkn = pfad => {
+  const n = (D.papierkorb?.notizen || []).find(x => x.pfad === pfad); if (!n) return null;
+  return {lead: sq("file-text", "indigo", "xl"), title: esc(n.name), sub: `Notiz · im Papierkorb seit ${esc(n.tag)}`,
+    body: `<div class="acts"><button class="btn pri" type="button" data-act="pknzurueck" data-id="${esc(pfad)}">${icon("rotate-ccw")}Zurücklegen</button><button class="btn rot" type="button" data-act="pknweg" data-id="${esc(pfad)}">${icon("trash-2")}Endgültig löschen</button></div>`
+      + gh2("Angaben") + grp(kv("Vorher", `<code>${esc(n.von)}</code>`) + kv("Größe", esc(gr(n.bytes))))};
+};
 SHEETS["wunsch-neu"] = () => ({lead: sq("star", "yellow", "xl"), title: "Neuer Wunsch", sub: "Was soll dein Agent für dich tun?",
   body: `<form class="form" data-form="wunsch"><label>Was<input class="inp" name="titel" required></label><label>Genauer (optional)<textarea class="inp" name="text"></textarea></label><div class="zeile"><label>Priorität<select class="inp" name="prio"><option value="hoch">Hoch</option><option value="mittel" selected>Mittel</option><option value="niedrig">Niedrig</option></select></label><label>Gruppe (optional)<input class="inp" name="gruppe"></label></div><button class="btn pri" type="submit">Eintragen</button></form>`});
 
@@ -648,7 +705,7 @@ async function notizLaden(pfad){
   $("sheet")._h = null; renderSheet();
 }
 SHEETS["notiz-neu"] = () => ({lead: sq("notebook-pen", "indigo", "xl"), title: "Neue Notiz", sub: "Wird als Markdown-Datei gespeichert",
-  body: `<form class="form" data-form="notiz"><div class="zeile"><label>Titel<input class="inp" name="titel" required></label><label>Ordner (optional)<input class="inp" name="ordner" list="ordnerliste"></label></div><datalist id="ordnerliste">${(D.notizen?.ordner || []).map(o => `<option value="${esc(o)}">`).join("")}</datalist><label>Text<textarea class="inp lang" name="text"></textarea></label><button class="btn pri" type="submit">Anlegen</button></form>`});
+  body: `<form class="form" data-form="notiz"><div class="zeile"><label>Titel<input class="inp" name="titel" required></label><label>Ordner (optional)<input class="inp" name="ordner" list="ordnerliste" value="${esc(UI.nordner)}"></label></div><datalist id="ordnerliste">${(D.notizen?.ordner || []).map(o => `<option value="${esc(o)}">`).join("")}</datalist><label>Text<textarea class="inp lang" name="text"></textarea></label><button class="btn pri" type="submit">Anlegen</button></form>`});
 
 /* ---------- Klicks und Formulare ---------- */
 document.addEventListener("click", async e => {
@@ -661,6 +718,7 @@ document.addEventListener("click", async e => {
   const id = t.dataset.id, w = t.dataset.wert;
   switch (t.dataset.act) {
     case "zu": return closeSheet();
+    case "nordner": e.preventDefault(); UI.nordner = w || ""; UI.q = ""; UI.treffer = null; renderPage(); return scrollTo(0, 0);
     case "abmelden": e.preventDefault(); return abmelden();
     case "abhaken": { const a = (D.pos?.aufgaben || []).find(x => x.id === id); if (a) await post(`/api/pos/aufgaben/${id}`, {erledigt: !a.erledigt}); return; }
     case "schritt": { const p = projekt(id), v = await eingeben("Als Nächstes", "Der nächste Schritt in diesem Projekt.", p?.naechster_schritt || ""); if (v !== null) await post(`/api/pos/projekte/${id}`, {naechster_schritt: v}); return; }
@@ -669,6 +727,11 @@ document.addEventListener("click", async e => {
     case "werledigt": { const v = await eingeben("Erledigt", "Ein Satz zum Ergebnis."); if (v) await post(`/api/wuensche/${id}`, {status: "erledigt", ergebnis: v}); return; }
     case "wverwerfen": { const v = await eingeben("Verwerfen", "Warum? (ein Satz)"); if (v) await post(`/api/wuensche/${id}`, {status: "verworfen", ergebnis: v}); return; }
     case "woffen": return post(`/api/wuensche/${id}`, {status: "offen"});
+    case "pkzurueck": if (await post("/api/papierkorb/zurueck", {nr: +id})) { closeSheet(); toast("Zurückgelegt"); } return;
+    case "pknzurueck": if (await post("/api/papierkorb/zurueck", {notiz: id})) { closeSheet(); toast("Zurückgelegt"); } return;
+    case "pkweg": case "pknweg":
+      if (await bestaetigen("Endgültig löschen?", "Das lässt sich nicht rückgängig machen.", "Löschen", true) && await post("/api/papierkorb/loeschen", t.dataset.act === "pkweg" ? {nr: +id} : {notiz: id})) { closeSheet(); toast("Gelöscht"); }
+      return;
     case "vorschlag": return post(`/api/berichte/${id}/nachricht`, {text: w, frage: t.dataset.frage});
     case "nbearbeiten": NZ.edit = true; $("sheet")._h = null; return renderSheet();
     case "nabbrechen": NZ.edit = false; $("sheet")._h = null; return renderSheet();
@@ -718,7 +781,7 @@ async function anmelden(s){
   start();
 }
 function abmelden(){ KEY = ""; try { localStorage.removeItem("zentrale-schluessel"); } catch(e) {} closeSheet(); zeigeLogin(); }
-function route(){ const h = location.hash.slice(1); PAGE = VIEWS[h] ? h : "uebersicht"; closeSheet(); renderAll(); scrollTo(0, 0); }
+function route(){ const h = location.hash.slice(1); if (h !== PAGE) UI.nordner = ""; PAGE = VIEWS[h] ? h : "uebersicht"; closeSheet(); renderAll(); scrollTo(0, 0); }
 let timer = 0;
 function start(){
   $("login").hidden = true; $("app").hidden = false;

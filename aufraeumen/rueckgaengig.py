@@ -22,7 +22,7 @@ import protokoll as P
 
 
 def offen(alle):
-    zurueck = {e["zurueck_von"] for e in alle if e.get("art") == "zurueck"}
+    zurueck = {e["zurueck_von"] for e in alle if e.get("art") == "zurueck"} | {e["geloescht_von"] for e in alle if e.get("art") == "geloescht"}
     return [e for e in alle if e.get("art") in ("verschieben", "papierkorb") and e["nr"] not in zurueck]
 
 
