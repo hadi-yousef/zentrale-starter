@@ -17,7 +17,7 @@ Fragen und Vorschl√§ge gehen als Issue, auf Deutsch oder Englisch. Sicherheitsl√
    ZENTRALE_DATEN=/tmp/zs ZENTRALE_SCHLUESSEL_ORDNER=/tmp/zs/keys python3 start.py --port 8091
    ```
 4. Tests laufen lassen: `python3 -I -m unittest discover -s tests`
-5. Pull Request stellen. Die Tests laufen dann auf Windows, Mac und Linux. Beim ersten Beitrag startet sie der Betreuer von Hand.
+5. Pull Request stellen. Die Tests laufen dann auf Windows, Mac und Linux. Der Betreuer startet sie von Hand.
 
 ## Was gilt
 

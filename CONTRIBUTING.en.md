@@ -17,7 +17,7 @@ Questions and ideas go into an issue, in German or English. Never report securit
    ZENTRALE_DATEN=/tmp/zs ZENTRALE_SCHLUESSEL_ORDNER=/tmp/zs/keys python3 start.py --port 8091
    ```
 4. Run the tests: `python3 -I -m unittest discover -s tests`
-5. Open a pull request. The tests then run on Windows, Mac and Linux. The maintainer starts them by hand at first.
+5. Open a pull request. The tests then run on Windows, Mac and Linux. The maintainer starts them by hand.
 
 ## What applies
 
