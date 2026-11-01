@@ -290,7 +290,7 @@ Erst wenn der Besitzer es will, je mit eigener Freigabe:
 
 ## Die Zentrale für Agenten
 
-- Läuft unter http://127.0.0.1:8090, nur auf diesem Rechner (mit `--heimnetz` auch fürs Heimnetz und Tailscale, `docs/HOMELAB.md`). Daten in `daten\` (JSON und Markdown, in `.gitignore`).
+- Läuft unter http://127.0.0.1:8090, nur auf diesem Rechner (mit `--heimnetz` auch für andere Geräte über Tailscale, `docs/HOMELAB.md`). Daten in `daten\` (JSON und Markdown, in `.gitignore`).
 - Alle Befehle: `py zentrale_client.py --help`. Immer mit `--agent claude` bzw. `--agent codex`. Wünsche genau: `docs/WUENSCHE.md`. Die wichtigsten:
 
 | Zweck | Befehl (nach `py zentrale_client.py --agent codex`) |
@@ -355,9 +355,10 @@ Quelle, nie Passwörter, Kontonummern oder Gesundheitsdaten.
 ## Homelab
 
 Hat der Besitzer mehrere Geräte (alte Laptops, Rechner, einen Server), richtest du sie mit ihm nach **`docs/HOMELAB.md`**
-ein: Geräte erfassen, Zentrale fürs Heimnetz öffnen (`py start.py --heimnetz`), auf jedem Gerät den Melder
+ein: Geräte erfassen, Tailscale auf jedem Gerät, Zentrale dafür öffnen (`py start.py --heimnetz`), auf jedem Gerät den Melder
 (`py start.py geraet-neu "<Name>"`, dann `melder.py einrichten`), dann Vorschlag, welches Gerät der Server wird, Umzug der
-Zentrale ohne Vermischung, Tailscale, Ablage und nächtliche Sicherung, Putzen je Gerät. Jeder Schritt mit Ja.
+Zentrale ohne Vermischung, Ablage und nächtliche Sicherung, Putzen je Gerät. Jeder Schritt mit Ja. Schlüssel gehen nie über
+normales HTTP im Heimnetz, die Zentrale weist es ab.
 In der Zentrale: Homelab → Geräte, Dienste, Netzwerk, Speicher. `zentrale_client.py geraete` zeigt Zustand und Warnungen.
 Geräte-Schlüssel dürfen nur melden; nie per Chat verschicken. Linux installieren, Platten formatieren und Anmeldungen
 (Tailscale) macht der Besitzer selbst.

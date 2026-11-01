@@ -8,6 +8,7 @@ import ipaddress
 import json
 import os
 import socket
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
@@ -29,8 +30,11 @@ API_OFFEN = {"/api/lebt"}
 GROSS = 600 * 1024   # Berichte und Notizen dürfen größer sein als andere Anfragen
 # Nur eigene Namen annehmen (Schutz vor DNS-Rebinding): Eine fremde Webseite im Browser schickt ihren eigenen Namen als Host.
 EIGENE_NAMEN = {"localhost"} | {n.strip().lower() for n in os.environ.get("ZENTRALE_HOSTS", "").split(",") if n.strip()}
-# Im Heimnetz-Betrieb nur Geräte aus dem eigenen Netz: private Adressen, Tailscale (Shared Address Space), dieser Rechner.
-# „nicht global“ heißt: nicht aus dem Internet erreichbar (ipaddress kennt die Bereiche selbst).
+# Mit --heimnetz: dieser Rechner und Tailscale. Tailscale verschlüsselt selbst, über normales HTTP im Heimnetz wären Schlüssel
+# und private Daten mitlesbar. Das normale Heimnetz nur mit dem ausdrücklichen Schalter --lan-unverschluesselt.
+TAILSCALE = (ipaddress.ip_network("100.64.0.0/10"), ipaddress.ip_network("fd7a:115c:a1e0::/48"))
+NUR_TAILSCALE = ("Diese Zentrale nimmt von anderen Geräten nur verschlüsselte Verbindungen über Tailscale an. Über das normale "
+                 "Heimnetz wären Schlüssel und Daten mitlesbar. Bitte die Tailscale-Adresse nehmen (docs/HOMELAB.md, Schritt 2).")
 
 
 def absender_ok(ip):
@@ -39,7 +43,14 @@ def absender_ok(ip):
     try:
         a = ipaddress.ip_address(ip)
         a = a.ipv4_mapped or a if a.version == 6 else a
-        return not a.is_global and not a.is_multicast and not a.is_unspecified
+        if a.is_loopback or any(a in n for n in TAILSCALE):
+            return True
+        heimnetz = not a.is_global and not a.is_multicast and not a.is_unspecified   # nicht aus dem Internet erreichbar
+        if heimnetz and not hub.LAN_OFFEN:   # die Seite „Geräte“ zeigt, wer noch auf Tailscale umziehen muss
+            if len(hub.ABGEWIESEN) >= 50:
+                hub.ABGEWIESEN.clear()
+            hub.ABGEWIESEN[str(a)] = int(time.time())
+        return heimnetz and hub.LAN_OFFEN
     except ValueError:
         return False
 
@@ -83,7 +94,7 @@ class Handler(BaseHTTPRequestHandler):
         """Host prüfen und Schlüssel lesen. Gibt (url, aid) zurück oder None, wenn schon geantwortet wurde."""
         url = urlsplit(self.path)
         if not absender_ok(self.client_address[0]):
-            self._json(403, {"fehler": "Nur aus dem Heimnetz oder über Tailscale."})
+            self._send(403, NUR_TAILSCALE.encode("utf-8"), "text/plain; charset=utf-8")
             return None
         if not host_ok(self.headers.get("Host")):
             self._json(403, {"fehler": "Unbekannte Adresse."})
@@ -252,8 +263,9 @@ class Handler(BaseHTTPRequestHandler):
         pass
 
 
-def starten(bind="127.0.0.1", port=8090):
+def starten(bind="127.0.0.1", port=8090, lan=False):
     hub.PORT = port
+    hub.LAN_OFFEN = lan
     hub.HEIMNETZ = bind not in ("127.0.0.1", "localhost", "::1")
     if hub.HEIMNETZ:   # den eigenen Rechnernamen als Adresse annehmen (http://<name>:8090, http://<name>.local:8090)
         n = socket.gethostname().lower()

@@ -2,9 +2,10 @@
 r"""Melder: schickt jede Minute den Zustand dieses Geräts an die Zentrale (Homelab → Geräte).
 
 Läuft unter Windows, macOS und Linux, braucht nur Python 3.6 oder neuer, sonst nichts. Eine einzige Datei: Sie lässt sich
-von der Zentrale holen (http://<zentrale>:8090/melder.py) oder per USB-Stick kopieren.
+von GitHub holen (https://raw.githubusercontent.com/hadi-yousef/zentrale-starter/main/melder/melder.py) oder per USB-Stick
+kopieren. Die Zentrale nimmt von anderen Geräten nur Tailscale an (docs/HOMELAB.md).
 
-  python3 melder.py einrichten --zentrale http://<IP der Zentrale>:8090 --name "MacBook-Air-2015" --schluessel-datei geraet-macbook-air-2015.key
+  python3 melder.py einrichten --zentrale http://<Tailscale-Adresse der Zentrale>:8090 --name "MacBook-Air-2015" --schluessel-datei geraet-macbook-air-2015.key
   python3 melder.py --zeigen        zeigt, was gemeldet würde (schickt nichts)
   python3 melder.py --einmal        meldet einmal und zeigt die Antwort
   python3 melder.py                 meldet jede Minute (für den Autostart)
@@ -331,7 +332,7 @@ def einrichten(zentrale, name, datei):
     try:
         a = schicken(e, zustand(name))
     except Exception as x:
-        sys.exit("Die Zentrale nimmt die Meldung nicht an: %s\nLäuft sie mit --heimnetz? Stimmt die Adresse? Passt der Schlüssel?" % x)
+        sys.exit("Die Zentrale nimmt die Meldung nicht an: %s\nLäuft sie mit --heimnetz? Ist es die Tailscale-Adresse (das normale Heimnetz weist sie ab)? Passt der Schlüssel?" % x)
     os.makedirs(ORDNER, exist_ok=True)
     with open(EINST, "w", encoding="utf-8") as f:
         json.dump(e, f)
@@ -399,7 +400,7 @@ def main():
     if a[:1] == ["einrichten"]:
         import argparse
         ap = argparse.ArgumentParser(prog="melder.py einrichten")
-        ap.add_argument("--zentrale", required=True, help="Adresse der Zentrale, z. B. http://<IP>:8090 oder http://heimserver:8090")
+        ap.add_argument("--zentrale", required=True, help="Adresse der Zentrale, z. B. http://<Tailscale-Adresse>:8090 oder http://heimserver:8090")
         ap.add_argument("--name", required=True, help="Name des Geräts, wie er in der Zentrale stehen soll")
         ap.add_argument("--schluessel-datei", help="Datei geraet-….key (sonst wird der Schlüssel abgefragt)")
         x = ap.parse_args(a[1:])

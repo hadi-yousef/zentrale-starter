@@ -91,15 +91,18 @@ def geraet_neu(name, port):
     sys.path.insert(0, str(HIER / "zentrale"))
     import geraete
     hub.PORT = port
-    adr = (geraete.adressen() or [f"http://<Adresse dieses Rechners>:{port}"])[0].rstrip("/")
+    adr = (geraete.adressen() or [f"http://<Tailscale-Adresse dieses Rechners>:{port}"])[0].rstrip("/")
+    quelle = "https://raw.githubusercontent.com/hadi-yousef/zentrale-starter/main/melder/melder.py"
     print(f"Schlüssel für das Gerät „{name}“ angelegt: {datei}")
     print("Er darf nur den Zustand melden, sonst nichts. Bring die Datei auf das Gerät (USB-Stick, Netzwerkordner), nicht per Chat.")
     print()
     print("Auf dem Gerät (Python 3.6 oder neuer):")
-    print(f"  1. Melder holen:   curl -o melder.py {adr}/melder.py      (Windows: py -c \"import urllib.request as u; u.urlretrieve('{adr}/melder.py', 'melder.py')\")")
+    print(f"  1. Melder holen:   curl -o melder.py {quelle}")
+    print(f"                     (Windows: py -c \"import urllib.request as u; u.urlretrieve('{quelle}', 'melder.py')\"; oder melder{os.sep}melder.py mit auf den Stick)")
     print(f"  2. Einrichten:     python3 melder.py einrichten --zentrale {adr} --name \"{name}\" --schluessel-datei <Pfad zu {datei.name}>")
     print("  3. Autostart:      python3 melder.py autostart      (zeigt die fertigen Befehle für dieses System)")
-    print("Die Zentrale muss dafür mit --heimnetz laufen. Ablauf: docs/HOMELAB.md.")
+    print(f"Auf dem Rechner mit der Zentrale selbst: --zentrale http://127.0.0.1:{port}")
+    print("Das Gerät braucht Tailscale, die Zentrale muss mit --heimnetz laufen. Ablauf: docs/HOMELAB.md.")
 
 
 def port_frei(bind, port):
@@ -119,7 +122,10 @@ def main():
     ap.add_argument("--bind", default=os.environ.get("ZENTRALE_BIND", "127.0.0.1"),
                     help="Adresse. Standard 127.0.0.1 = nur dieser Rechner. Für andere Geräte: --heimnetz (docs/HOMELAB.md).")
     ap.add_argument("--heimnetz", action="store_true", default=os.environ.get("ZENTRALE_HEIMNETZ") == "1",
-                    help="auch auf andere Geräte im Heimnetz und über Tailscale hören (nur private Adressen, nur mit Schlüssel)")
+                    help="auch für andere Geräte über Tailscale (verschlüsselt, nur mit Schlüssel)")
+    ap.add_argument("--lan-unverschluesselt", action="store_true", default=os.environ.get("ZENTRALE_LAN_UNVERSCHLUESSELT") == "1",
+                    help="zusätzlich das normale Heimnetz, UNVERSCHLÜSSELT: Schlüssel und Daten sind mitlesbar. "
+                         "Nur für Geräte, auf denen Tailscale nicht läuft (docs/HOMELAB.md, Schritt 3)")
     a = ap.parse_args()
 
     if a.befehl == "geraet-neu":
@@ -143,7 +149,7 @@ def main():
     if a.befehl == "schluessel-neu":
         return besitzer_zeigen(hub.schluessel_neu(hub.BESITZER))
 
-    if a.heimnetz and a.bind == "127.0.0.1":
+    if (a.heimnetz or a.lan_unverschluesselt) and a.bind == "127.0.0.1":
         a.bind = "0.0.0.0"
     try:   # läuft schon eine andere Zentrale? Dann nicht still daneben eine zweite (docs/EINRICHTEN.md)
         import einrichten
@@ -160,11 +166,14 @@ def main():
             sys.exit(f"Noch kein Schlüssel für den Besitzer. Bitte einmal von Hand starten: {PY} start.py")
         besitzer_zeigen(hub.schluessel_neu(hub.BESITZER), neu=False)
     if a.bind not in ("127.0.0.1", "localhost", "::1"):
-        print(f"Die Zentrale hört auch auf andere Geräte im Heimnetz und über Tailscale (Adresse {a.bind}). Fremde Netze und das "
-              "Internet weist sie ab, und ohne Schlüssel gibt es keine Daten. Firewall: docs/HOMELAB.md, Schritt 2.")
+        print(f"Die Zentrale nimmt auch andere Geräte über Tailscale an (Adresse {a.bind}). Das normale Heimnetz, fremde Netze und "
+              "das Internet weist sie ab, und ohne Schlüssel gibt es keine Daten. Einrichtung: docs/HOMELAB.md, Schritt 2 und 3.")
+        if a.lan_unverschluesselt:
+            print("ACHTUNG: --lan-unverschluesselt: Sie nimmt auch das normale Heimnetz an, UNVERSCHLÜSSELT. Wer im Netz mitlauscht, "
+                  "kann Schlüssel und Daten lesen. Den Schlüssel des Besitzers dort nie eingeben, nur die Tailscale-Adresse nehmen.")
     import app
     print(f"Zentrale läuft: http://{'127.0.0.1' if a.bind == '0.0.0.0' else a.bind}:{a.port}   (beenden mit Strg+C)", flush=True)
-    app.starten(a.bind, a.port)
+    app.starten(a.bind, a.port, lan=a.lan_unverschluesselt)
 
 
 if __name__ == "__main__":

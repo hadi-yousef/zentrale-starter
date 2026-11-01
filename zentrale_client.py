@@ -422,7 +422,7 @@ def groesse(b):
         b /= 1024
 
 
-FASSUNG = "2026-11-04"   # gleich wie hub.FASSUNG; weicht die laufende Zentrale ab, kommt eine Warnung
+FASSUNG = "2026-11-05"   # gleich wie hub.FASSUNG; weicht die laufende Zentrale ab, kommt eine Warnung
 
 
 def pruefen(z):
@@ -622,6 +622,9 @@ def ausfuehren(z, a):
         d = z.get("/api/geraete")
         if not d["geraete"]:
             print(f"Noch kein Gerät. Anlegen: {PY} start.py geraet-neu \"<Name>\" (docs/HOMELAB.md).")
+        if (d.get("zentrale") or {}).get("abgewiesen"):
+            print("ACHTUNG: Aus dem normalen Heimnetz abgewiesen: " + ", ".join(d["zentrale"]["abgewiesen"]) +
+                  ". Die Zentrale nimmt andere Geräte nur über Tailscale an (docs/HOMELAB.md, Schritt 2 bis 4).")
         for g in d["geraete"]:
             i = g.get("info") or {}
             lw = ", ".join(f"{l['lw']} {groesse(l['frei'])} frei von {groesse(l['gesamt'])}" for l in i.get("laufwerke") or [] if l.get("frei") is not None)

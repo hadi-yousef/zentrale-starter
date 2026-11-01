@@ -658,7 +658,7 @@ async function post(pfad, body){
 }
 
 /* ---------- Daten ---------- */
-const FASSUNG = "2026-11-04";   // gleich wie hub.FASSUNG
+const FASSUNG = "2026-11-05";   // gleich wie hub.FASSUNG
 const D = {pos: null, wuensche: null, berichte: null, notizen: null, agenten: null, laeufe: null, papierkorb: null, ich: null, fehler: ""};
 async function laden(){
   if (!KEY) return;
@@ -1184,7 +1184,9 @@ function hlKachel(g){
 const hlLeer = () => empty(`<b>Noch kein Gerät</b>Sag deinem Agenten: „Richte das Homelab nach docs/HOMELAB.md ein.“ Er legt je Gerät einen Schlüssel an (<code>py start.py geraet-neu "Alter-PC"</code>) und startet dort den Melder. Dann erscheint es hier mit Prozessor, Speicher, Laufwerken und Akku.`, "server");
 function hlHinweisHeimnetz(){
   const Z = HL().zentrale || {};
-  return Z.heimnetz ? "" : `<p class="hint run">${icon("info")}<span>Die Zentrale hört gerade nur auf diesen Rechner. Damit andere Geräte melden können, startet dein Agent sie mit <code>--heimnetz</code> (docs/HOMELAB.md, Schritt 2).</span></p>`;
+  const A = Z.abgewiesen || [];
+  if (A.length) return `<p class="hint run">${icon("triangle-alert")}<span>Abgewiesen: ${esc(A.slice(0, 5).join(", "))}. Die Zentrale nimmt andere Geräte nur noch über Tailscale an, weil im normalen Heimnetz Schlüssel mitlesbar wären. Sag deinem Agenten: „Geräte auf Tailscale umstellen“ (docs/HOMELAB.md, Schritt 2 bis 4).</span></p>`;
+  return Z.heimnetz ? "" : `<p class="hint run">${icon("info")}<span>Die Zentrale hört gerade nur auf diesen Rechner. Damit andere Geräte melden können, richtet dein Agent Tailscale ein und startet sie mit <code>--heimnetz</code> (docs/HOMELAB.md, Schritt 2 und 3).</span></p>`;
 }
 function viewGeraete(){
   const G = HL().geraete, on = G.filter(g => g.online).length;
@@ -1220,12 +1222,12 @@ function viewNetzwerk(){
   const adr = Z.adressen || [];
   const zeilen = G.map(g => { const i = hlI(g), ts = i.tailscale;
     return row(circ(hlIcon(g), "", g.online), esc(g.name), esc([(i.ip || []).length ? "Heimnetz " + i.ip.join(", ") : "", ts ? (ts.an ? "Tailscale " + (ts.ip || "an") : "Tailscale aus") : "ohne Tailscale"].filter(Boolean).join(" · ")), "", sh("geraet:" + g.id)); }).join("");
-  return kopf("Netzwerk", G.length ? `${on} von ${G.length} ${G.length === 1 ? "Gerät" : "Geräten"} online` : "Geräte im Heimnetz und über Tailscale")
+  return kopf("Netzwerk", G.length ? `${on} von ${G.length} ${G.length === 1 ? "Gerät" : "Geräten"} online` : "Geräte über Tailscale")
     + (G.length ? gh("Geräte", `${on} von ${G.length} online`) + `<div class="cards">${G.map(karte).join("")}</div>` : hlLeer())
-    + gh("Zentrale erreichen") + grp(row(sq("house", Z.heimnetz ? "green" : "gray"), "Im Heimnetz", Z.heimnetz ? esc(adr.join(", ") || "Adresse unbekannt") : "aus, nur dieser Rechner (mit --heimnetz starten)", "")
-      + row(sq("network", "blue"), "Über Tailscale", "von unterwegs, mit der Tailscale-Adresse des Geräts mit der Zentrale (docs/HOMELAB.md, Schritt 6)", ""))
+    + gh("Zentrale erreichen") + grp(row(sq("network", Z.heimnetz ? "green" : "gray"), "Über Tailscale", Z.heimnetz ? esc(adr.join(", ") || "Tailscale ist hier nicht an (docs/HOMELAB.md, Schritt 2)") : "aus, nur dieser Rechner (mit --heimnetz starten)", "")
+      + row(sq("house", Z.lan_offen ? "orange" : "gray"), "Normales Heimnetz", Z.lan_offen ? "an, UNVERSCHLÜSSELT: Schlüssel und Daten sind mitlesbar" : "aus: wäre unverschlüsselt", ""))
     + (zeilen ? gh("Adressen") + grp(zeilen) : "")
-    + note("Fremde Netze und das Internet weist die Zentrale ab. Ohne Schlüssel gibt es keine Daten, auch nicht im Heimnetz.");
+    + note("Fremde Netze und das Internet weist die Zentrale ab. Ohne Schlüssel gibt es keine Daten.");
 }
 function viewDienste(){
   const G = hlDienste();

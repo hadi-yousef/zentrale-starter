@@ -52,7 +52,9 @@ Autostart nach der Anmeldung: `docs\AUTOSTART.md`. **Mac und Linux:** `python3` 
 ## Sicherheit
 
 - Die Zentrale hört nur auf `127.0.0.1`, also nur auf deinen Rechner. Mit `--heimnetz` (für das Homelab) nimmt sie auch
-  Geräte aus dem Heimnetz und über Tailscale an, weist fremde Netze ab und gibt ohne Schlüssel keine Daten heraus.
+  Geräte über Tailscale an (verschlüsselt). Das normale Heimnetz, fremde Netze und das Internet weist sie ab, und ohne
+  Schlüssel gibt sie keine Daten heraus. Normales Heimnetz nur mit dem ausdrücklichen Schalter `--lan-unverschluesselt`,
+  denn dort wären Schlüssel mitlesbar.
 - Geräte haben eigene Schlüssel, die nur melden dürfen.
 - Schlüssel werden nur als Prüfsumme gespeichert. `daten\` (deine Einträge) und das Aufräum-Protokoll stehen in `.gitignore`.
 - Die Aufräum-Werkzeuge verschieben auf derselben Platte in einen Papierkorb und schreiben jeden Schritt ins Protokoll.

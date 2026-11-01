@@ -21,10 +21,12 @@ STATE_DIR = Path(os.environ.get("ZENTRALE_DATEN") or Path(__file__).resolve().pa
 SCHLUESSEL = STATE_DIR / "schluessel.json"
 BESITZER = "besitzer"
 MAX_BODY = 64 * 1024
-FASSUNG = "2026-11-04"   # bei jedem Update hochsetzen, auch FASSUNG in index.src.html; der Client und die Seite vergleichen
+FASSUNG = "2026-11-05"   # bei jedem Update hochsetzen, auch FASSUNG in index.src.html; der Client und die Seite vergleichen
 ORDNER = Path(__file__).resolve().parent.parent   # der Ordner dieser Zentrale (zentrale-starter)
 ORDNER_ID = hashlib.sha256(str(ORDNER).lower().encode("utf-8")).hexdigest()[:12]   # Kennung ohne Pfad, für /api/lebt
-HEIMNETZ = False   # setzt start.py: hört die Zentrale auch auf andere Geräte im Heimnetz?
+HEIMNETZ = False   # setzt start.py: hört die Zentrale auch auf andere Geräte (Tailscale)?
+LAN_OFFEN = False  # setzt start.py mit --lan-unverschluesselt: auch das normale Heimnetz, unverschlüsselt
+ABGEWIESEN = {}    # Adresse aus dem Heimnetz -> Zeit der letzten abgewiesenen Anfrage (Hinweis auf der Seite „Geräte“)
 PORT = 8090
 
 _lock = threading.Lock()

@@ -9,6 +9,7 @@ import contextlib
 import importlib
 import importlib.util
 import io
+import ipaddress
 import json
 import os
 import shutil
@@ -39,7 +40,8 @@ def alt_machen(p):
     p = Path(p)
     for d, dirs, files in os.walk(p):
         for x in files + dirs:
-            os.utime(os.path.join(d, x), (ALT, ALT), follow_symlinks=False)
+            if not os.path.islink(os.path.join(d, x)):
+                os.utime(os.path.join(d, x), (ALT, ALT))
     os.utime(p, (ALT, ALT))
 
 
@@ -463,6 +465,75 @@ class F_Finanzen(unittest.TestCase):
         self.assertIn("'@x", zeile)
         self.assertIn("'+2", zeile)
         self.assertIn("-5,00", zeile, "Beträge bleiben Zahlen")
+
+
+# ---------- S-02: Andere Geräte nur verschlüsselt ----------
+
+def adr(netz, n=1):
+    """Eine Beispiel-Adresse aus einem Netz (so steht keine echte Adresse in den Tests)."""
+    return str(ipaddress.ip_network(netz)[n])
+
+
+TS4, TS6 = adr("100.64.0.0/10"), adr("fd7a:115c:a1e0::/48")
+LAN = adr("192.168.0.0/16", 20)
+
+
+class S02_NurTailscale(unittest.TestCase):
+    def setUp(self):
+        import app, hub
+        self.app, self.hub = app, hub
+        self.alt = (hub.HEIMNETZ, hub.LAN_OFFEN)
+        hub.HEIMNETZ, hub.LAN_OFFEN = True, False
+        hub.ABGEWIESEN.clear()
+
+    def tearDown(self):
+        self.hub.HEIMNETZ, self.hub.LAN_OFFEN = self.alt
+        self.hub.ABGEWIESEN.clear()
+
+    def test_heimnetz_nimmt_nur_diesen_rechner_und_tailscale(self):
+        ok = self.app.absender_ok
+        for ip in ("127.0.0.1", "::1", TS4, adr("100.64.0.0/10", -2), TS6, "::ffff:" + TS4):
+            self.assertTrue(ok(ip), ip)
+        for ip in (LAN, adr("10.0.0.0/8", 5), adr("172.16.0.0/12", 7), adr("169.254.0.0/16", 9), "8.8.8.8",
+                   adr("100.128.0.0/16"), "fe80::1", "unsinn"):
+            self.assertFalse(ok(ip), ip)
+        self.assertIn(LAN, self.hub.ABGEWIESEN, "die Seite soll zeigen, wer abgewiesen wurde")
+        self.assertNotIn("8.8.8.8", self.hub.ABGEWIESEN)
+
+    def test_schalter_oeffnet_nur_das_heimnetz(self):
+        self.hub.LAN_OFFEN = True
+        ok = self.app.absender_ok
+        self.assertTrue(ok(LAN))
+        self.assertTrue(ok(TS4))
+        self.assertFalse(ok("8.8.8.8"), "das Internet bleibt draußen")
+
+    def test_ohne_heimnetz_lauscht_sie_ohnehin_nur_lokal(self):
+        self.hub.HEIMNETZ = False
+        self.assertTrue(self.app.absender_ok("127.0.0.1"))
+
+    def test_anleitung_holt_den_melder_nicht_ueber_http(self):
+        texte = [(HIER / n).read_text(encoding="utf-8") for n in ("docs/HOMELAB.md", "start.py", "melder/melder.py")]
+        for x in texte:
+            self.assertNotIn("/melder.py', 'melder.py'", x.replace("main/melder/melder.py', 'melder.py'", ""))
+            self.assertNotRegex(x, r"(curl[^\n]*|von der Zentrale holen[^\n]*)http://")
+        self.assertIn("https://raw.githubusercontent.com/", texte[0])
+
+    def test_adressen_ohne_heimnetz_adresse(self):
+        import geraete
+        with mock.patch.object(geraete, "tailscale_ip", return_value=TS4), \
+                mock.patch.object(geraete, "_eigene_ip", return_value=LAN), mock.patch.dict(os.environ, {"ZENTRALE_ADRESSEN": ""}):
+            self.assertEqual(geraete.adressen(), [f"http://{TS4}:{self.hub.PORT}"])
+            self.hub.LAN_OFFEN = True
+            self.assertEqual(len(geraete.adressen()), 2)
+
+    def test_tailscale_adresse_vom_befehl(self):
+        import geraete
+        for ausgabe, soll in ((TS4 + "\n", TS4), (LAN + "\n", ""), ("", "")):
+            geraete._ts["zeit"] = 0
+            with mock.patch.object(geraete.shutil, "which", return_value="tailscale"), \
+                    mock.patch.object(geraete.subprocess, "run", return_value=subprocess.CompletedProcess([], 0, ausgabe, "")):
+                self.assertEqual(geraete.tailscale_ip(), soll)
+        geraete._ts["zeit"] = 0
 
 
 def tearDownModule():

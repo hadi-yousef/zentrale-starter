@@ -8,9 +8,12 @@ darf nur melden, sonst nichts (das prüft app.py). Der Name des Geräts kommt im
 Gespeichert in DATEN/geraete.json: {"geraete": {id: {id, name, art, erstmals, zuletzt, info: {…letzte Meldung…}}}}
 Offline gilt ein Gerät nach 3 Minuten ohne Meldung. Warnungen rechnet die Zentrale bei jeder Abfrage neu aus.
 """
+import ipaddress
 import os
 import re
+import shutil
 import socket
+import subprocess
 import threading
 import time
 
@@ -200,20 +203,57 @@ def _warnungen(g, jetzt):
     return W
 
 
-def adressen():
-    """Wie andere Geräte die Zentrale erreichen könnten (eigene Adressen im Heimnetz). ZENTRALE_ADRESSEN (mit Komma)
-    ersetzt sie, z. B. „http://heimserver:8090“, wenn ein Name statt der IP angezeigt werden soll."""
-    if os.environ.get("ZENTRALE_ADRESSEN"):
-        return [a.strip() for a in os.environ["ZENTRALE_ADRESSEN"].split(",") if a.strip()]
-    A = []
+def _eigene_ip(ziel):
+    """Welche eigene Adresse nimmt der Rechner für dieses Ziel? Schickt nichts, wählt nur die Netzwerkkarte."""
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("10.255.255.255", 1))   # schickt nichts, wählt nur die Netzwerkkarte
-        A.append(s.getsockname()[0])
+        s.connect((ziel, 1))
+        ip = s.getsockname()[0]
         s.close()
+        return ip
     except OSError:
-        pass
-    return [f"http://{a}:{hub.PORT}" for a in A if not a.startswith("127.")]
+        return ""
+
+
+_ts = {"zeit": 0, "ip": ""}
+
+
+def tailscale_ip():
+    """Eigene Tailscale-Adresse oder "" (fragt `tailscale ip -4`, wie der Melder; höchstens einmal in der Minute)."""
+    if time.time() - _ts["zeit"] < 60:
+        return _ts["ip"]
+    prog = shutil.which("tailscale")
+    for p in (r"C:\Program Files\Tailscale\tailscale.exe", "/Applications/Tailscale.app/Contents/MacOS/Tailscale"):
+        if not prog and os.path.exists(p):
+            prog = p
+    ip = ""
+    if prog:
+        try:
+            r = subprocess.run([prog, "ip", "-4"], capture_output=True, text=True, timeout=5,
+                               creationflags=0x08000000 if os.name == "nt" else 0)   # CREATE_NO_WINDOW: kein Konsolenfenster
+            ip = (r.stdout.split() or [""])[0] if r.returncode == 0 else ""
+            ip = ip if ipaddress.ip_address(ip) in ipaddress.ip_network("100.64.0.0/10") else ""
+        except (OSError, ValueError, subprocess.SubprocessError):
+            ip = ""
+    _ts.update(zeit=time.time(), ip=ip)
+    return ip
+
+
+def adressen():
+    """Wie andere Geräte die Zentrale erreichen: die Tailscale-Adresse, mit --lan-unverschluesselt auch die im Heimnetz.
+    ZENTRALE_ADRESSEN (mit Komma) ersetzt sie, z. B. „http://heimserver:8090“ für einen Tailscale-Namen (MagicDNS)."""
+    if os.environ.get("ZENTRALE_ADRESSEN"):
+        return [a.strip() for a in os.environ["ZENTRALE_ADRESSEN"].split(",") if a.strip()]
+    A = [tailscale_ip()]
+    if hub.LAN_OFFEN:
+        A.append(_eigene_ip("10.255.255.255"))
+    return [f"http://{a}:{hub.PORT}" for a in A if a and not a.startswith("127.")]
+
+
+def abgewiesen():
+    """Adressen aus dem Heimnetz, die in der letzten Stunde abgewiesen wurden (z. B. ein Melder mit der alten Adresse)."""
+    grenze = int(time.time()) - 3600
+    return sorted(ip for ip, t in list(hub.ABGEWIESEN.items()) if t >= grenze)
 
 
 def liste():
@@ -229,4 +269,5 @@ def liste():
     G.sort(key=lambda g: (not g["online"], (g.get("info") or {}).get("art") != "linux", (g.get("name") or "").lower()))
     W.sort(key=lambda w: rang[w["stufe"]])
     return {"geraete": G, "warnungen": W, "jetzt": jetzt, "offline_s": OFFLINE_S, "melder_aktuell": MELDER_FASSUNG,
-            "zentrale": {"heimnetz": bool(hub.HEIMNETZ), "adressen": adressen() if hub.HEIMNETZ else [], "port": hub.PORT}}
+            "zentrale": {"heimnetz": bool(hub.HEIMNETZ), "lan_offen": bool(hub.LAN_OFFEN), "abgewiesen": abgewiesen(),
+                         "adressen": adressen() if hub.HEIMNETZ else [], "port": hub.PORT}}
