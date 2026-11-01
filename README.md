@@ -61,6 +61,10 @@ Autostart nach der Anmeldung: `docs\AUTOSTART.md`. **Mac und Linux:** `python3` 
   Nur die Putzrunde (`aufraeumen\putzen.py`) entfernt endgültig, und nur, was sich von selbst neu erzeugt
   (`docs/PUTZEN.md`): erst als Probe, dann nach deinem Ja.
 
+## Mitmachen
+
+Jeder kann mitentwickeln, über Pull Requests: `CONTRIBUTING.md`. Sicherheitslücken bitte vertraulich melden: `SECURITY.md`.
+
 ## Lizenz
 
 **Apache License 2.0**, siehe `LICENSE`. © 2026 **Hadi Yousef** ([github.com/hadi-yousef](https://github.com/hadi-yousef)).
