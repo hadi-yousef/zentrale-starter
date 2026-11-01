@@ -1,5 +1,7 @@
 # Mitentwickeln
 
+**English:** [CONTRIBUTING.en.md](CONTRIBUTING.en.md)
+
 Jeder kann mitentwickeln. Der Weg führt immer über einen Pull Request: Direkt auf `main` schreibt nur der Betreuer. Das hat
 einen Grund: Was in `main` landet, kommt beim nächsten Update auf die Rechner aller Nutzer und steuert dort ihre KI-Agenten.
 
@@ -24,6 +26,7 @@ Fragen und Vorschläge gehen als Issue, auf Deutsch oder Englisch. Sicherheitsl�
 | Abhängigkeiten | Nur die Python-Standardbibliothek, Python 3.9 oder neuer. Es wird nichts installiert. |
 | Tests | Jeder behobene Fehler bekommt einen Test, der ohne die Behebung fehlschlägt. |
 | Oberfläche | Nur `zentrale/index.src.html` ändern, danach `python3 zentrale/bauen.py`. Jeden Text aus Daten mit `esc()` maskieren, kein `alert`, `confirm` oder `prompt`. Größere Änderungen zuerst als Bild im Issue zeigen. |
+| Sprache | Oberfläche und Anleitungen für die Agenten sind vorerst deutsch. Texte für Nutzer bleiben deutsch, außer im Issue ist etwas anderes abgestimmt. Kommentare im Code gehen in beiden Sprachen. |
 | Windows | Die meisten Nutzer haben Windows. Pfade und Befehle müssen dort genauso gehen. |
 | Sicherheit | Die Zentrale bleibt lokal oder im Tailscale-Netz. Nichts stellt sie ins offene Internet. Schlüssel gehen nie unverschlüsselt durchs Heimnetz. |
 | Löschen | Aufräum-Werkzeuge löschen nie, was sich nicht neu erzeugt. Jeder Schritt bleibt im Protokoll und lässt sich zurückdrehen. |

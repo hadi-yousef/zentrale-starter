@@ -1,5 +1,7 @@
 # Zentrale Starter
 
+**English:** [README.en.md](README.en.md)
+
 Eine kleine **Zentrale** für einen Rechner, und eine Anleitung, mit der dein KI-Agent (Codex oder Claude Code, z. B. in
 T3 Code) bei dir aufräumt: sicher, in kleinen Schritten. Gelöscht wird nur, was sich von selbst neu erzeugt
 (Caches, alte Python-Umgebungen, `node_modules`, Temp), alles andere kommt in einen Papierkorb.
