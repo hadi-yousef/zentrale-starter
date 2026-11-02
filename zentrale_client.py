@@ -422,7 +422,7 @@ def groesse(b):
         b /= 1024
 
 
-FASSUNG = "2026-11-05"   # gleich wie hub.FASSUNG; weicht die laufende Zentrale ab, kommt eine Warnung
+FASSUNG = "2026-11-06"   # gleich wie hub.FASSUNG; weicht die laufende Zentrale ab, kommt eine Warnung
 
 
 def pruefen(z):
@@ -492,7 +492,10 @@ def ausfuehren(z, a):
         for n in w["notizen"]:
             print(f"\n{zeit(n['zeit'])} {n['von']}: {n['text']}")
     elif a.befehl == "wunsch-notiz":
-        w = z.post(f"/api/wuensche/{q(a.nr)}/notizen", {"text": a.text})
+        text = text_aus(a).strip()
+        if not text:
+            raise Fehler("Text fehlt (Text oder --text-datei).")
+        w = z.post(f"/api/wuensche/{q(a.nr)}/notizen", {"text": text})
         print(f"Notiz an Wunsch Nr. {w['nr']} gehängt.")
     elif a.befehl == "wunsch-erledigt":
         w = z.post(f"/api/wuensche/{q(a.nr)}", {"status": "erledigt", "ergebnis": a.ergebnis})
@@ -518,11 +521,12 @@ def ausfuehren(z, a):
         print(f"Gerade dran ({len(d['aktiv'])}):")
         for x in d["aktiv"]:
             print(f"  {x['agent']}: " + (f"Wunsch Nr. {x['wunsch']} · " if x.get("wunsch") else "") + (x.get("titel") or x["lauf"])
-                  + f"  seit {zeit(x['start'])}" + (f" · {x['schritt']}" if x.get("schritt") else "") + ("  (still)" if x.get("still") else ""))
+                  + (f"  [Lauf {x['lauf']}]" if x.get("titel") else "") + f"  seit {zeit(x['start'])}" + (f" · {x['schritt']}" if x.get("schritt") else "") + ("  (still)" if x.get("still") else ""))
         print("Zuletzt fertig:")
         for x in d["fertig"][:a.anzahl]:
             print(f"  {zeit(x['ende'])} {x['agent']} [{x['status']}] " + (f"Wunsch Nr. {x['wunsch']} · " if x.get("wunsch") else "")
-                  + (x.get("titel") or x["lauf"]) + (f" → {x['ergebnis'][:120]}" if x.get("ergebnis") else ""))
+                  + (x.get("titel") or x["lauf"]) + (f"  [Lauf {x['lauf']}]" if x.get("titel") else "")
+                  + (f" → {x['ergebnis'][:120]}" if x.get("ergebnis") else ""))
 
     elif a.befehl == "projekte":
         d = z.get("/api/pos")
@@ -570,6 +574,9 @@ def ausfuehren(z, a):
     elif a.befehl == "bericht":
         b = z.get(f"/api/berichte/{q(a.nr)}")
         print(f"Bericht Nr. {b['nr']}: {b['titel']}  ({b['von']}, {zeit(b['zeit'])})")
+        bezug = ([f"Projekt: {b['projekt']}"] if b.get("projekt") else []) + ([f"Wunsch Nr. {b['wunsch']}"] if b.get("wunsch") else [])
+        if bezug:
+            print(" · ".join(bezug))
         if b["kurz"]:
             print("\n" + b["kurz"])
         for i, f in enumerate(b["fragen"], 1):
@@ -586,7 +593,10 @@ def ausfuehren(z, a):
             print("Hinweis: Der Bericht hat keine Frage zum Antippen. Fragen an den Besitzer gehören je in ein eigenes --frage, "
                   "dann bekommt er sie nacheinander.")
     elif a.befehl == "bericht-antwort":
-        b = z.post(f"/api/berichte/{q(a.nr)}/nachricht", {"text": a.text})
+        text = text_aus(a).strip()
+        if not text:
+            raise Fehler("Text fehlt (Text oder --text-datei).")
+        b = z.post(f"/api/berichte/{q(a.nr)}/nachricht", {"text": text})
         print(f"Antwort in Bericht Nr. {b['nr']} geschrieben.")
     elif a.befehl == "bericht-erledigt":
         b = z.post(f"/api/berichte/{q(a.nr)}/erledigt", {"antworten": a.antwort or [], "notiz": a.notiz or ""})
@@ -674,7 +684,7 @@ def main():
     p.add_argument("titel"); p.add_argument("--text"); p.add_argument("--gruppe")
     p.add_argument("--prio", required=True, choices=["hoch", "mittel", "niedrig"])
     p = P("wunsch-zeigen", "Wunsch mit Text und Notizen"); p.add_argument("nr")
-    p = P("wunsch-notiz", "Notiz (Stand) an einen Wunsch hängen"); p.add_argument("nr"); p.add_argument("text")
+    p = P("wunsch-notiz", "Notiz (Stand) an einen Wunsch hängen"); p.add_argument("nr"); p.add_argument("text", nargs="?"); p.add_argument("--text-datei")
     p = P("wunsch-erledigt", "Wunsch abhaken"); p.add_argument("nr"); p.add_argument("--ergebnis", required=True)
     p = P("wunsch-verwerfen", "Wunsch verwerfen"); p.add_argument("nr"); p.add_argument("--grund", required=True)
     p = P("wunsch-prio", "Priorität ändern"); p.add_argument("nr"); p.add_argument("prio", choices=["hoch", "mittel", "niedrig"])
@@ -702,7 +712,7 @@ def main():
     p.add_argument("--frage", action=FrageDazu, dest="fragen_dummy", help="Frage, mehrfach möglich")
     p.add_argument("--vorschlaege", action=VorschlaegeDazu, dest="vorschlaege_dummy", help="Vorschläge zur letzten Frage, getrennt mit |")
     p.set_defaults(fragen=None)
-    p = P("bericht-antwort", "im Bericht antworten"); p.add_argument("nr"); p.add_argument("text")
+    p = P("bericht-antwort", "im Bericht antworten"); p.add_argument("nr"); p.add_argument("text", nargs="?"); p.add_argument("--text-datei")
     p = P("bericht-erledigt", "offene Fragen schließen (im Chat beantwortet)"); p.add_argument("nr")
     p.add_argument("--antwort", action="append"); p.add_argument("--notiz")
     p = P("berichte-warten", "warten, bis der Besitzer antwortet"); p.add_argument("--sitzung"); p.add_argument("--max", type=int, default=600)

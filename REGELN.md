@@ -1,7 +1,8 @@
 # Regeln für alle Agenten
 
-Vorlage. Der Besitzer passt sie an, wie er will. Neue Regeln kommen nur hierher. Danach `py regeln_verteilen.py`: Es
-schreibt sie in die Anleitung von Claude Code (`%USERPROFILE%\.claude\CLAUDE.md`) und Codex (`%USERPROFILE%\.codex\AGENTS.md`),
+Vorlage. Sie kommt mit jedem Update neu, darum hier nichts ändern. **Eigene Regeln des Besitzers kommen nach
+`REGELN.lokal.md`** (daneben anlegen, kein Update fasst sie an, sie gehen dieser Vorlage vor). Danach `py regeln_verteilen.py`: Es
+schreibt beides in die Anleitung von Claude Code (`%USERPROFILE%\.claude\CLAUDE.md`) und Codex (`%USERPROFILE%\.codex\AGENTS.md`),
 damit sie in **jedem** Projekt gelten, nicht nur in diesem Ordner. Zeigt der Client eine ACHTUNG-Zeile zu den Regeln,
 rufst du es auf.
 „Du“ ist der Agent, „der Besitzer“ ist der Mensch, dem der Rechner gehört.

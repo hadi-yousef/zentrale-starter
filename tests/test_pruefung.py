@@ -536,6 +536,270 @@ class S02_NurTailscale(unittest.TestCase):
         geraete._ts["zeit"] = 0
 
 
+# ---------- Rückmeldungen aus dem Betrieb: Update, Regeln, Client ----------
+def _git_umgebung():
+    env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+    env.update(GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1", GIT_TERMINAL_PROMPT="0",
+               GIT_AUTHOR_NAME="Test", GIT_AUTHOR_EMAIL="test@localhost",
+               GIT_COMMITTER_NAME="Test", GIT_COMMITTER_EMAIL="test@localhost")
+    return env
+
+
+def _git(env, *a, cwd=None):
+    return subprocess.run(["git", "-c", "core.hooksPath=" + os.devnull, *a], cwd=cwd, env=env, check=True,
+                          capture_output=True, text=True, encoding="utf-8").stdout.strip()
+
+
+VORLAGE = "# Regeln\n\n## Sprache\n- Deutsch.\n\n## Löschen\n- Nie löschen.\n"
+
+
+class EigeneRegeln(unittest.TestCase):
+    def setUp(self):
+        if not shutil.which("git"):
+            self.skipTest("git fehlt")
+        self.t = neuer_ordner("regeln")
+        self.env = _git_umgebung()
+        self.heim = self.t / "heim"
+        self.heim.mkdir()
+        self.env.update(HOME=str(self.heim), USERPROFILE=str(self.heim))
+        self.env.pop("CODEX_HOME", None)
+        self.env.pop("CLAUDE_CONFIG_DIR", None)
+        self.o = self.t / "zentrale"
+        _git(self.env, "init", "-q", str(self.o))
+        _git(self.env, "symbolic-ref", "HEAD", "refs/heads/main", cwd=self.o)
+        shutil.copy(HIER / "regeln_verteilen.py", self.o / "regeln_verteilen.py")
+        (self.o / ".gitignore").write_text("REGELN.lokal.md\nREGELN.ziele.txt\n", encoding="utf-8")
+        (self.o / "REGELN.md").write_text(VORLAGE, encoding="utf-8")
+        _git(self.env, "add", ".", cwd=self.o)
+        _git(self.env, "commit", "-qm", "start", cwd=self.o)
+        self.anfang = _git(self.env, "rev-parse", "HEAD", cwd=self.o)
+
+    def verteilen(self, *args, env=None):
+        return subprocess.run([sys.executable, "-B", str(self.o / "regeln_verteilen.py"), *args], env=env or self.env,
+                              capture_output=True, text=True, encoding="utf-8")
+
+    def update_nachstellen(self, eigener_text):
+        """Wie update(): Eigenes liegt im Sicherungszweig, REGELN.md ist wieder die neue Vorlage."""
+        _git(self.env, "checkout", "-qb", "sicherung-vor-update-20261101-120000", cwd=self.o)
+        (self.o / "REGELN.md").write_text(eigener_text, encoding="utf-8")
+        _git(self.env, "commit", "-qam", "eigene Regeln", "--allow-empty", cwd=self.o)
+        _git(self.env, "checkout", "-q", "main", cwd=self.o)
+        (self.o / "REGELN.md").write_text(VORLAGE + "\n## Neu\n- Neue Regel der Vorlage.\n", encoding="utf-8")
+        _git(self.env, "commit", "-qam", "neue Vorlage", cwd=self.o)
+
+    def test_eigene_regel_kommt_aus_der_sicherung_und_bleibt(self):
+        self.update_nachstellen(VORLAGE.replace("- Deutsch.\n", "- Deutsch.\n- Immer mit Beispiel.\n"))
+        r = self.verteilen()
+        self.assertEqual(r.returncode, 0, r.stderr)
+        lokal = (self.o / "REGELN.lokal.md").read_text(encoding="utf-8")
+        self.assertIn("- Immer mit Beispiel.", lokal)
+        self.assertIn("## Sprache", lokal, "die Zeile soll ihren Abschnitt behalten")
+        self.assertNotIn("Nie löschen", lokal, "Zeilen der Vorlage gehören nicht hinein")
+        anleitung = (self.heim / ".claude" / "CLAUDE.md").read_text(encoding="utf-8")
+        self.assertIn("- Immer mit Beispiel.", anleitung)
+        self.assertIn("Neue Regel der Vorlage", anleitung)
+        self.assertLess(anleitung.index("Neue Regel der Vorlage"), anleitung.index("Immer mit Beispiel"))
+        self.assertEqual(_git(self.env, "status", "--porcelain", cwd=self.o), "", "die eigene Datei darf Git nicht stören")
+        self.verteilen()
+        self.assertEqual((self.o / "REGELN.lokal.md").read_text(encoding="utf-8"), lokal, "zweimal aufrufen doppelt nichts")
+
+    def test_entfernte_datei_kommt_nicht_wieder(self):
+        self.update_nachstellen(VORLAGE + "- Eigene Zeile.\n")
+        self.verteilen()
+        (self.o / "REGELN.lokal.md").unlink()
+        self.verteilen()
+        self.assertFalse((self.o / "REGELN.lokal.md").exists())
+
+    def test_vorhandene_eigene_regeln_bleiben_erhalten(self):
+        (self.o / "REGELN.lokal.md").write_text("- Schon da.\n", encoding="utf-8")
+        self.update_nachstellen(VORLAGE + "- Schon da.\n- Noch neu.\n")
+        self.verteilen()
+        lokal = (self.o / "REGELN.lokal.md").read_text(encoding="utf-8")
+        self.assertEqual(lokal.count("- Schon da."), 1, lokal)
+        self.assertIn("- Noch neu.", lokal)
+
+    def test_gegenfall_unveraenderte_vorlage_legt_nichts_an(self):
+        self.update_nachstellen(VORLAGE)
+        self.verteilen()
+        self.assertFalse((self.o / "REGELN.lokal.md").exists())
+
+    def test_gegenfall_ohne_git_geht_es_auch(self):
+        shutil.rmtree(self.o / ".git", onerror=lambda f, p, e: (os.chmod(p, 0o700), f(p)))
+        r = self.verteilen()
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("Nie löschen", (self.heim / ".claude" / "CLAUDE.md").read_text(encoding="utf-8"))
+
+    def test_weitere_ordner_aus_der_umgebung(self):
+        env = dict(self.env, CLAUDE_CONFIG_DIR=str(self.t / "claude2"), CODEX_HOME=str(self.t / "codex2"))
+        self.assertEqual(self.verteilen(env=env).returncode, 0)
+        for p in (self.t / "claude2" / "CLAUDE.md", self.t / "codex2" / "AGENTS.md", self.heim / ".claude" / "CLAUDE.md",
+                  self.heim / ".codex" / "AGENTS.md"):
+            self.assertIn("Nie löschen", p.read_text(encoding="utf-8"), str(p))
+
+    def test_ziel_wird_gemerkt(self):
+        ziel = self.t / "t3" / "AGENTS.md"
+        self.assertEqual(self.verteilen("--ziel", str(ziel)).returncode, 0)
+        self.assertIn("Nie löschen", ziel.read_text(encoding="utf-8"))
+        (self.o / "REGELN.md").write_text(VORLAGE + "- Später.\n", encoding="utf-8")
+        self.verteilen()
+        self.assertIn("- Später.", ziel.read_text(encoding="utf-8"), "ohne Schalter muss es auch dort ankommen")
+        self.verteilen("--ziel", str(ziel))
+        self.assertEqual((self.o / "REGELN.ziele.txt").read_text(encoding="utf-8").count("AGENTS.md"), 1)
+
+    def test_ziel_muss_eine_datei_sein(self):
+        r = self.verteilen("--ziel", str(self.t))
+        self.assertNotEqual(r.returncode, 0)
+        self.assertFalse((self.o / "REGELN.ziele.txt").exists())
+
+
+class UpdateQuelle(unittest.TestCase):
+    def setUp(self):
+        spec = importlib.util.spec_from_file_location("einrichten_quelle", HIER / "einrichten.py")
+        self.m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.m)
+
+    def finde(self, **remotes):
+        def git(*a):
+            aus = " ".join(remotes) if a == ("remote",) else remotes.get(a[-1], "")
+            return subprocess.CompletedProcess(a, 0, aus + "\n", "")
+        return self.m.quelle_finden(git)
+
+    def test_offizielle_adresse_geht_vor(self):
+        self.assertEqual(self.finde(origin="https://github.com/jemand/eigene-kopie.git",
+                                    oben="ssh://github.com/hadi-yousef/zentrale-starter.git"), "oben")
+
+    def test_anderer_name_mit_offizieller_adresse(self):
+        self.assertEqual(self.finde(meine="https://github.com/hadi-yousef/zentrale-starter"), "meine")
+
+    def test_sonst_origin_oder_die_einzige(self):
+        self.assertEqual(self.finde(origin="https://example.invalid/a.git", b="https://example.invalid/b.git"), "origin")
+        self.assertEqual(self.finde(b="https://example.invalid/b.git"), "b")
+
+    def test_aehnlicher_name_zaehlt_nicht_als_offiziell(self):
+        self.assertEqual(self.finde(origin="https://example.invalid/a.git",
+                                    b="https://github.com/hadi-yousef/zentrale-starter-kopie.git"), "origin")
+
+    def test_mehrdeutig_bleibt_leer(self):
+        self.assertEqual(self.finde(a="https://example.invalid/a.git", b="https://example.invalid/b.git"), "")
+        self.assertEqual(self.finde(), "")
+
+    def test_update_mit_anderem_quellnamen_holt_die_neue_fassung(self):
+        if not shutil.which("git"):
+            self.skipTest("git fehlt")
+        t, env = neuer_ordner("quelle"), _git_umgebung()
+        oben, klon = t / "oben", t / "klon"
+        _git(env, "init", "-q", str(oben))
+        _git(env, "symbolic-ref", "HEAD", "refs/heads/main", cwd=oben)
+        (oben / "zentrale").mkdir()
+        (oben / "zentrale" / "hub.py").write_text('FASSUNG = "alt"\n', encoding="utf-8")
+        _git(env, "add", ".", cwd=oben)
+        _git(env, "commit", "-qm", "alt", cwd=oben)
+        _git(env, "clone", "-q", "-o", "meine-quelle", str(oben), str(klon))
+        (oben / "zentrale" / "hub.py").write_text('FASSUNG = "neu"\n', encoding="utf-8")
+        _git(env, "commit", "-qam", "neu", cwd=oben)
+        echt = subprocess.run
+
+        def run(args, **kw):
+            if args[0] != "git":
+                return subprocess.CompletedProcess(args, 0, "", "")
+            kw["env"] = env
+            return echt(args, **kw)
+        self.m.HIER = klon
+        with mock.patch.object(self.m.subprocess, "run", side_effect=run), mock.patch.object(self.m, "autostart", return_value=[]), \
+                mock.patch.object(self.m, "daten_zaehlen", return_value=(t, {})), contextlib.redirect_stdout(io.StringIO()):
+            self.m.update()
+        self.assertIn('"neu"', (klon / "zentrale" / "hub.py").read_text(encoding="utf-8"))
+
+
+class ProjektnameInDerAdresse(unittest.TestCase):
+    def test_name_mit_leerzeichen_und_umlaut(self):
+        import app
+        import pos
+        import urllib.parse
+        name = "Büro Umbau Test"
+        pos.projekt_neu("claude", {"name": name})
+        kodiert = urllib.parse.quote(name)
+        r = app.Handler._post(None, "claude", f"/api/pos/projekte/{kodiert}", ["projekte", kodiert], {"naechster_schritt": "Weiter"})
+        self.assertEqual((r["name"], r["naechster_schritt"]), (name, "Weiter"))
+
+    def test_gegenfall_unbekannter_name_bleibt_ein_fehler(self):
+        import app
+        with self.assertRaises(Exception):
+            app.Handler._post(None, "claude", "/api/pos/projekte/Gibt%20es%20nicht", ["projekte", "Gibt%20es%20nicht"], {"naechster_schritt": "x"})
+
+
+class ClientTexte(unittest.TestCase):
+    def setUp(self):
+        import zentrale_client
+        self.c = zentrale_client
+        self.z = mock.Mock()
+        self.z.post.return_value = {"nr": 3}
+
+    def befehl(self, **kw):
+        import argparse
+        with contextlib.redirect_stdout(io.StringIO()) as aus:
+            self.c.ausfuehren(self.z, argparse.Namespace(**kw))
+        return aus.getvalue()
+
+    def test_text_aus_datei_kommt_unversehrt_an(self):
+        d = neuer_ordner("text") / "t.md"
+        d.write_text("Text mit `backticks` und $(befehl)\n", encoding="utf-8")
+        self.befehl(befehl="wunsch-notiz", nr="3", text=None, text_datei=str(d))
+        self.assertEqual(self.z.post.call_args[0], ("/api/wuensche/3/notizen", {"text": "Text mit `backticks` und $(befehl)"}))
+        self.befehl(befehl="bericht-antwort", nr="3", text=None, text_datei=str(d))
+        self.assertEqual(self.z.post.call_args[0], ("/api/berichte/3/nachricht", {"text": "Text mit `backticks` und $(befehl)"}))
+
+    def test_gegenfall_text_direkt_geht_weiter(self):
+        self.befehl(befehl="wunsch-notiz", nr="3", text="Kurz", text_datei=None)
+        self.assertEqual(self.z.post.call_args[0][1], {"text": "Kurz"})
+
+    def test_ohne_text_kein_leerer_eintrag(self):
+        with self.assertRaises(self.c.Fehler):
+            self.befehl(befehl="wunsch-notiz", nr="3", text=None, text_datei=None)
+        self.z.post.assert_not_called()
+
+    def test_schalter_steht_in_der_hilfe(self):
+        for b in ("wunsch-notiz", "bericht-antwort"):
+            r = subprocess.run([sys.executable, "-B", str(HIER / "zentrale_client.py"), b, "--help"], capture_output=True,
+                               text=True, encoding="utf-8", env=dict(os.environ, PYTHONIOENCODING="utf-8"))
+            self.assertIn("--text-datei", r.stdout, b)
+
+    def test_bericht_zeigt_projekt_und_wunsch(self):
+        self.z.get.return_value = {"nr": 3, "titel": "T", "von": "claude", "zeit": 0, "kurz": "", "fragen": [], "verlauf": [],
+                                   "projekt": "Website", "wunsch": 7}
+        aus = self.befehl(befehl="bericht", nr="3")
+        self.assertIn("Projekt: Website", aus)
+        self.assertIn("Wunsch Nr. 7", aus)
+
+    def test_laeufe_zeigen_die_kennung(self):
+        l = {"agent": "claude", "lauf": "chat-abc", "titel": "Titel", "start": 0, "ende": 0, "status": "fertig"}
+        self.z.get.return_value = {"aktiv": [l], "fertig": [l]}
+        self.assertEqual(self.befehl(befehl="laeufe", anzahl=5).count("[Lauf chat-abc]"), 2)
+
+
+class HookWunsch(unittest.TestCase):
+    def test_zitierte_nummer_verschiebt_den_lauf_nicht(self):
+        import laeufe
+        laeufe.melden("claude", {"aktion": "start", "lauf": "chat-a", "titel": "Erste", "wunsch": "5", "quelle": "hook"})
+        x = laeufe.melden("claude", {"aktion": "start", "lauf": "chat-a", "titel": "Zweite", "wunsch": "9", "quelle": "hook"})
+        self.assertEqual(x["wunsch"], 5)
+
+    def test_gesetzte_nummer_bleibt_gegen_den_hook(self):
+        import laeufe
+        laeufe.melden("claude", {"aktion": "start", "lauf": "chat-b", "titel": "Erste", "quelle": "hook"})
+        laeufe.melden("claude", {"aktion": "stand", "lauf": "chat-b", "wunsch": "6"})
+        x = laeufe.melden("claude", {"aktion": "start", "lauf": "chat-b", "titel": "Zweite", "wunsch": "9", "quelle": "hook"})
+        self.assertEqual(x["wunsch"], 6)
+
+    def test_gegenfall_erste_nummer_gilt_und_agent_darf_wechseln(self):
+        import laeufe
+        laeufe.melden("claude", {"aktion": "start", "lauf": "chat-c", "titel": "Ohne", "quelle": "hook"})
+        x = laeufe.melden("claude", {"aktion": "start", "lauf": "chat-c", "titel": "Mit", "wunsch": "4", "quelle": "hook"})
+        self.assertEqual(x["wunsch"], 4)
+        x = laeufe.melden("claude", {"aktion": "stand", "lauf": "chat-c", "wunsch": "8"})
+        self.assertEqual(x["wunsch"], 8)
+
+
 def tearDownModule():
     shutil.rmtree(TMP, ignore_errors=True)
 

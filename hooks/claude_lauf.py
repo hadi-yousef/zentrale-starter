@@ -3,7 +3,7 @@
 
 Eingetragen für UserPromptSubmit (Start) und Stop (Fertig), einrichten mit `py hooks/einrichten.py`.
 Ein Lauf je Chat („chat-<session_id>“). Titel ist die erste Zeile der Nachricht des Besitzers, die Wunsch-Nummer
-kommt aus „Wunsch Nr. …“ darin. Bei Fertig steht der Anfang von Claudes letzter Antwort als Ergebnis dabei.
+kommt aus „Wunsch Nr. …“ darin, aber nur beim ersten Start des Chats (spätere Nummern sind oft nur Zitate). Bei Fertig steht der Anfang von Claudes letzter Antwort als Ergebnis dabei.
 
 Der Hook hält Claude nicht auf: Die Zentrale läuft auf diesem Rechner, gewartet wird höchstens 2 Sekunden.
 Fehler (Zentrale aus, Schlüssel fehlt) werden verschluckt. Schlüssel: der von `py start.py agent-neu claude`.

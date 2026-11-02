@@ -20,7 +20,7 @@ README, `CONTRIBUTING.en.md` and `SECURITY.md` are available in English.
 | **Agents** | Each agent has its own key and uses `zentrale_client.py` to record what it is doing and what it wants to ask you. |
 | **Tidying up** | Tools in `aufraeumen/`: inventory (read only), backup to a USB drive with verification, moves only within the same disk with a log, undo for every step, trash instead of deleting. Plus a cleanup run for junk that regenerates (uv, pip, npm, old `.venv` and `node_modules`, temp files). |
 | **Guide** | `AGENTS.md` (Codex) and `CLAUDE.md` (Claude) walk the agent through phases: backup, inventory, plan, tidying up, filling the hub. Each phase ends with your yes. |
-| **Rules** | `REGELN.md`: how the agents should work. A template you can adapt. |
+| **Rules** | `REGELN.md`: how the agents should work. Your own rules go into `REGELN.lokal.md`, which survives every update and takes priority. |
 
 ## Quick start (Windows)
 

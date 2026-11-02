@@ -11,7 +11,7 @@ import socket
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import parse_qs, urlsplit
+from urllib.parse import parse_qs, unquote, urlsplit
 
 import berichte
 import finanzen
@@ -214,7 +214,7 @@ class Handler(BaseHTTPRequestHandler):
             if teile == ["projekte"]:
                 return pos.projekt_neu(aid, b)
             if len(teile) == 2 and teile[0] == "projekte":
-                return pos.projekt_aendern(aid, teile[1], b)
+                return pos.projekt_aendern(aid, unquote(teile[1]), b)   # Namen mit Leerzeichen und Umlauten kommen kodiert an
             if teile == ["aufgaben"]:
                 return pos.aufgabe_neu(aid, b)
             if len(teile) == 2 and teile[0] == "aufgaben":

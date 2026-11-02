@@ -363,6 +363,17 @@ def daten_zaehlen():
     return d, z
 
 
+def quelle_finden(git):
+    """Name der Git-Quelle für Updates: die offizielle Adresse, sonst origin, sonst die einzige. Sonst leer."""
+    namen = git("remote").stdout.split()
+    for n in namen:
+        if re.search(r"github\.com[/:]hadi-yousef/zentrale-starter(\.git)?/?$", git("remote", "get-url", n).stdout.strip(), re.I):
+            return n
+    if "origin" in namen:
+        return "origin"
+    return namen[0] if len(namen) == 1 else ""
+
+
 def update():
     """Neue Fassung holen, ohne dass etwas verloren geht:
     1. Daten zählen, eigene Änderungen (nicht hochgeladen, auch committete) in einen Sicherungszweig legen
@@ -388,6 +399,11 @@ def update():
 
     if not (HIER / ".git").exists():
         sys.exit("Dieser Ordner ist kein Git-Klon. Update: neu klonen (README.md), dann nach docs/EINRICHTEN.md einrichten.")
+    quelle = quelle_finden(git)
+    if not quelle:
+        namen = ", ".join(git("remote").stdout.split()) or "keine"
+        sys.exit(f"Ich finde die Quelle für Updates nicht (eingetragen: {namen}). Nichts geändert. "
+                 "Trag sie ein: git remote add origin <Adresse des Starter-Repos>")
     ordner_daten, vorher = daten_zaehlen()
     alt = fassung()
     print(f"Zentrale in {HIER}, Fassung {alt}, Daten in {ordner_daten}")
@@ -396,7 +412,7 @@ def update():
     # 1. Eigenes sichern (daten\\ ist nicht in Git und bleibt sowieso unberührt)
     offen = [z for z in git("status", "--porcelain").stdout.splitlines() if z.strip()]
     # Eigene Commits: nicht auf GitHub. Commits, die es dort mit gleichem Text gibt, sind alte Fassungen vor einem Umschreiben.
-    git("fetch", "-q", "origin")
+    git("fetch", "-q", quelle)
     oben = set(git("log", "--format=%s", "--remotes").stdout.splitlines())
     eigene = [z for z in git("log", "--format=%h %s", "HEAD", "--not", "--remotes").stdout.splitlines()
               if z.strip() and z.split(" ", 1)[-1] not in oben]
@@ -431,12 +447,12 @@ def update():
         print(f"Gesichert in Zweig {sicherung}.")
 
     # 2. Neue Fassung holen
-    r = git("fetch", "origin")
+    r = git("fetch", quelle)
     if r.returncode:
         print((r.stdout + r.stderr).strip())
         sys.exit("Holen hat nicht geklappt (Netz?). Nichts geändert" + (f"; deine Änderungen liegen in {sicherung}." if sicherung else "."))
     zweig = git("rev-parse", "--abbrev-ref", "HEAD").stdout.strip() or "main"
-    ziel = f"origin/{zweig if zweig != 'HEAD' else 'main'}"
+    ziel = f"{quelle}/{zweig if zweig != 'HEAD' else 'main'}"
     if git("merge-base", "--is-ancestor", "HEAD", ziel).returncode == 0 and not offen:
         r = git("merge", "--ff-only", ziel)
         wie = "vorgespult"

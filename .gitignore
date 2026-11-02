@@ -6,6 +6,9 @@ aufraeumen/protokoll.jsonl.sperre
 aufraeumen/INVENTUR.md
 aufraeumen/PLAN.md
 aufraeumen/*.json
+# Eigene Regeln und zusätzliche Regel-Ziele des Besitzers
+REGELN.lokal.md
+REGELN.ziele.txt
 # Schlüssel nie ins Repo
 *.key
 .env

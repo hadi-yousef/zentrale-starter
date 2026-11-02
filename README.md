@@ -17,7 +17,7 @@ T3 Code) bei dir aufräumt: sicher, in kleinen Schritten. Gelöscht wird nur, wa
 | **Agenten** | Jeder Agent hat einen eigenen Schlüssel und trägt über `zentrale_client.py` ein, was er tut und was er fragen will. |
 | **Aufräumen** | Werkzeuge in `aufraeumen\`: Bestandsaufnahme (nur lesen), Sichern auf Stick mit Prüfung, Verschieben nur auf derselben Platte mit Protokoll, Rückgängig für jeden Schritt, Papierkorb statt Löschen. Dazu die Putzrunde gegen Müll, der sich neu erzeugt (uv, pip, npm, alte `.venv` und `node_modules`, Temp). |
 | **Anleitung** | `AGENTS.md` (Codex) und `CLAUDE.md` (Claude) führen den Agenten in Phasen durch: Sichern, Bestandsaufnahme, Plan, Aufräumen, Zentrale füllen. Jede Phase endet mit deinem Ja. |
-| **Regeln** | `REGELN.md`: wie die Agenten arbeiten sollen. Eine Vorlage, die du anpasst. |
+| **Regeln** | `REGELN.md`: wie die Agenten arbeiten sollen. Eigene Regeln kommen nach `REGELN.lokal.md`, die bleibt bei jedem Update erhalten und geht vor. |
 
 ## Schnellstart (Windows)
 

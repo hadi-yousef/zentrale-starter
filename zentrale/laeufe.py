@@ -67,9 +67,10 @@ def melden(aid, d):
         alt = _aktiv.get(k)
         if aktion == "fertig" and not alt and d.get("nur_wenn_aktiv"):
             return {}
-        if aktion == "start" and (not w or not felder["titel"]):   # Folge-Nachricht im selben Chat: Wunsch und Titel behalten
+        if aktion == "start" and (not w or not felder["titel"] or felder["quelle"] == "hook"):   # Folge-Nachricht im selben Chat: Wunsch und Titel behalten
             vorher = alt or next((x for x in reversed(_fertig) if x["agent"] == aid and x["lauf"] == lauf), None) or {}
-            w = w or vorher.get("wunsch")
+            # Der Hook nimmt die Nummer nur beim ersten Start: Eine zitierte Nummer verschiebt den laufenden Chat nicht
+            w = (vorher.get("wunsch") or w) if felder["quelle"] == "hook" else (w or vorher.get("wunsch"))
             felder["titel"] = felder["titel"] or vorher.get("titel", "")
         if aktion == "start" or not alt:
             if alt and aktion == "start" and jetzt - alt["start"] >= 60:   # nie fertig gemeldet: als abgebrochen ablegen
