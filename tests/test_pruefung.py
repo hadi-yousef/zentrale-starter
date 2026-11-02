@@ -557,7 +557,7 @@ class EigeneRegeln(unittest.TestCase):
     def setUp(self):
         if not shutil.which("git"):
             self.skipTest("git fehlt")
-        self.t = neuer_ordner("regeln")
+        self.t = Path(tempfile.mkdtemp(prefix="regeln-", dir=TMP)).resolve()   # eigener Ordner: Windows räumt Git-Dateien nicht einfach weg
         self.env = _git_umgebung()
         self.heim = self.t / "heim"
         self.heim.mkdir()
