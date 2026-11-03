@@ -16,7 +16,7 @@ from pathlib import Path
 
 HOOK = Path(__file__).resolve().parent / "claude_lauf.py"
 DATEI = Path.home() / ".claude" / "settings.json"
-EREIGNISSE = ("UserPromptSubmit", "Stop")
+EREIGNISSE = ("UserPromptSubmit", "Stop", "StopFailure")   # StopFailure: Antwort brach an einem API-Fehler ab (z. B. Limit), dann kommt kein Stop
 
 
 def befehl():

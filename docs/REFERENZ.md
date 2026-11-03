@@ -1,12 +1,14 @@
 # Referenzbilder: so sieht die Zentrale aus
 
-Für Agenten. **So muss die Zentrale aussehen**, wenn sie richtig läuft (Fassung 2026-11-02). Die Bilder sind mit
+Für Agenten. **So muss die Zentrale aussehen**, wenn sie richtig läuft (Fassung 2026-11-07). Die Bilder sind mit
 Beispieldaten gemacht. Sieht die Zentrale des Besitzers anders aus, fehlt links „Agenten“ oder „Papierkorb“, oder steht
-unten links eine andere Fassung, dann arbeitest du an einer **alten oder falschen Zentrale**. Dann nicht weiterbauen,
+unten links eine andere Fassung als in `zentrale\hub.py`, dann arbeitest du an einer **alten oder falschen Zentrale**. Dann nicht weiterbauen,
 sondern `AGENTS.md`, Abschnitt „Nur eine Zentrale“, befolgen.
 
 Die Oberfläche wird nicht nachgebaut und nicht umgestaltet. Sie kommt fertig aus diesem Repo (`zentrale\index.src.html`).
 Größere Änderungen nur nach Entwurf als Bild und OK des Besitzers (`REGELN.md`, „Oberflächen“).
+
+Die Bilder 01 bis 17 stammen aus einer früheren Fassung: Dort fehlen in der Leiste noch Kalender, E-Mail und Inventar, und unten links steht eine ältere Fassung. Das ist kein Fehler. Es gilt immer `FASSUNG` in `zentrale\hub.py`.
 
 | Bild | Seite | Worauf achten |
 |---|---|---|
@@ -27,6 +29,11 @@ Größere Änderungen nur nach Entwurf als Bild und OK des Besitzers (`REGELN.md
 | ![](bilder/15-geraete.png) | **Homelab → Geräte** | Oben die Warnungen als Pillen (rot dringend, orange bald, grau Hinweise). Je Gerät eine Karte mit grünem bzw. grauem Punkt (online/offline), Ringen für Prozessor, Arbeitsspeicher und Platte, unten Akku und Laufzeit. Offline-Geräte blass. |
 | ![](bilder/16-geraet-blatt.png) | Gerät angetippt | Warnungen, Ringe (auch Temperatur und Akku), Laufwerke mit Balken und Papierkorb, Akku, System, Netzwerk, Dienste. „Vergessen“ nur bei offline. |
 | ![](bilder/17-speicher.png) | **Homelab → Speicher** | Oben alle Laufwerke zusammen, je Gerät eine Farbe. Darunter je Gerät die Laufwerke mit belegt, Papierkorb (orange) und frei. Fast volle in Rot. |
+| ![](bilder/18-kalender.png) | **Kalender** | Oben die Zahl und wohin neue Termine kommen, darunter „Neuer Termin …“. Je Tag ein Abschnitt, auch mit fälligen Aufgaben. Unten „Kalender verbinden“: Geht auch ohne Konto. |
+| ![](bilder/19-email.png) | **E-Mail** | „Wichtig“ oben, darunter „Alles andere“, dann die Postfächer und ob Agenten mitlesen dürfen (Standard: aus). |
+| ![](bilder/20-email-blatt.png) | Mail angetippt | „Wichtig“ bzw. „Nicht wichtig“ und „Erledigt“, Absender, Anhänge nur als Name, der Text. Senden und Löschen gibt es nicht. |
+| ![](bilder/21-inventar.png) | **Inventar** | Vier Zahlen, Eingabe für Suche oder Satz, Kategorien, Karten je Teil. Orange Menge und „nachkaufen“: unter der Mindestmenge. |
+| ![](bilder/22-inventar-blatt.png) | Teil angetippt | Plus und Minus, Kerndaten, Fotos, Verlauf aller Buchungen. |
 
-Die Leiste hat oben Übersicht, Agenten, Berichte, Wünsche, unter „Persönlich“ Projekte, Finanzen, Notizen und unter
+Die Leiste hat oben Übersicht, Agenten, Berichte, Wünsche, unter „Persönlich“ Projekte, Kalender, E-Mail, Inventar, Finanzen, Notizen und unter
 „Homelab“ Geräte, Dienste (nur wenn ein Linux-Gerät meldet), Netzwerk, Speicher, Papierkorb.

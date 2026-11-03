@@ -30,6 +30,14 @@ import rueckgaengig as R    # noqa: E402
 _sperre = threading.Lock()
 
 
+def _junction(p):
+    """Windows-Verbindung: os.walk ginge sonst hinein, in jeder Python-Fassung. OneDrive-Ordner zählen nicht dazu."""
+    try:
+        return getattr(os.lstat(p), "st_reparse_tag", 0) == 0xA0000003
+    except OSError:
+        return False
+
+
 def _schritte():
     alle = P.lesen()
     weg = {e["zurueck_von"] for e in alle if e.get("art") == "zurueck"} | {e["geloescht_von"] for e in alle if e.get("art") == "geloescht"}
@@ -73,14 +81,15 @@ def _windows_papierkorb():
         return _system["bytes"]
     n = None
     try:
-        sid = subprocess.run(["whoami", "/user", "/fo", "csv", "/nh"], capture_output=True, text=True, timeout=10,
+        sid = subprocess.run(["whoami", "/user", "/fo", "csv", "/nh"], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=10,
                              creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0)).stdout.strip().split(",")[-1].strip('"')
         if sid.startswith("S-1-"):
             n = 0
             for b in string.ascii_uppercase:
                 d = Path(f"{b}:\\$Recycle.Bin") / sid
                 if d.is_dir():
-                    for wurzel, _, dateien in os.walk(d):
+                    for wurzel, unter, dateien in os.walk(d):
+                        unter[:] = [x for x in unter if not _junction(os.path.join(wurzel, x))]
                         for f in dateien:
                             if not f.startswith("$I"):   # $I… sind nur die kleinen Begleitdateien
                                 try:
@@ -192,7 +201,7 @@ def loeschen(b):
         if os.name != "nt":
             raise ValueError("Den Windows-Papierkorb gibt es nur unter Windows.")
         r = subprocess.run(["powershell", "-NoProfile", "-Command", "Clear-RecycleBin -Force -ErrorAction Stop"], capture_output=True,
-                           text=True, timeout=300, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+                           text=True, encoding="utf-8", errors="replace", timeout=300, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
         _system["t"] = 0
         if r.returncode:
             raise ValueError("Der Windows-Papierkorb ließ sich nicht leeren: " + (r.stderr.strip()[:200] or "unbekannter Fehler"))

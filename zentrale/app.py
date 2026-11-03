@@ -8,6 +8,7 @@ import ipaddress
 import json
 import os
 import socket
+import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -17,7 +18,10 @@ import berichte
 import finanzen
 import geraete
 import hub
+import inventar
+import kalender
 import laeufe
+import mails
 import notizen
 import papierkorb
 import pos
@@ -82,7 +86,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Cache-Control", "no-store")
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Referrer-Policy", "no-referrer")
-        self.send_header("Content-Security-Policy", "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; "
+        self.send_header("Content-Security-Policy", "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; "
                          "script-src 'self' 'unsafe-inline'; frame-ancestors 'none'")
         self.end_headers()
         self.wfile.write(body)
@@ -156,6 +160,27 @@ class Handler(BaseHTTPRequestHandler):
                 if r is None:
                     return self._json(404, {"fehler": "unbekannt"})
                 return self._json(200, r[1]) if r[0] == "json" else self._send(200, r[1], r[2])
+            if url.path == "/api/kalender":
+                return self._json(200, kalender.stand_besitzer() if aid == hub.BESITZER else kalender.stand())
+            if url.path == "/api/kalender/termine":
+                return self._json(200, kalender.termine(tage=int(arg("tage", "7"))))
+            if url.path == "/api/inventar":
+                return self._json(200, inventar.stand())
+            if url.path == "/api/inventar/verstehen":
+                return self._json(200, inventar.verstehen(arg("text")))
+            if url.path.startswith("/api/inventar/teile/") and len(teile) == 4 and teile[2] == "foto":   # /teile/<id>/foto/<datei>
+                pfad = inventar.foto_pfad(teile[1], teile[3])
+                return self._send(200, pfad.read_bytes(), "image/png" if pfad.suffix == ".png" else "image/jpeg")
+            if url.path == "/api/mail" or url.path.startswith("/api/mail/"):
+                mails.darf(aid)
+                if url.path == "/api/mail":
+                    return self._json(200, mails.liste(arg("anzahl", "60")))
+                if url.path == "/api/mail/offen":
+                    return self._json(200, mails.offen(arg("anzahl", "10")))
+                if len(teile) == 1:
+                    return self._json(200, mails.lesen(teile[0]))
+        except PermissionError as e:
+            return self._json(403, {"fehler": str(e)})
         except ValueError as e:
             return self._json(400, {"fehler": str(e)})
         if url.path == "/melder.py":
@@ -183,6 +208,7 @@ class Handler(BaseHTTPRequestHandler):
             n = -1
         # Finanzen: Kontoauszüge kommen als Datei (base64, bis 10 MB)
         grenze = finanzen.UPLOAD_MAX if url.path == "/api/finanzen/upload" else 4 * 1024 * 1024 if url.path.startswith("/api/finanzen/") \
+            else 15 * 1024 * 1024 if url.path.startswith("/api/inventar/teile/") and url.path.endswith("/foto") \
             else GROSS if url.path.startswith(("/api/berichte", "/api/notizen")) else hub.MAX_BODY
         if n < 0 or n > grenze:
             return self._json(413, {"fehler": "Die Anfrage ist zu groß."})
@@ -251,6 +277,43 @@ class Handler(BaseHTTPRequestHandler):
             if aid != hub.BESITZER:
                 raise PermissionError("Endgültig löschen darf nur der Besitzer. Agenten verschieben nur in den Papierkorb.")
             return papierkorb.loeschen(b)
+        if pfad.startswith("/api/kalender/"):
+            if teile in (["einrichten"], ["waehlen"], ["trennen"]) and aid != hub.BESITZER:
+                raise PermissionError("Einen Kalender verbindet nur der Besitzer, in der Oberfläche.")
+            if teile == ["einrichten"]:
+                return kalender.einrichten(b.get("dienst"), b.get("konto"), b.get("passwort"), b.get("url"))
+            if teile == ["waehlen"]:
+                return kalender.waehlen(str(b.get("ziel") or ""))
+            if teile == ["trennen"]:
+                return kalender.trennen()
+            if teile == ["termine"]:
+                return kalender.termin_neu(aid, b)
+            if len(teile) == 3 and teile[0] == "termine" and teile[2] == "weg":
+                return kalender.termin_weg(teile[1])
+        if pfad.startswith("/api/inventar/"):
+            if teile == ["teile"]:
+                return inventar.teil_neu(aid, b)
+            if len(teile) == 2 and teile[0] == "teile":
+                return inventar.teil_aendern(aid, teile[1], b)
+            if len(teile) == 3 and teile[0] == "teile" and teile[2] == "foto":
+                return inventar.foto_neu(aid, teile[1], b)
+            if teile == ["buchen"]:
+                return inventar.buchen(aid, b)
+        if pfad.startswith("/api/mail/"):
+            if teile in (["verbinden"], ["trennen"], ["agenten"]):
+                if aid != hub.BESITZER:
+                    raise PermissionError("Postfächer verbindet nur der Besitzer, in der Oberfläche.")
+                if teile == ["verbinden"]:
+                    return mails.verbinden(str(b.get("art") or ""), b.get("adresse"), b.get("passwort"), b.get("host"), bool(b.get("vom_kalender")))
+                return mails.trennen(b.get("id")) if teile == ["trennen"] else mails.agenten_erlauben(b.get("ja"))
+            mails.darf(aid)
+            if teile == ["abrufen"]:
+                mails._abruf.set()
+                return {"ok": True}
+            if len(teile) == 2 and teile[1] == "bewertung":
+                return mails.bewerten(aid, teile[0], b)
+            if len(teile) == 1:
+                return mails.aendern(aid, teile[0], b)
         if pfad == "/api/notizen/neu":
             return notizen.neu(b.get("ordner"), b.get("titel"), b.get("text"))
         if pfad == "/api/notizen/speichern":
@@ -274,6 +337,7 @@ def starten(bind="127.0.0.1", port=8090, lan=False):
         notizen.grundgeruest()
     except OSError as e:
         print(f"Grundgerüst der Notizen nicht angelegt: {e}", flush=True)
+    threading.Thread(target=mails.waechter, daemon=True).start()
     ThreadingHTTPServer.daemon_threads = True
     # Unter Windows erlaubt SO_REUSEADDR, dass zwei Programme denselben Port belegen. Das wollen wir nicht.
     ThreadingHTTPServer.allow_reuse_address = os.name != "nt"

@@ -116,6 +116,7 @@ def messen(p):
         return {"typ": "datei", "bytes": st.st_size, "dateien": 1, "sha256": sha256(p) if lesen_ok else None}
     n = b = 0
     for d, dirs, files in os.walk(p):
+        dirs[:] = [x for x in dirs if not _junction(os.path.join(d, x))]
         for f in files:
             try:
                 b += os.lstat(os.path.join(d, f)).st_size
@@ -123,6 +124,14 @@ def messen(p):
             except OSError:
                 pass
     return {"typ": "ordner", "bytes": b, "dateien": n, "sha256": None}
+
+
+def _junction(p):
+    """Windows-Verbindung: os.walk ginge sonst hinein, in jeder Python-Fassung. OneDrive-Ordner zählen nicht dazu."""
+    try:
+        return getattr(os.lstat(p), "st_reparse_tag", 0) == 0xA0000003
+    except OSError:
+        return False
 
 
 def platte(p):

@@ -88,6 +88,7 @@ def messen(p):
         return 0
     b = 0
     for d, dirs, files in os.walk(p, onerror=lambda e: None):
+        dirs[:] = [x for x in dirs if not ist_link(Path(d) / x)]
         for f in files:
             try:
                 b += os.lstat(os.path.join(d, f)).st_size
@@ -123,6 +124,7 @@ def zuletzt_baum(p):
         return neu
     kaputt = []
     for d, dirs, files in os.walk(p, onerror=kaputt.append):
+        dirs[:] = [x for x in dirs if not ist_link(Path(d) / x)]
         for x in dirs + files:
             try:
                 neu = max(neu, os.lstat(os.path.join(d, x)).st_mtime)

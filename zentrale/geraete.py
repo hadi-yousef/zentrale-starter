@@ -229,7 +229,7 @@ def tailscale_ip():
     ip = ""
     if prog:
         try:
-            r = subprocess.run([prog, "ip", "-4"], capture_output=True, text=True, timeout=5,
+            r = subprocess.run([prog, "ip", "-4"], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=5,
                                creationflags=0x08000000 if os.name == "nt" else 0)   # CREATE_NO_WINDOW: kein Konsolenfenster
             ip = (r.stdout.split() or [""])[0] if r.returncode == 0 else ""
             ip = ip if ipaddress.ip_address(ip) in ipaddress.ip_network("100.64.0.0/10") else ""

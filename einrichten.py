@@ -84,6 +84,14 @@ def ports():
     return funde
 
 
+def _junction(p):
+    """Windows-Verbindung: os.walk ginge sonst hinein, in jeder Python-Fassung. OneDrive-Ordner zählen nicht dazu."""
+    try:
+        return getattr(os.lstat(p), "st_reparse_tag", 0) == 0xA0000003
+    except OSError:
+        return False
+
+
 def ps(befehl):
     try:
         return subprocess.run(["powershell", "-NoProfile", "-Command", befehl], capture_output=True, text=True,
@@ -99,7 +107,7 @@ def prozesse():
                "-and $_.Name -match 'py' } | ForEach-Object { \"$($_.ProcessId)`t$($_.CommandLine)\" }")
     else:
         try:
-            t = subprocess.run(["ps", "-axo", "pid=,command="], capture_output=True, text=True, timeout=10).stdout
+            t = subprocess.run(["ps", "-axo", "pid=,command="], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=10).stdout
         except Exception:
             t = ""
         t = "\n".join("\t".join(z.strip().split(None, 1)) for z in t.splitlines()
@@ -144,7 +152,7 @@ def ordner():
     funde, start = [], Path.home()
     for wurzel, dirs, files in os.walk(start):
         tiefe = len(Path(wurzel).relative_to(start).parts)
-        dirs[:] = [d for d in dirs if d.lower() not in OHNE and not d.startswith(".") and tiefe < 4]
+        dirs[:] = [d for d in dirs if d.lower() not in OHNE and not d.startswith(".") and tiefe < 4 and not _junction(os.path.join(wurzel, d))]
         f = set(files)
         p = Path(wurzel)
         if p.resolve() == HIER:
@@ -359,7 +367,8 @@ def daten_zaehlen():
     pos = lade("pos.json")
     z = {"Wünsche": len(lade("wuensche.json").get("wuensche", [])), "Berichte": len(lade("berichte.json").get("berichte", [])),
          "Projekte": len(pos.get("projekte", [])), "Aufgaben": len(pos.get("aufgaben", [])),
-         "Notizen": sum(1 for x in (d / "notizen").rglob("*.md")) if (d / "notizen").is_dir() else 0}
+         "Notizen": sum(1 for x in (d / "notizen").rglob("*.md")) if (d / "notizen").is_dir() else 0,
+         "Termine": len(lade("termine.json").get("termine", [])), "Teile im Inventar": len(lade("inventar.json").get("teile", [])), "Mails": len(lade("mails.json").get("mails", []))}
     return d, z
 
 
@@ -427,7 +436,7 @@ def update():
             with tempfile.TemporaryDirectory() as tmp:
                 env = dict(os.environ, GIT_INDEX_FILE=str(Path(tmp) / "index"), GIT_AUTHOR_NAME="Zentrale",
                            GIT_AUTHOR_EMAIL="zentrale@localhost", GIT_COMMITTER_NAME="Zentrale", GIT_COMMITTER_EMAIL="zentrale@localhost")
-                g = lambda *a: subprocess.run(["git", "-C", str(HIER), *a], capture_output=True, text=True, env=env)
+                g = lambda *a: subprocess.run(["git", "-C", str(HIER), *a], capture_output=True, text=True, encoding="utf-8", errors="replace", env=env)
                 stand = ""
                 # jeder Schritt muss klappen, sonst wird nichts zurückgesetzt
                 if g("read-tree", "HEAD").returncode == 0 and g("add", "-A").returncode == 0:
@@ -460,7 +469,7 @@ def update():
         if not sicherung:   # Geschichte neu geschrieben: der alte Stand bekommt trotzdem einen Zweig
             sicherung = zweig_anlegen("HEAD")
         r = git("reset", "--hard", ziel)
-        wie = "auf den neuen Stand gesetzt (" + ("eigene Änderungen liegen in der Sicherung" if offen else "die Geschichte wurde neu geschrieben") + ")"
+        wie = "auf den neuen Stand gesetzt (" + ("eigene Änderungen liegen in der Sicherung" if offen else "eigene Commits liegen im Sicherungszweig" if eigene else "die Geschichte wurde neu geschrieben") + ")"
     if r.returncode:
         print((r.stdout + r.stderr).strip())
         sys.exit("Update hat nicht geklappt. Dein Stand ist unverändert" + (f", Sicherung in {sicherung}." if sicherung else "."))
@@ -469,6 +478,13 @@ def update():
 
     # 3. Regeln, Neustart, Prüfung
     subprocess.run([sys.executable, str(HIER / "regeln_verteilen.py")])
+    einstellungen = Path.home() / ".claude" / "settings.json"
+    try:
+        hook_da = "claude_lauf.py" in einstellungen.read_text(encoding="utf-8-sig")
+    except OSError:
+        hook_da = False
+    if hook_da:   # nur wenn der Besitzer den Hook schon wollte: neue Ereignisse nachtragen (vorher wird eine Kopie gelegt)
+        subprocess.run([sys.executable, str(HIER / "hooks" / "einrichten.py")])
     aufgabe = [x for x in autostart() if x[3] and x[1].lower() != "disabled"]
     lief = False
     if WIN and aufgabe:

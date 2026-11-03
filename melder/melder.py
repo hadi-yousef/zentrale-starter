@@ -61,10 +61,19 @@ def selten(name, sekunden, fn):
     return v
 
 
+def _junction(p):
+    """Windows-Verbindung: os.walk ginge sonst hinein, in jeder Python-Fassung. OneDrive-Ordner zählen nicht dazu."""
+    try:
+        return getattr(os.lstat(p), "st_reparse_tag", 0) == 0xA0000003
+    except OSError:
+        return False
+
+
 def ordnergroesse(p, grenze=300000):
     """Größe eines Ordners (für den Papierkorb), höchstens grenze Dateien zählen."""
     summe, n = 0, 0
-    for w, _, dateien in os.walk(p):
+    for w, unter, dateien in os.walk(p):
+        unter[:] = [x for x in unter if not _junction(os.path.join(w, x))]
         for d in dateien:
             try:
                 summe += os.lstat(os.path.join(w, d)).st_size

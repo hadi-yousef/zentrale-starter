@@ -60,7 +60,13 @@ def ziel_merken(pfad):
     p = Path(pfad).expanduser().resolve()
     if p.is_dir():
         sys.exit(f"--ziel braucht eine Datei, kein Ordner: {p}\\AGENTS.md oder {p}\\CLAUDE.md")
-    if not any(os.path.normcase(os.path.abspath(x)) == os.path.normcase(str(p)) for x in ziele()):
+    # Umgebungsvariablen zählen hier nicht: Sie gelten nur für diesen Aufruf, ein anderer Agent hat sie vielleicht nicht
+    fest = [Path.home() / ".claude" / "CLAUDE.md", Path.home() / ".codex" / "AGENTS.md"]
+    try:
+        fest += [Path(z.strip()) for z in ZIELE_DATEI.read_text(encoding="utf-8-sig").splitlines() if z.strip()]
+    except OSError:
+        pass
+    if not any(os.path.normcase(os.path.abspath(x)) == os.path.normcase(str(p)) for x in fest):
         with ZIELE_DATEI.open("a", encoding="utf-8") as f:
             f.write(f"{p}\n")
         print(f"gemerkt:  {p}")

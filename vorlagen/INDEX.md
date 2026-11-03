@@ -17,6 +17,16 @@ Ein bis zwei Sätze: Was ist das, wofür ist es da?
 | Große Dateien (Videos, Rohdaten) | … (nicht in Git) |
 | Fernspeicher | noch keiner / … |
 
+## Aufbau
+Nur anlegen, was gebraucht wird:
+| Ordner | Was |
+|---|---|
+| `quellen\` | Rohmaterial, bleibt unverändert |
+| `arbeit\` | Entwürfe |
+| `fertig\` | Ergebnisse |
+| `werkzeuge\` | Skripte nur für dieses Projekt |
+| `wissen\` | was man hier wissen muss |
+
 ## Starten und prüfen
 ```powershell
 # wie man es startet, baut oder testet

@@ -21,7 +21,7 @@ STATE_DIR = Path(os.environ.get("ZENTRALE_DATEN") or Path(__file__).resolve().pa
 SCHLUESSEL = STATE_DIR / "schluessel.json"
 BESITZER = "besitzer"
 MAX_BODY = 64 * 1024
-FASSUNG = "2026-11-06"   # bei jedem Update hochsetzen, auch FASSUNG in index.src.html; der Client und die Seite vergleichen
+FASSUNG = "2026-11-07"   # bei jedem Update hochsetzen, auch FASSUNG in index.src.html; der Client und die Seite vergleichen
 ORDNER = Path(__file__).resolve().parent.parent   # der Ordner dieser Zentrale (zentrale-starter)
 ORDNER_ID = hashlib.sha256(str(ORDNER).lower().encode("utf-8")).hexdigest()[:12]   # Kennung ohne Pfad, für /api/lebt
 HEIMNETZ = False   # setzt start.py: hört die Zentrale auch auf andere Geräte (Tailscale)?
@@ -51,11 +51,14 @@ def _json_laden(p, sonst):
         return sonst
 
 
-def json_schreiben(p, d):
-    """Erst in eine Zwischendatei schreiben, dann ersetzen: so ist die Datei nie halb geschrieben."""
+def json_schreiben(p, d, geheim=False):
+    """Erst in eine Zwischendatei schreiben, dann ersetzen: so ist die Datei nie halb geschrieben.
+    geheim: nur der eigene Benutzer darf lesen (Zugangsdaten). Unter Windows schützt das Benutzerprofil, chmod tut dort nichts."""
     p.parent.mkdir(parents=True, exist_ok=True)
     tmp = p.with_name(p.name + ".tmp")
-    tmp.write_bytes(json.dumps(d, ensure_ascii=False).encode("utf-8"))
+    tmp.write_bytes(json.dumps(d, ensure_ascii=False).encode("utf-8", "replace"))
+    if geheim:
+        os.chmod(tmp, 0o600)
     tmp.replace(p)
 
 

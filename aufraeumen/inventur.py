@@ -44,8 +44,13 @@ SYSTEM = {"AppData", "Windows", "Program Files", "Program Files (x86)", "Program
 
 
 def verbindung(p):
-    """Link oder Windows-Verbindung (Junction, z. B. „Eigene Dateien“ im Profil): nicht hineingehen, sonst doppelt gezählt."""
-    return os.path.islink(p) or getattr(os.path, "isjunction", lambda x: False)(p)
+    """Link oder Windows-Verbindung (Junction, z. B. „Eigene Dateien“ im Profil): nicht hineingehen, sonst doppelt gezählt.
+    os.walk folgt Junctions in jeder Python-Fassung. Geprüft wird die genaue Art (0xA0000003 = Junction), nicht nur „Reparse-Punkt“:
+    Auch OneDrive-Ordner sind Reparse-Punkte, und die müssen gezählt und gesichert werden. Geht auch vor Python 3.12."""
+    try:
+        return os.path.islink(p) or getattr(os.lstat(p), "st_reparse_tag", 0) == 0xA0000003
+    except OSError:
+        return False
 
 
 def groesse(b):
@@ -58,6 +63,7 @@ def groesse(b):
 def ordnergroesse(p):
     n = 0
     for d, dirs, files in os.walk(p, onerror=lambda e: None):
+        dirs[:] = [x for x in dirs if not verbindung(os.path.join(d, x))]
         for f in files:
             try:
                 n += os.lstat(os.path.join(d, f)).st_size

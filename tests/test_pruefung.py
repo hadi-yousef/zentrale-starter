@@ -800,6 +800,549 @@ class HookWunsch(unittest.TestCase):
         self.assertEqual(x["wunsch"], 8)
 
 
+# ---------- Kalender, E-Mail, Inventar ----------
+
+ADR = "name" + chr(64) + "example.org"
+AT = bytes([64])
+PNG = b"\x89PNG\r\n\x1a\n" + b"0" * 20
+
+
+class Inventar(unittest.TestCase):
+    def setUp(self):
+        import inventar
+        self.I = inventar
+        t = Path(tempfile.mkdtemp(prefix="inv-", dir=TMP))
+        self.datei = t / "inventar.json"
+        for ziel, wert in ((inventar, {"DATEI": self.datei, "FOTOS": t / "fotos", "_export_spaeter": lambda: None}),):
+            for k, v in wert.items():
+                p = mock.patch.object(ziel, k, v)
+                p.start()
+                self.addCleanup(p.stop)
+
+    def test_buchung_mit_vorher_und_nachher(self):
+        t = self.I.teil_neu("besitzer", {"name": "Schrauben M4", "min": 5})
+        r = self.I.buchen("besitzer", {"teil": t["id"], "delta": "25"})["buchung"]
+        self.assertEqual((r["vorher"], r["nachher"]), (0, 25))
+        r = self.I.buchen("claude", {"teil": t["id"], "delta": -3})["buchung"]
+        self.assertEqual((r["vorher"], r["nachher"], r["von"]), (25, 22, "claude"))
+
+    def test_nicht_mehr_entnehmen_als_da_ist(self):
+        t = self.I.teil_neu("besitzer", {"name": "Kabel"})
+        self.I.buchen("besitzer", {"teil": t["id"], "delta": 2})
+        with self.assertRaises(ValueError):
+            self.I.buchen("besitzer", {"teil": t["id"], "delta": -3})
+        self.assertEqual(self.I.stand()["teile"][0]["menge"], 2)
+
+    def test_gleicher_name_nur_einmal(self):
+        self.I.teil_neu("besitzer", {"name": "Karton"})
+        with self.assertRaises(ValueError):
+            self.I.teil_neu("besitzer", {"name": "karton"})
+
+    def test_saetze_ergeben_nur_einen_vorschlag(self):
+        t = self.I.teil_neu("besitzer", {"name": "Schrauben M4"})
+        v = self.I.verstehen("25x Schrauben M4 dazu")
+        self.assertEqual((v["art"], v["menge"], v["richtung"], v["treffer"][0]["id"]), ("buchung", 25, 1, t["id"]))
+        v = self.I.verstehen("3 Stück Schrauben M4 entnommen")
+        self.assertEqual((v["menge"], v["richtung"]), (3, -1))
+        v = self.I.verstehen("2,5 m Kabel rot verbraucht")
+        self.assertEqual((v["menge"], v["einheit"], v["name"], v["neu"]), (2.5, "m", "Kabel rot", True))
+        self.assertEqual(self.I.verstehen("3 Kartons Papier dazu")["einheit"], "Karton")
+        v = self.I.verstehen("Wie viele Schrauben M4 habe ich?")
+        self.assertEqual((v["art"], v["treffer"][0]["id"]), ("frage", t["id"]))
+        self.assertEqual(self.I.stand()["buchungen"], [], "ein Satz allein bucht nichts")
+        with self.assertRaises(ValueError):
+            self.I.verstehen("irgendwas ohne Zahl")
+
+    def test_unlesbare_datei_wird_nicht_ueberschrieben(self):
+        self.datei.write_text("kaputt", encoding="utf-8")
+        with self.assertRaises(ValueError):
+            self.I.teil_neu("besitzer", {"name": "X"})
+        self.assertEqual(self.datei.read_text(encoding="utf-8"), "kaputt")
+
+    def test_umlaute_und_einkaufsliste_in_der_notiz(self):
+        t = self.I.teil_neu("besitzer", {"name": "Dübel", "min": 10, "kategorie": "Kleinteile"})
+        self.I.buchen("besitzer", {"teil": t["id"], "delta": 3})
+        l = self.I.text_liste()
+        self.assertIn("Dübel", l)
+        self.assertIn("## Einkaufsliste", l)
+        json.loads(self.datei.read_bytes().decode("utf-8"))
+
+    def test_fotos_nur_bilder_und_nur_vom_eigenen_teil(self):
+        import base64
+        a, b = self.I.teil_neu("besitzer", {"name": "A"}), self.I.teil_neu("besitzer", {"name": "B"})
+        with self.assertRaises(ValueError):
+            self.I.foto_neu("besitzer", a["id"], {"bild": base64.b64encode(b"<html>").decode()})
+        d = self.I.foto_neu("besitzer", a["id"], {"bild": base64.b64encode(PNG).decode()})["fotos"][0]["datei"]
+        self.assertTrue(self.I.foto_pfad(a["id"], d).is_file())
+        for teil, datei in ((b["id"], d), (a["id"], "../inventar.json")):
+            with self.assertRaises(ValueError):
+                self.I.foto_pfad(teil, datei)
+
+
+class KalenderLokal(unittest.TestCase):
+    def setUp(self):
+        import kalender
+        self.K = kalender
+        t = Path(tempfile.mkdtemp(prefix="kal-", dir=TMP))
+        for k, v in (("DATEI", t / "kalender.json"), ("TERMINE", t / "termine.json")):
+            p = mock.patch.object(kalender, k, v)
+            p.start()
+            self.addCleanup(p.stop)
+
+    def test_geht_ohne_konto(self):
+        from datetime import datetime, timedelta
+        m = (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d")
+        self.K.termin_neu("besitzer", {"titel": "Zahnärztin", "start": m + " 14:00", "dauer": 30, "ort": "Praxis"})
+        self.K.termin_neu("claude", {"titel": "Urlaub", "start": m, "ganztag": True})
+        d = self.K.termine(tage=3)
+        self.assertEqual(sorted(t["titel"] for t in d["termine"]), ["Urlaub", "Zahnärztin"])
+        z = next(t for t in d["termine"] if t["titel"] == "Zahnärztin")
+        self.assertEqual((z["start"], z["ende"]), (m + "T14:00:00", m + "T14:30:00"))
+        self.assertEqual(d["fehler"], [])
+
+    def test_ausserhalb_des_zeitraums_nicht_dabei(self):
+        self.K.termin_neu("besitzer", {"titel": "Fern", "start": "2099-01-01 10:00"})
+        self.K.termin_neu("besitzer", {"titel": "Alt", "start": "2001-01-01 10:00"})
+        self.assertEqual(self.K.termine(tage=7)["termine"], [])
+
+    def test_unsinn_wird_abgewiesen(self):
+        for b in ({"titel": "", "start": "2030-01-01 10:00"}, {"titel": "X", "start": "morgen"},
+                  {"titel": "X", "start": "2030-01-01 10:00", "ende": "2030-01-01 09:00"}, {"titel": "X", "start": "2030-01-01", "kalender": "Gibtsnicht"}):
+            with self.assertRaises(ValueError):
+                self.K.termin_neu("besitzer", b)
+
+    def test_entfernen_nur_markiert_und_nur_eigene(self):
+        t = self.K.termin_neu("besitzer", {"titel": "Weg", "start": "2030-01-01 10:00"})
+        self.K.termin_weg(t["id"])
+        self.assertIn("entfernt", json.loads(self.K.TERMINE.read_text(encoding="utf-8"))["termine"][0])
+        with self.assertRaises(ValueError):
+            self.K.termin_weg(t["id"])
+
+    def ics(self, *z):
+        return "\r\n".join(("BEGIN:VCALENDAR", "BEGIN:VEVENT", *z, "END:VEVENT", "END:VCALENDAR"))
+
+    def test_ics_erinnerung_ueberschreibt_den_titel_nicht(self):
+        e = self.K._ereignisse(self.ics("SUMMARY:Termin", "DTSTART:20300101T100000Z", "BEGIN:VALARM", "SUMMARY:Alarm", "END:VALARM"), "K")
+        self.assertEqual(e[0]["titel"], "Termin")
+
+    def test_ics_abgesagt_und_zeichen(self):
+        self.assertEqual(self.K._ereignisse(self.ics("SUMMARY:Weg", "DTSTART:20300101T100000Z", "STATUS:CANCELLED"), "K"), [])
+        b = chr(92)
+        e = self.K._ereignisse(self.ics(f"SUMMARY:A{b}, B{b}; C{b}nD", "DTSTART;VALUE=DATE:20300101"), "K")
+        self.assertEqual((e[0]["titel"], e[0]["ganztag"], e[0]["start"]), ("A, B; C\nD", True, "2030-01-01"))
+
+    def test_ohne_zeitzonen_datenbank_gilt_die_ortszeit(self):
+        with mock.patch.object(self.K, "_zone", return_value=None):   # so ist es unter Windows ohne tzdata
+            e = self.K._ereignisse(self.ics("DTSTART;TZID=Europe/Vienna:20300101T100000"), "K")
+        self.assertEqual(e[0]["start"], "2030-01-01T10:00:00")
+
+
+class KalenderVerbunden(unittest.TestCase):
+    """Gegen einen kleinen CalDAV-Dienst auf diesem Rechner."""
+    def setUp(self):
+        import http.server
+        import threading
+        import kalender
+        self.K = kalender
+        t = Path(tempfile.mkdtemp(prefix="kalv-", dir=TMP))
+        for k, v in (("DATEI", t / "kalender.json"), ("TERMINE", t / "termine.json")):
+            p = mock.patch.object(kalender, k, v)
+            p.start()
+            self.addCleanup(p.stop)
+        self.puts = []
+        test = self
+
+        class Dienst(http.server.BaseHTTPRequestHandler):
+            def log_message(self, *a):
+                pass
+
+            def antwort(self, code, text="", **kopf):
+                self.send_response(code)
+                for k, v in kopf.items():
+                    self.send_header(k, v)
+                self.send_header("Content-Length", str(len(text.encode())))
+                self.end_headers()
+                self.wfile.write(text.encode())
+
+            def do_PROPFIND(self):
+                self.rfile.read(int(self.headers.get("Content-Length") or 0))
+                if self.path == "/umleitung/":
+                    return self.antwort(302, Location="http://localhost:1/geheim/")
+                k = '<d:multistatus xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav" xmlns:a="http://apple.com/ns/ical/"><d:response><d:href>/x/</d:href><d:propstat><d:prop>%s</d:prop></d:propstat></d:response>%s</d:multistatus>'
+                if self.path == "/kein-xml/":
+                    return self.antwort(207, "das ist kein xml")
+                if self.path == "/":
+                    return self.antwort(207, k % ("<d:current-user-principal><d:href>/p/</d:href></d:current-user-principal>", ""))
+                if self.path == "/p/":
+                    return self.antwort(207, k % ("<c:calendar-home-set><d:href>/h/</d:href></c:calendar-home-set>", ""))
+                return self.antwort(207, '<d:multistatus xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav" xmlns:a="http://apple.com/ns/ical/"><d:response><d:href>/h/arbeit/</d:href><d:propstat><d:prop><d:displayname>Arbeit</d:displayname><d:resourcetype><d:collection/><c:calendar/></d:resourcetype></d:prop></d:propstat></d:response></d:multistatus>')
+
+            def do_REPORT(self):
+                self.rfile.read(int(self.headers.get("Content-Length") or 0))
+                ics = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nSUMMARY:Besprechung\r\nDTSTART:20300101T100000Z\r\nEND:VEVENT\r\nEND:VCALENDAR"
+                self.antwort(207, f'<d:multistatus xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav"><d:response><d:href>/h/arbeit/1.ics</d:href><d:propstat><d:prop><c:calendar-data>{ics}</c:calendar-data></d:prop></d:propstat></d:response></d:multistatus>')
+
+            def do_PUT(self):
+                test.puts.append((self.path, self.rfile.read(int(self.headers.get("Content-Length") or 0)).decode()))
+                self.antwort(201)
+
+        self.srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Dienst)
+        threading.Thread(target=self.srv.serve_forever, daemon=True).start()
+        self.addCleanup(self.srv.server_close)
+        self.addCleanup(self.srv.shutdown)
+        self.url = f"http://127.0.0.1:{self.srv.server_port}"
+
+    def test_verbinden_lesen_eintragen_und_kein_passwort_nach_aussen(self):
+        d = self.K.einrichten("andere", ADR, "geheim-1234", self.url + "/")
+        self.assertEqual([c["name"] for c in d["kalender"]], ["Arbeit"])
+        self.assertEqual(d["ziel_name"], "Arbeit")
+        agent = json.dumps(self.K.stand())
+        for x in ("geheim-1234", ADR, "/h/arbeit"):
+            self.assertNotIn(x, agent)
+        self.assertNotIn("geheim-1234", json.dumps(self.K.stand_besitzer()))
+        from datetime import datetime
+        t = self.K.termine(von=datetime(2030, 1, 1), tage=2)
+        self.assertEqual(([x["titel"] for x in t["termine"]], t["fehler"]), (["Besprechung"], []))
+        r = self.K.termin_neu("claude", {"titel": "Neu, mit Komma", "start": "2030-02-01 10:00"})
+        self.assertFalse(r["lokal"])
+        self.assertTrue(self.puts[0][0].startswith("/h/arbeit/zentrale-"))
+        self.assertIn("SUMMARY:Neu" + chr(92) + ", mit Komma", self.puts[0][1])
+        # zurück auf eigene Termine: nichts geht mehr an den Kalender
+        self.K.waehlen("lokal")
+        self.assertTrue(self.K.termin_neu("claude", {"titel": "Lokal", "start": "2030-02-02 10:00"})["lokal"])
+        self.assertEqual(len(self.puts), 1)
+
+    def test_umleitung_zu_fremden_bekommt_das_passwort_nicht(self):
+        with self.assertRaisesRegex(ValueError, "fremde Adresse"):
+            self.K.einrichten("andere", ADR, "geheim-1234", self.url + "/umleitung/")
+
+    def test_passwort_nur_ueber_https(self):
+        with self.assertRaisesRegex(ValueError, "https"):
+            self.K.einrichten("andere", ADR, "geheim-1234", "http://cloud.example.org/dav/")
+
+    def test_kaputte_antwort_ist_ein_klarer_fehler(self):
+        with self.assertRaisesRegex(ValueError, "keine lesbare Antwort"):
+            self.K.einrichten("andere", ADR, "geheim-1234", self.url + "/kein-xml/")
+
+    def test_nicht_erreichbarer_kalender_steht_in_fehler(self):
+        self.K.einrichten("andere", ADR, "geheim-1234", self.url + "/")
+        self.K.termin_neu("claude", {"titel": "Lokal", "start": "2030-01-01 10:00", "kalender": "lokal"})
+        self.srv.shutdown()
+        self.srv.server_close()
+        from datetime import datetime
+        d = self.K.termine(von=datetime(2030, 1, 1), tage=2)
+        self.assertEqual([x["titel"] for x in d["termine"]], ["Lokal"], "die eigenen Termine bleiben sichtbar")
+        self.assertEqual(len(d["fehler"]), 1)
+
+
+class Mails(unittest.TestCase):
+    def setUp(self):
+        import mails
+        self.M = mails
+        t = Path(tempfile.mkdtemp(prefix="mail-", dir=TMP))
+        for k, v in (("KONF", t / "mail.json"), ("DATEI", t / "mails.json"), ("KALENDER", t / "kalender.json")):
+            p = mock.patch.object(mails, k, v)
+            p.start()
+            self.addCleanup(p.stop)
+
+    def mail(self, von="a" + chr(64) + "example.org", **k):
+        return dict({"konto": "x", "uid": 1, "zeit": 100, "von": von, "von_name": "A", "an": "", "betreff": "B", "text": "T", "anhaenge": [], "message_id": str(k.get("uid", 1)),
+                     "status": "neu", "wichtig": None, "grund": "", "kurz": "", "gelesen": False, "erledigt": False, "alt": False}, **k)
+
+    def test_zertifikat_wird_geprueft(self):
+        import ssl
+        with mock.patch.object(self.M.imaplib, "IMAP4_SSL") as i:
+            self.M._imap("imap.example.org", ADR, "x")
+        kx = i.call_args.kwargs["ssl_context"]
+        self.assertEqual((kx.verify_mode, kx.check_hostname), (ssl.CERT_REQUIRED, True))
+
+    def test_postfach_wird_nur_gelesen(self):
+        fake = mock.Mock()
+        fake.untagged_responses = {"UIDVALIDITY": [b"7"]}
+        fake.select.return_value = ("OK", [b"1"])
+        fake.status.return_value = ("OK", [b"INBOX (UIDNEXT 3)"])
+        roh = b"From: A <a" + AT + b"b.example>\r\nSubject: Hallo\r\nDate: Tue, 1 Jan 2030 10:00:00 +0000\r\n\r\nText"
+
+        def uid(befehl, *a):
+            if befehl == "search":
+                return "OK", [b"1 2"]
+            return ("OK", [b"1 (RFC822.SIZE 10)"]) if "SIZE" in a[1] else ("OK", [(b"x", roh)])
+        fake.uid.side_effect = uid
+        with mock.patch.object(self.M, "_imap", return_value=fake):
+            neu, letzte, _ = self.M._holen({"host": "h", "adresse": ADR, "passwort": "p"})
+        fake.select.assert_called_once_with("INBOX", readonly=True)
+        abrufe = [c.args[2] for c in fake.uid.call_args_list if c.args[0] == "fetch"]
+        self.assertTrue(all("PEEK" in x or "SIZE" in x for x in abrufe), abrufe)
+        for verboten in ("store", "expunge", "append", "delete", "copy", "move"):
+            self.assertFalse(getattr(fake, verboten).called, verboten)
+        self.assertFalse([c for c in fake.uid.call_args_list if c.args[0].lower() not in ("search", "fetch")])
+        self.assertEqual((len(neu), letzte, neu[0]["betreff"]), (2, 2, "Hallo"))
+
+    def test_html_und_kaputte_bytes(self):
+        roh = (b'From: =?utf-8?q?M=C3=BCller?= <m' + AT + b'b.example>\r\nSubject: =?bad?q?x?= \xff\r\nContent-Type: text/html; charset=nix\r\n\r\n'
+               b"<style>a{}</style><script>boese()</script><p>Gr\xfc\xdfe</p>")
+        m = self.M._zerlegen(roh, "x", 1, False)
+        self.assertNotIn("boese", m["text"])
+        self.assertEqual(m["von_name"], "Müller")
+        json.dumps(m, ensure_ascii=False).encode("utf-8")
+
+    def test_anhaenge_nur_als_name(self):
+        roh = (b"From: a" + AT + b"b.example\r\nSubject: S\r\nMIME-Version: 1.0\r\nContent-Type: multipart/mixed; boundary=g\r\n\r\n--g\r\nContent-Type: text/plain\r\n\r\nHallo\r\n"
+               b'--g\r\nContent-Type: application/pdf\r\nContent-Disposition: attachment; filename="r.pdf"\r\nContent-Transfer-Encoding: base64\r\n\r\nQUJD\r\n--g--\r\n')
+        m = self.M._zerlegen(roh, "x", 1, False)
+        self.assertEqual((m["anhaenge"], m["text"]), (["r.pdf"], "Hallo"))
+
+    def test_agenten_lesen_nur_mit_erlaubnis(self):
+        self.M.darf("besitzer")
+        with self.assertRaises(PermissionError):
+            self.M.darf("claude")
+        self.M.agenten_erlauben(True)
+        self.M.darf("claude")
+        self.M.agenten_erlauben(False)
+        with self.assertRaises(PermissionError):
+            self.M.darf("claude")
+
+    def test_passwort_kommt_nie_heraus(self):
+        with mock.patch.object(self.M, "_imap"):
+            self.M.verbinden("andere", ADR, "geheim-1234", "imap.example.org")
+        self.assertNotIn("geheim-1234", json.dumps(self.M.liste()))
+        self.assertIn("geheim-1234", self.M.KONF.read_text(encoding="utf-8"))
+
+    def test_verbinden_prueft_die_eingaben(self):
+        with mock.patch.object(self.M, "_imap") as i:
+            for b in (("andere", ADR, "p", "kein host"), ("andere", "keine-adresse", "p", "imap.example.org"), ("andere", ADR, "", "imap.example.org"), ("fremd", ADR, "p", "imap.example.org")):
+                with self.assertRaises(ValueError):
+                    self.M.verbinden(*b)
+            self.assertFalse(i.called)
+
+    def test_regel_des_besitzers_gilt_fuer_neue_und_geht_vor(self):
+        with self.M._sperre:
+            self.M._einsortieren({}, [self.mail(uid=1)])
+        self.M.aendern("besitzer", 1, {"wichtig": True})
+        with self.M._sperre:
+            self.M._einsortieren(self.M._konf(), [self.mail(uid=2, message_id="2")])
+        self.assertEqual(self.M.lesen(2)["wichtig"], True)
+        self.M.aendern("claude", 2, {"wichtig": False})
+        self.assertEqual(self.M._konf()["regeln"]["a" + chr(64) + "example.org"], True, "ein Agent ändert keine Regel")
+        with self.M._sperre:
+            self.M._einsortieren(self.M._konf(), [self.mail(uid=3, message_id="3", von="c" + chr(64) + "example.org")])
+        self.M.aendern("besitzer", 3, {"wichtig": False})
+        self.assertFalse(self.M.bewerten("claude", 3, {"wichtig": True})["wichtig"], "die Regel des Besitzers geht vor")
+
+    def test_keine_doppelten(self):
+        with self.M._sperre:
+            self.M._einsortieren({}, [self.mail()])
+            self.M._einsortieren({}, [self.mail()])
+        self.assertEqual(self.M.liste()["gesamt"], 1)
+
+
+class Schnittstelle(unittest.TestCase):
+    """Rechte und Wege über echte Anfragen an die Zentrale (ohne Schlüsseldatei: der Name steht im Kopf)."""
+    def setUp(self):
+        import threading
+        from http.server import ThreadingHTTPServer
+        import app, hub
+        self.t = Path(tempfile.mkdtemp(prefix="api-", dir=TMP))
+        import inventar, kalender, mails
+        for z, k, v in ((inventar, "DATEI", self.t / "i.json"), (inventar, "FOTOS", self.t / "f"), (inventar, "_export_spaeter", lambda: None), (kalender, "DATEI", self.t / "k.json"), (kalender, "TERMINE", self.t / "t.json"),
+                        (mails, "KONF", self.t / "m.json"), (mails, "DATEI", self.t / "ms.json"), (mails, "KALENDER", self.t / "k.json"), (hub, "who", lambda h: h.split()[-1] if h else None), (hub, "HEIMNETZ", False)):
+            p = mock.patch.object(z, k, v)
+            p.start()
+            self.addCleanup(p.stop)
+        self.srv = ThreadingHTTPServer(("127.0.0.1", 0), app.Handler)
+        threading.Thread(target=self.srv.serve_forever, daemon=True).start()
+        self.addCleanup(self.srv.server_close)
+        self.addCleanup(self.srv.shutdown)
+
+    def frage(self, wer, pfad, daten=None):
+        import urllib.error, urllib.request
+        r = urllib.request.Request(f"http://127.0.0.1:{self.srv.server_port}{pfad}", data=None if daten is None else json.dumps(daten).encode(), headers={"Authorization": "Bearer " + wer, "Content-Type": "application/json"})
+        try:
+            with urllib.request.urlopen(r, timeout=10) as a:
+                return a.status, a.read(), a.headers.get("Content-Type")
+        except urllib.error.HTTPError as e:
+            return e.code, e.read(), ""
+
+    def test_verbinden_nur_der_besitzer(self):
+        for pfad in ("/api/kalender/einrichten", "/api/kalender/waehlen", "/api/kalender/trennen", "/api/mail/verbinden", "/api/mail/trennen", "/api/mail/agenten"):
+            self.assertEqual(self.frage("claude", pfad, {"ja": True})[0], 403, pfad)
+
+    def test_mails_fuer_agenten_erst_nach_erlaubnis(self):
+        self.assertEqual(self.frage("claude", "/api/mail")[0], 403)
+        self.assertEqual(self.frage("claude", "/api/mail/1", {"gelesen": True})[0], 403)
+        self.assertEqual(self.frage("besitzer", "/api/mail")[0], 200)
+        self.assertEqual(self.frage("besitzer", "/api/mail/agenten", {"ja": True})[0], 200)
+        self.assertEqual(self.frage("claude", "/api/mail")[0], 200)
+
+    def test_geraete_schluessel_duerfen_nichts_davon(self):
+        for pfad in ("/api/kalender", "/api/kalender/termine", "/api/inventar", "/api/mail"):
+            self.assertEqual(self.frage("geraet-alt", pfad)[0], 403, pfad)
+
+    def test_ohne_schluessel_nichts(self):
+        import urllib.error, urllib.request
+        for pfad in ("/api/kalender", "/api/inventar", "/api/mail"):
+            with self.assertRaises(urllib.error.HTTPError) as c:
+                urllib.request.urlopen(f"http://127.0.0.1:{self.srv.server_port}{pfad}", timeout=10)
+            self.assertEqual(c.exception.code, 401)
+
+    def test_wege_inventar_mit_foto_und_kalender(self):
+        import base64
+        c, b, _ = self.frage("claude", "/api/inventar/teile", {"name": "Dübel"})
+        self.assertEqual(c, 200)
+        tid = json.loads(b)["id"]
+        self.assertEqual(self.frage("claude", f"/api/inventar/teile/{tid}", {"ort": "Regal 1"})[0], 200)
+        self.assertEqual(self.frage("claude", "/api/inventar/buchen", {"teil": tid, "delta": 3})[0], 200)
+        c, b, _ = self.frage("claude", f"/api/inventar/teile/{tid}/foto", {"bild": base64.b64encode(PNG).decode()})
+        self.assertEqual(c, 200)
+        d = json.loads(b)["fotos"][0]["datei"]
+        c, b, typ = self.frage("besitzer", f"/api/inventar/teile/{tid}/foto/{d}")
+        self.assertEqual((c, b, typ), (200, PNG, "image/png"))
+        self.assertEqual(self.frage("besitzer", f"/api/inventar/teile/{tid}/foto/..%2Fi.json")[0], 400)
+        v = json.loads(self.frage("claude", "/api/inventar/verstehen?text=" + "3x%20D%C3%BCbel%20dazu")[1])
+        self.assertEqual(v["treffer"][0]["id"], tid)
+        c, b, _ = self.frage("claude", "/api/kalender/termine", {"titel": "T", "start": "2030-01-01 10:00"})
+        self.assertEqual(c, 200)
+        tt = json.loads(b)["id"]
+        self.assertEqual(self.frage("claude", f"/api/kalender/termine/{tt}/weg", {})[0], 200)
+        self.assertIn(b'"konto"', self.frage("besitzer", "/api/kalender")[1])
+        self.assertNotIn(b'"konto"', self.frage("claude", "/api/kalender")[1])
+        self.assertEqual(self.frage("besitzer", "/api/kalender/termine?tage=abc")[0], 400)
+
+
+# ---------- Fehler aus der Rückmeldung des Kollegen ----------
+
+class Junctions(unittest.TestCase):
+    def test_art_entscheidet_nicht_jeder_reparse_punkt(self):
+        import inventur
+        from types import SimpleNamespace as NS
+        with mock.patch.object(inventur.os, "lstat", return_value=NS(st_reparse_tag=0xA0000003)), mock.patch.object(inventur.os.path, "islink", return_value=False):
+            self.assertTrue(inventur.verbindung("x"))
+        with mock.patch.object(inventur.os, "lstat", return_value=NS(st_reparse_tag=0x9000001A)), mock.patch.object(inventur.os.path, "islink", return_value=False):   # OneDrive
+            self.assertFalse(inventur.verbindung("x"))
+        with mock.patch.object(inventur.os, "lstat", side_effect=OSError), mock.patch.object(inventur.os.path, "islink", return_value=False):
+            self.assertFalse(inventur.verbindung("x"))
+
+    @unittest.skipUnless(WIN, "Junctions gibt es nur unter Windows")
+    def test_messen_geht_nicht_durch_junctions(self):
+        import inventur
+        t = Path(tempfile.mkdtemp(prefix="jn-", dir=TMP)).resolve()
+        ziel, ordner = t / "ziel", t / "ordner" / "tief"
+        ziel.mkdir()
+        ordner.mkdir(parents=True)
+        (ziel / "gross.bin").write_bytes(b"0" * 5000)
+        (ordner / "klein.bin").write_bytes(b"0" * 10)
+        subprocess.run(["cmd", "/c", "mklink", "/J", str(ordner / "link"), str(ziel)], check=True, capture_output=True)
+        self.assertTrue(inventur.verbindung(ordner / "link"))
+        self.assertFalse(inventur.verbindung(ordner))
+        self.assertEqual(inventur.ordnergroesse(t / "ordner"), 10)
+        os.rmdir(ordner / "link")
+
+
+class Kodierung(unittest.TestCase):
+    def test_alle_programmaufrufe_mit_fester_kodierung(self):
+        import ast
+        fehlt = []
+        for f in HIER.rglob("*.py"):
+            if {"tests", "vendor", ".git"} & set(f.relative_to(HIER).parts):
+                continue
+            for n in ast.walk(ast.parse(f.read_text(encoding="utf-8"))):
+                if isinstance(n, ast.Call) and getattr(n.func, "attr", "") in ("run", "check_output", "Popen"):
+                    k = {x.arg: x.value for x in n.keywords}
+                    if "text" in k and "**" not in str(k) and not ("encoding" in k and "errors" in k):
+                        fehlt.append(f"{f.name}:{n.lineno}")
+        self.assertEqual(fehlt, [], "unter Windows scheitert das Lesen sonst an Umlauten still (stdout ist None)")
+
+
+class HookAbbruch(unittest.TestCase):
+    def lade(self):
+        spec = importlib.util.spec_from_file_location("claude_lauf_test", HIER / "hooks" / "claude_lauf.py")
+        m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(m)
+        return m
+
+    def test_abbruch_am_limit_beendet_den_lauf(self):
+        m, e = self.lade(), io.TextIOWrapper(io.BytesIO(json.dumps({"hook_event_name": "StopFailure", "session_id": "s1", "error": "rate_limit", "last_assistant_message": "API Error: Rate limit reached"}).encode()), encoding="utf-8")
+        import zentrale_client
+        with mock.patch.object(zentrale_client, "Zentrale") as Z, mock.patch.object(sys, "stdin", e):
+            m.main()
+        d = Z.return_value._anfrage.call_args.args[1]
+        self.assertEqual((d["aktion"], d["nur_wenn_aktiv"], d["lauf"]), ("fertig", True, "chat-s1"))
+        self.assertIn("Rate limit", d["ergebnis"])
+
+    def test_wird_eingetragen(self):
+        spec = importlib.util.spec_from_file_location("hook_einrichten_test", HIER / "hooks" / "einrichten.py")
+        m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(m)
+        self.assertIn("StopFailure", m.EREIGNISSE)
+
+
+class UpdateFolgen(unittest.TestCase):
+    def setUp(self):
+        spec = importlib.util.spec_from_file_location("einrichten_folgen", HIER / "einrichten.py")
+        self.m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.m)
+        if not shutil.which("git"):
+            self.skipTest("git fehlt")
+
+    def lauf(self, heim, mit_eigenem=False):
+        t, env = Path(tempfile.mkdtemp(prefix="upd-", dir=TMP)).resolve(), _git_umgebung()
+        oben, klon = t / "oben", t / "klon"
+        _git(env, "init", "-q", str(oben))
+        _git(env, "symbolic-ref", "HEAD", "refs/heads/main", cwd=oben)
+        (oben / "zentrale").mkdir()
+        (oben / "zentrale" / "hub.py").write_text('FASSUNG = "alt"\n', encoding="utf-8")
+        _git(env, "add", ".", cwd=oben)
+        _git(env, "commit", "-qm", "alt", cwd=oben)
+        _git(env, "clone", "-q", str(oben), str(klon))
+        if mit_eigenem:
+            (klon / "eigen.txt").write_text("x", encoding="utf-8")
+            _git(env, "add", ".", cwd=klon)
+            _git(env, "commit", "-qm", "eigener Commit", cwd=klon)
+        (oben / "zentrale" / "hub.py").write_text('FASSUNG = "neu"\n', encoding="utf-8")
+        _git(env, "commit", "-qam", "neu", cwd=oben)
+        echt, aufrufe = subprocess.run, []
+
+        def run(args, **kw):
+            if args[0] != "git":
+                aufrufe.append(args)
+                return subprocess.CompletedProcess(args, 0, "", "")
+            kw["env"] = env
+            return echt(args, **kw)
+        self.m.HIER = klon
+        aus = io.StringIO()
+        with mock.patch.object(self.m.subprocess, "run", side_effect=run), mock.patch.object(self.m, "autostart", return_value=[]), mock.patch.object(self.m.Path, "home", return_value=heim), \
+                mock.patch.object(self.m, "daten_zaehlen", return_value=(t, {})), contextlib.redirect_stdout(aus):
+            self.m.update()
+        return aufrufe, aus.getvalue()
+
+    def test_eigene_commits_werden_richtig_benannt(self):
+        heim = Path(tempfile.mkdtemp(prefix="heim-", dir=TMP))
+        _, aus = self.lauf(heim, mit_eigenem=True)
+        self.assertIn("eigene Commits liegen im Sicherungszweig", aus)
+        self.assertNotIn("Geschichte wurde neu geschrieben", aus)
+
+    def test_hook_wird_nur_nachgetragen_wenn_er_schon_da_ist(self):
+        heim = Path(tempfile.mkdtemp(prefix="heim-", dir=TMP))
+        ohne, _ = self.lauf(heim)
+        self.assertFalse([a for a in ohne if "einrichten.py" in str(a)], "ohne Hook wird nichts eingerichtet")
+        (heim / ".claude").mkdir()
+        (heim / ".claude" / "settings.json").write_text('{"hooks": {"Stop": [{"hooks": [{"command": "py claude_lauf.py"}]}]}}', encoding="utf-8")
+        mit, _ = self.lauf(heim)
+        self.assertTrue([a for a in mit if "einrichten.py" in str(a)], "der vorhandene Hook bekommt das neue Ereignis")
+
+
+class ZielMerken(unittest.TestCase):
+    def test_datei_wird_gemerkt_auch_wenn_sie_ueber_die_umgebung_dabei_ist(self):
+        spec = importlib.util.spec_from_file_location("regeln_ziel_test", HIER / "regeln_verteilen.py")
+        m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(m)
+        t = Path(tempfile.mkdtemp(prefix="ziel-", dir=TMP)).resolve()
+        with mock.patch.object(m, "ZIELE_DATEI", t / "REGELN.ziele.txt"), mock.patch.dict(os.environ, {"CODEX_HOME": str(t / "zweiter")}), contextlib.redirect_stdout(io.StringIO()):
+            m.ziel_merken(t / "zweiter" / "AGENTS.md")
+            m.ziel_merken(t / "zweiter" / "AGENTS.md")   # zweimal: nur einmal gemerkt
+        self.assertEqual((t / "REGELN.ziele.txt").read_text(encoding="utf-8").splitlines(), [str(t / "zweiter" / "AGENTS.md")])
+
+
 def tearDownModule():
     shutil.rmtree(TMP, ignore_errors=True)
 
