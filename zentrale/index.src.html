@@ -223,6 +223,7 @@ select.inp{padding-right:8px}
 .bekn{display:block;font-size:11.5px;font-weight:650;color:var(--ink2);margin-bottom:2px;font-variant-numeric:tabular-nums}
 .bem.ich.woanders{font-style:italic;opacity:.85}
 .beck .btn{flex:none}
+.mlsuche{width:100%;margin:0 0 8px}.mlfilter{margin-bottom:6px}
 .belk{flex-wrap:wrap}.beproj{flex:1 1 100%;height:32px;font-size:13.5px;padding:0 8px;margin-top:2px}
 .beab2{display:flex;align-items:center;gap:6px;margin:0;padding:12px 16px 6px;font:600 12.5px var(--font);color:var(--ink2);border-bottom:1px solid var(--sep)}
 .beab2.warte{color:var(--orange)}.beab2 .i{width:14px;height:14px}
@@ -708,7 +709,7 @@ async function post(pfad, body){
 }
 
 /* ---------- Daten ---------- */
-const FASSUNG = "2026-11-07";   // gleich wie hub.FASSUNG
+const FASSUNG = "2026-11-08";   // gleich wie hub.FASSUNG
 const D = {pos: null, wuensche: null, berichte: null, notizen: null, agenten: null, laeufe: null, papierkorb: null, ich: null, fehler: ""};
 async function laden(){
   if (!KEY) return;
@@ -973,15 +974,18 @@ function beDatum(t){
 function beGelesen(b){ if (!b.gelesen && !b._gemeldet) { b._gemeldet = 1; api(`/api/berichte/${b.id}/gelesen`, {ja: true}).catch(() => {}); } }
 function beListe(){
   const A = beAlle(), offen = A.reduce((n, b) => n + offeneFragen(b), 0);
-  const P = [...new Set(A.map(b => b.projekt || ""))].filter(Boolean).sort((a, b) => a.localeCompare(b, "de"));
-  if (BER.projekt && !P.includes(BER.projekt)) BER.projekt = "";
-  const B = BER.projekt ? A.filter(b => b.projekt === BER.projekt) : A;
+  /* Ältere Berichte können „zentrale“ neben „Zentrale“ haben: im Filter ist das ein Eintrag, mit dem Namen des Projekts, wenn es eines gibt */
+  const beKey = s => (s || "").trim().toLocaleLowerCase("de"), PN = new Map();
+  A.forEach(b => { const k = beKey(b.projekt); if (k && !PN.has(k)) PN.set(k, ((D.pos?.projekte || []).find(p => beKey(p.name) === k) || {}).name || b.projekt); });
+  const P = [...PN.values()].sort((a, b) => a.localeCompare(b, "de")), beIn = (b, x) => beKey(b.projekt) === beKey(x);
+  if (BER.projekt && !P.some(x => beKey(x) === beKey(BER.projekt))) BER.projekt = "";
+  const B = BER.projekt ? A.filter(b => beIn(b, BER.projekt)) : A;
   const O = B.filter(b => offeneFragen(b)).sort((a, b) => a.zeit - b.zeit), R = B.filter(b => !offeneFragen(b)), N = BER.mehr ? R.length : 12;
   const zeile = b => {
     const o = offeneFragen(b), m = b.verlauf[b.verlauf.length - 1], vor = m ? `${beWer(m.von)}: ${m.text}` : `${wer(b.von)}: ${b.kurz || b.titel}`;
     return `<button class="ben${b.id === BER.sel ? " on" : ""}" type="button" data-act="besel" data-id="${esc(b.id)}"><span class="pt${b.gelesen ? " leer" : ""}"></span><strong class="benr">${b.nr ? "Nr. " + b.nr : ""}</strong>
       <span class="t"><b>${esc(b.titel)}<span>${esc(beDatum(beZuletzt(b)))}</span></b><span>${esc(vor)}</span><span class="bezl">${abSchild(b.von, b.projekt)}${o ? `<i class="befr">${icon("message-circle-question")} ${o} ${o === 1 ? "Frage" : "Fragen"}</i>` : b.fragen.length ? `<i class="befr ok">${icon("check")} ${b.erledigt ? "erledigt" : "beantwortet"}</i>` : ""}</span></span></button>`; };
-  const filter = P.length > 1 ? `<select class="inp beproj" data-beproj aria-label="Nach Projekt filtern"><option value="">Alle Projekte (${A.length})</option>${P.map(x => `<option value="${esc(x)}"${x === BER.projekt ? " selected" : ""}>${esc(x)} (${A.filter(b => b.projekt === x).length})</option>`).join("")}</select>` : "";
+  const filter = P.length > 1 ? `<select class="inp beproj" data-beproj aria-label="Nach Projekt filtern"><option value="">Alle Projekte (${A.length})</option>${P.map(x => `<option value="${esc(x)}"${beKey(x) === beKey(BER.projekt) ? " selected" : ""}>${esc(x)} (${A.filter(b => beIn(b, x)).length})</option>`).join("")}</select>` : "";
   return `<div class="bel"><div class="belk"><b>Berichte</b><span class="muted">${offen ? `${offen} ${offen === 1 ? "Frage" : "Fragen"} offen` : "alles beantwortet"}</span>${filter}</div>` +
     (!A.length ? `<p class="beleer">Noch keine Berichte.<br>Wenn dein Agent eine Entscheidung braucht, fragt er hier, mit Vorschlägen zum Antippen.</p>` :
      (O.length ? `<h5 class="beab2 warte">${icon("message-circle-question")}Wartet auf dich</h5>${O.map(zeile).join("")}` : "") +
@@ -1002,7 +1006,7 @@ function beVerlauf(b){
     /* Woanders beantwortet (im Chat mit dem Agenten): steht nicht im Verlauf, darum hier als Blase des Besitzers */
     if (f.antwort && f.antwort.woanders && !b.verlauf.some(m => m.frage === f.id)) {
       const nurNotiz = /^im chat beantwortet\.?$/i.test(f.antwort.text || "");
-      E.push([f.antwort.zeit, 2 * k + 2, `<div class="bem ich${nurNotiz ? " woanders" : ""}">${esc(f.antwort.text || "Im Chat beantwortet")}</div>` + (nurNotiz ? "" : `<span class="bestatus">im Chat beantwortet</span>`)]);
+      E.push([f.antwort.zeit, 2 * k + 2, `<div class="bem ich${nurNotiz ? " woanders" : ""}">${esc(f.antwort.text || "Im Chat beantwortet")}</div>` + (nurNotiz && !f.antwort.von ? "" : `<span class="bestatus">${[nurNotiz ? "" : "im Chat beantwortet", f.antwort.von ? "eingetragen von " + esc(wer(f.antwort.von)) : ""].filter(Boolean).join(" · ")}</span>`)]);
     }
   });
   const letzteIch = [...b.verlauf].reverse().find(m => m.von === "besitzer");
@@ -1839,30 +1843,55 @@ async function kaEintragen(v){
 }
 
 /* ---------- E-Mail (mails.py): nur lesend, wichtige zuerst. Der Besitzer verbindet die Postfächer und entscheidet, ob Agenten mitlesen ---------- */
-const ML = {daten: null, zeit: 0, fehler: "", voll: {}, art: "icloud"};
+const ML = {daten: null, zeit: 0, fehler: "", voll: {}, art: "icloud", suche: "", filter: "", treffer: null, gesamt: 0, ordner: {}};
+const mlSuchtAktiv = () => !!(ML.suche.trim() || ML.filter);
+let mlUhr;
+function mlSuchen(sofort){
+  clearTimeout(mlUhr);
+  if (!mlSuchtAktiv()) { ML.treffer = null; mlTrefferZeichnen(); return; }
+  const s = ML.suche, f = ML.filter;
+  mlUhr = setTimeout(async () => {
+    try { const d = await api(`/api/mail?anzahl=200&suche=${encodeURIComponent(s)}&art=${encodeURIComponent(f)}`); if (ML.suche === s && ML.filter === f) { ML.treffer = d.treffer || []; ML.gesamt = d.treffer_gesamt || 0; mlTrefferZeichnen(); } } catch(e) { ML.fehler = e.message; }
+  }, sofort ? 0 : 250);
+}
+function mlTrefferZeichnen(){
+  const t = $("mltreffer"), n = $("mlnormal");
+  if (!t || !n) return;
+  n.hidden = mlSuchtAktiv(); t.hidden = !mlSuchtAktiv();
+  if (!mlSuchtAktiv()) { t.innerHTML = ""; return; }
+  if (!ML.treffer) { t.innerHTML = `<p class="muted">Wird gesucht …</p>`; return; }
+  t.innerHTML = gh("Treffer", String(ML.gesamt)) + (ML.treffer.length ? grp(ML.treffer.map(mlZeile).join("")) : empty("Nichts gefunden. Gesucht wird in allen Mails, die die Zentrale schon geholt hat.", "search"));
+}
 async function mlLaden(){
   ML.zeit = Date.now();
   if (!KEY) return;
   try { ML.daten = await api("/api/mail?anzahl=200"); ML.fehler = ""; } catch(e) { ML.fehler = e.message; }
   $("sheet")._h = null; renderPage(); renderSheet();
+  if (mlSuchtAktiv()) mlSuchen(true);
 }
-const mlAlle = () => ML.daten ? [...ML.daten.wichtig, ...ML.daten.rest] : [];
+const mlAlle = () => ML.daten ? [...(ML.daten.verdacht || []), ...ML.daten.wichtig, ...ML.daten.rest, ...(ML.treffer || [])] : [];
 const mlInfo = nr => mlAlle().find(m => String(m.nr) === String(nr));
 const mlDatum = t => { const d = new Date(t * 1000), h = new Date(); return d.toDateString() === h.toDateString() ? d.toLocaleTimeString("de-DE", {hour: "2-digit", minute: "2-digit"}) : d.toLocaleDateString("de-DE", {day: "numeric", month: "short"}); };
-const mlZeile = m => row(sq(m.wichtig ? "star" : "mail", m.wichtig ? "orange" : m.gelesen ? "gray" : "blue"), `${m.gelesen ? "" : '<span class="mlneu"></span>'}${esc(m.von_name)} · ${esc(m.betreff)}`,
-  esc(m.kurz || m.vorschau || "") + (m.wichtig && m.grund ? `<br><span class="mlgrund">Grund: ${esc(m.grund)}</span>` : ""), val(esc(mlDatum(m.zeit))), sh("mail:" + m.nr));
-const mlKontoZeile = k => row(sq("mail", k.fehler ? "orange" : "green"), esc(k.adresse), esc(k.fehler || (k.zuletzt ? "abgerufen " + ago(k.zuletzt) : "wird gleich abgerufen")), stt(k.fehler ? "warn" : "ok", k.fehler ? "Fehler" : "verbunden"), sh("mailkonto:" + k.id));
+const mlWarnHoch = m => (m.warnung || {}).stufe === "hoch";
+const mlZeile = m => row(mlWarnHoch(m) ? sq("shield-alert", "red") : sq(m.wichtig ? "star" : "mail", m.wichtig ? "orange" : m.gelesen ? "gray" : "blue"), `${m.gelesen ? "" : '<span class="mlneu"></span>'}${esc(m.von_name)} · ${esc(m.betreff)}`,
+  esc(m.warnung ? m.warnung.gruende[0] : m.kurz || m.vorschau || "") + (!m.warnung && m.wichtig && m.grund ? `<br><span class="mlgrund">Grund: ${esc(m.grund)}</span>` : "") + (m.ordner && m.ordner !== "INBOX" ? `<br><span class="mlgrund">${esc(m.ordner_name)}</span>` : ""), val(esc(mlDatum(m.zeit))), sh("mail:" + m.nr));
+const mlKontoZeile = k => row(sq("mail", k.fehler ? "orange" : "green"), esc(k.adresse), esc(k.fehler || (k.nachholen ? "ältere Mails kommen nach und nach" : k.zuletzt ? "abgerufen " + ago(k.zuletzt) : "wird gleich abgerufen")), stt(k.fehler ? "warn" : "ok", k.fehler ? "Fehler" : "verbunden"), sh("mailkonto:" + k.id));
 function viewMail(){
   if (Date.now() - ML.zeit > 30000) mlLaden();
   if (!ML.daten) return kopf("E-Mail") + (ML.fehler ? empty(`<b>Die E-Mail ist gerade nicht erreichbar.</b>${esc(ML.fehler)}`, "mail") : empty("Wird geladen …", "mail"));
   const d = ML.daten, V = d.konten, neuK = `<button class="btn sm" type="button" data-sheet="mailneu">${icon("plus")}Postfach</button>`;
   if (!V.length) return kopf("E-Mail", "Deine Postfächer an einem Ort") + `<div class="tile dlhead">${sq("mail", "blue", "xl")}<div class="t"><b>E-Mail verbinden</b><span>iCloud, Gmail oder ein anderes Postfach mit IMAP. Die Zentrale liest nur, sie sendet und löscht nichts.</span></div><button class="btn pri sm" type="button" data-sheet="mailneu">Verbinden</button></div>` +
     note("Gelesen-Markierungen und Ordner in deinem Postfach bleiben, wie sie sind.");
-  const W = d.wichtig, R = d.rest, A = d.agenten_lesen;
+  const W = d.wichtig, R = d.rest, A = d.agenten_lesen, X = d.verdacht || [];
+  const fi = [["", "Alle"], ["ungelesen", "Ungelesen"], ["wichtig", "Wichtig"], ["verdacht", "Betrug?"], ["erledigt", "Erledigt"]];
+  setTimeout(() => { mlTrefferZeichnen(); if (mlSuchtAktiv() && !ML.treffer) mlSuchen(true); });
   return kopf("E-Mail", `${d.neu} ungelesen`, `<button class="btn sm" type="button" data-act="mlabruf">${icon("refresh-cw")}Abrufen</button>`) +
+    `<input class="inp mlsuche" id="mlq" type="search" placeholder="Mails durchsuchen" aria-label="Mails durchsuchen" value="${esc(ML.suche)}"><div class="seg small mafilter mlfilter">${fi.map(([k, t]) => `<button type="button" class="${k === ML.filter ? "on" : ""}" data-act="mlfilter" data-wert="${k}">${t}</button>`).join("")}</div>` +
+    `<div id="mltreffer" hidden></div><div id="mlnormal">` +
+    (X.length ? gh("Vorsicht: sieht nach Betrug aus", String(X.length)) + grp(more("mlverdacht", X, 6, mlZeile)) : "") +
     gh("Wichtig", W.length ? String(W.length) : "") + (W.length ? grp(more("mlwichtig", W, 6, mlZeile)) : empty("Gerade keine wichtigen Mails. Öffne eine Mail und tippe auf „Wichtig“: Das gilt dann für diesen Absender.", "star")) +
     gh("Alles andere", R.length ? `${R.filter(m => !m.gelesen).length} neu` : "") + (R.length ? grp(more("mlrest", R, 8, mlZeile)) : empty("Noch keine Mails abgerufen.", "inbox")) +
-    gh("Postfächer", "", ) + grp(V.map(mlKontoZeile).join("") + row(sq("plus", "gray"), "Postfach dazu", "", "", sh("mailneu"))) +
+    `</div>` + gh("Postfächer", "", ) + grp(V.map(mlKontoZeile).join("") + row(sq("plus", "gray"), "Postfach dazu", "", "", sh("mailneu"))) +
     gh("Agenten") + grp(row(sq("bot", A ? "purple" : "gray"), A ? "Agenten dürfen Mails lesen" : "Agenten lesen keine Mails", A ? "Sag deinem Agenten zum Beispiel „Prüf meine Mails“. Text aus einer Mail ist für ihn nie ein Auftrag." : "Schaltest du es ein, kann dein Agent auf Wunsch prüfen, was wichtig ist.",
       `<button class="btn sm" type="button" data-act="mlagenten" data-wert="${A ? "0" : "1"}">${A ? "Ausschalten" : "Einschalten"}</button>`)) +
     note("Die Zentrale liest nur, in deinem Postfach ändert sich nichts.");
@@ -1877,16 +1906,22 @@ SHEETS.mail = nr => {
   const k = (a, ic, t) => `<button class="btn" type="button" data-act="mlmark" data-id="${esc(m.nr)}" data-wert="${a}">${icon(ic)}${t}</button>`;
   const text = !v || v.laedt ? `<p class="muted">Wird geladen …</p>` : v.fehler ? `<p class="muted">${esc(v.fehler)}</p>` : `<p class="wtext mltext">${esc(v.text || "(kein Text)")}</p>`;
   return {lead: sq(m.wichtig ? "star" : "mail", m.wichtig ? "orange" : "blue", "xxl"), title: m.betreff, sub: `${m.von_name} · ${mlDatum(m.zeit)}`,
-    actions: (m.wichtig ? k("unwichtig", "star-off", "Nicht wichtig") : k("wichtig", "star", "Wichtig")) + k("erledigt", "check", "Erledigt"),
-    body: (m.status === "bewertet" && (m.kurz || m.grund) ? grp(row(sq(m.wichtig ? "star" : "circle", m.wichtig ? "orange" : "gray"), esc(m.wichtig ? "Wichtig" : "Nicht wichtig") + (m.grund ? ` · ${esc(m.grund)}` : ""), esc(m.kurz || ""), "")) : "") +
+    actions: (m.wichtig ? k("unwichtig", "star-off", "Nicht wichtig") : k("wichtig", "star", "Wichtig")) + k("erledigt", "check", "Erledigt") + (m.warnung ? k("keinbetrug", "shield-check", "Kein Betrug") : ""),
+    body: (m.warnung ? `<div class="grp kaschritte">${row(sq("shield-alert", mlWarnHoch(m) ? "red" : "orange"), mlWarnHoch(m) ? "Sieht nach Betrug aus" : "Vorsicht", m.warnung.gruende.map(esc).join("<br>") + "<br>Nichts anklicken, nichts eingeben. Im Zweifel selbst auf der Seite des Anbieters nachsehen oder dort anrufen.", "")}</div>` : "") + (m.status === "bewertet" && (m.kurz || m.grund) ? grp(row(sq(m.wichtig ? "star" : "circle", m.wichtig ? "orange" : "gray"), esc(m.wichtig ? "Wichtig" : "Nicht wichtig") + (m.grund ? ` · ${esc(m.grund)}` : ""), esc(m.kurz || ""), "")) : "") +
       grp(kv("Von", `${esc(m.von_name)} &lt;${esc(m.von)}&gt;`) + kv("An", esc(m.an)) + (m.anhaenge && m.anhaenge.length ? kv("Anhänge", esc(m.anhaenge.join(", "))) : "")) +
       grp(`<div class="todo"><div class="t">${text}</div></div>`)};
 };
 SHEETS.mailkonto = id => {
   const k = ML.daten && ML.daten.konten.find(x => x.id === id); if (!k) return null;
+  const tn = t => t === 365 ? "1 Jahr" : `${t} Tage`, O = ML.ordner[id], gew = new Set(k.ordner.map(o => o.id));
+  const oListe = !O ? row(sq("folder", "gray"), "Ordner wählen", `Gerade: ${esc(k.ordner.map(o => o.name).join(", "))}`, `<button class="btn sm" type="button" data-act="mlordnerlesen" data-id="${esc(k.id)}">Anzeigen</button>`)
+    : O.laedt ? row(sq("folder", "gray"), "Ordner werden gelesen …", "", "") : O.fehler ? row(sq("triangle-alert", "orange"), "Ordner ließen sich nicht lesen", esc(O.fehler), "")
+    : O.ordner.map(o => row(sq(gew.has(o.id) ? "folder-open" : "folder", gew.has(o.id) ? "blue" : "gray"), esc(o.name), o.art && o.art !== o.name ? esc(o.art) : "", `<button class="btn sm" type="button" data-act="mlordner" data-id="${esc(k.id)}" data-wert="${esc(o.id)}">${gew.has(o.id) ? "Weglassen" : "Mitlesen"}</button>`)).join("");
   return {lead: sq("mail", k.fehler ? "orange" : "green", "xxl"), title: k.name, sub: k.adresse, actions: `<button class="btn" type="button" data-act="mltrennen" data-id="${esc(k.id)}">${icon("unlink")}Trennen</button>`,
     body: (k.fehler ? grp(row(sq("triangle-alert", "orange"), "Letzter Abruf ging nicht", esc(k.fehler), "")) : "") + grp(kv("Adresse", esc(k.adresse)) + kv("Server", esc(k.host)) + kv("Zuletzt abgerufen", esc(k.zuletzt ? ago(k.zuletzt) : "noch nicht")))
-      + note("Trennen vergisst nur den Zugang. Schon geholte Mails bleiben hier, in deinem Postfach ändert sich nichts.")};
+      + gh2("Wie weit zurück") + `<div class="seg small mafilter">${ML.daten.tage_wahl.map(t => `<button type="button" class="${t === k.tage ? "on" : ""}" data-act="mltage" data-id="${esc(k.id)}" data-wert="${t}">${tn(t)}</button>`).join("")}</div>`
+      + gh2("Ordner") + grp(oListe)
+      + note("Ältere Mails kommen nach und nach dazu. Die Zentrale hebt höchstens 5.000 Mails auf, die ältesten fallen zuerst weg. ") + note("Trennen vergisst nur den Zugang. Schon geholte Mails bleiben hier, in deinem Postfach ändert sich nichts.")};
 };
 SHEETS.mailneu = () => {
   if (!ML.daten) return null;
@@ -1896,6 +1931,7 @@ SHEETS.mailneu = () => {
       + `<div class="grp kaschritte">${row(sq("key-round", "orange"), "App-Passwort anlegen", esc(x.hilfe), "") + (kal ? row(sq("calendar-days", "red"), "Zugang vom Kalender übernehmen", "Das App-Passwort deines Kalenders gilt auch für iCloud-Mail.", `<button class="btn pri sm" type="button" data-act="mlkal">Übernehmen</button>`) : "")}</div>`
       + `<form class="grp kaein" data-form="mailverbinden" data-art="${esc(a)}">${a === "andere" ? `<label>IMAP-Server (Port 993)<input class="inp" name="host" autocomplete="off" placeholder="imap.beispiel.at" required></label>` : ""}
         <label>E-Mail-Adresse<input class="inp" name="adresse" type="email" autocomplete="username" required></label>
+        <label>Wie weit zurück<select class="inp" name="tage">${ML.daten.tage_wahl.map(t => `<option value="${t}">${t === 365 ? "1 Jahr" : t + " Tage"}</option>`).join("")}</select></label>
         <label>App-Passwort<input class="inp" name="passwort" type="password" autocomplete="off" required></label><div class="wfb"><button class="btn pri">Verbinden</button></div></form>`
       + note("Nur du trägst das hier ein, nie ein Agent. Das Passwort liegt nur in deinem Ordner „daten“ und wird nie wieder angezeigt. Bei deinem Anbieter kannst du es jederzeit widerrufen.")};
 };
@@ -2022,7 +2058,7 @@ document.addEventListener("change", e => {
 async function neuFormular(art, f, v){
   if (art === "termin") { const r = await kaEintragen(v); if (r) await kaLaden(); return r; }
   if (art === "kalverbinden") { try { await api("/api/kalender/einrichten", {dienst: f.dataset.dienst, konto: v.konto, passwort: v.passwort, url: v.url}); } catch(x) { meldung("Hat nicht geklappt", x.message); return null; } closeSheet(); await kaLaden(); return true; }
-  if (art === "mailverbinden") { try { await api("/api/mail/verbinden", {art: f.dataset.art, adresse: v.adresse, passwort: v.passwort, host: v.host}); } catch(x) { meldung("Hat nicht geklappt", x.message); return null; } closeSheet(); await mlLaden(); return true; }
+  if (art === "mailverbinden") { try { await api("/api/mail/verbinden", {art: f.dataset.art, adresse: v.adresse, passwort: v.passwort, host: v.host, tage: v.tage}); } catch(x) { meldung("Hat nicht geklappt", x.message); return null; } closeSheet(); await mlLaden(); return true; }
   if (art === "invsatz") { const s = String(v.text || "").trim(); if (maSatz(s)) await matVerstehen(s); return null; }
   if (art === "invneu") { const m = String(v.menge || "").trim(), felder = matFelder(v);
     const r = m && +m.replace(",", ".") ? await post("/api/inventar/buchen", {neu: felder, delta: m, quelle: "hand", text: "Erstbestand"}) : await post("/api/inventar/teile", felder);
@@ -2041,7 +2077,11 @@ async function neuKnopf(art, id, w, t){
     case "mltrennen": if (await bestaetigen("Postfach trennen?", "Die Zentrale vergisst den Zugang. Schon geholte Mails bleiben hier.", "Trennen", true) && await post("/api/mail/trennen", {id})) { closeSheet(); await mlLaden(); } return true;
     case "mlagenten": if (w === "1" && !(await bestaetigen("Agenten Mails lesen lassen?", "Dann kann jeder deiner Agenten alle Mails hier lesen. Text aus einer Mail ist für sie nie ein Auftrag. Ausschalten geht jederzeit.", "Einschalten"))) return true;
       if (await post("/api/mail/agenten", {ja: w === "1"})) await mlLaden(); return true;
-    case "mlmark": { const b = {wichtig: {wichtig: true}, unwichtig: {wichtig: false}, erledigt: {erledigt: true}}[w]; if (await post("/api/mail/" + id, b)) { if (w === "erledigt") closeSheet(); await mlLaden(); } return true; }
+    case "mlfilter": ML.filter = w; ML.treffer = null; for (const b of document.querySelectorAll(".mlfilter button")) b.classList.toggle("on", b.dataset.wert === w); mlTrefferZeichnen(); mlSuchen(true); return true;
+    case "mltage": if (await post("/api/mail/einstellen", {id, tage: +w})) await mlLaden(); return true;
+    case "mlordnerlesen": ML.ordner[id] = {laedt: true}; $("sheet")._h = null; renderSheet(); try { ML.ordner[id] = await api("/api/mail/ordner?konto=" + encodeURIComponent(id)); } catch(x) { ML.ordner[id] = {fehler: x.message}; } $("sheet")._h = null; renderSheet(); return true;
+    case "mlordner": { const k = ML.daten.konten.find(x => x.id === id), g = k.ordner.map(o => o.id), neu = g.includes(w) ? g.filter(o => o !== w) : [...g, w]; if (await post("/api/mail/einstellen", {id, ordner: neu})) await mlLaden(); return true; }
+    case "mlmark": { const b = {wichtig: {wichtig: true}, unwichtig: {wichtig: false}, erledigt: {erledigt: true}, keinbetrug: {kein_betrug: true}}[w]; if (await post("/api/mail/" + id, b)) { if (w === "erledigt") closeSheet(); await mlLaden(); } return true; }
     case "mafilter": MAT.filter = w; renderPage(); return true;
     case "mawahl": MAT.wahl = w; renderPage(); return true;
     case "marichtung": MAT.richtung = +w; renderPage(); return true;
@@ -2064,8 +2104,8 @@ function ueTermine(){
 function ueMail(){
   if (Date.now() - ML.zeit > 30000) mlLaden();
   if (!ML.daten || !ML.daten.konten.length) return "";
-  const W = ML.daten.wichtig;
-  return `<div class="tile">${th("mail", "blue", W.length > 1 ? "Wichtige Mails" : "Wichtige Mail", `<button class="lnk" type="button" data-nav="mail">Alle</button>`)}${W.length ? W.slice(0, 3).map(m => row("", `${m.gelesen ? "" : '<span class="mlneu"></span>'}${esc(m.betreff)}`, esc(m.kurz || m.von_name), val(esc(mlDatum(m.zeit))), sh("mail:" + m.nr))).join("") : `<p class="muted hruhig">${icon("circle-check")}Gerade nichts Wichtiges.</p>`}</div>`;
+  const W = ML.daten.wichtig, X = ML.daten.verdacht || [];
+  return `<div class="tile">${th("mail", "blue", W.length > 1 ? "Wichtige Mails" : "Wichtige Mail", `<button class="lnk" type="button" data-nav="mail">Alle</button>`)}${X.length ? row(sq("shield-alert", "red"), X.length === 1 ? "1 Mail sieht nach Betrug aus" : `${X.length} Mails sehen nach Betrug aus`, "Nichts anklicken, erst ansehen.", "", ` data-nav="mail"`) : ""}${W.length ? W.slice(0, 3).map(m => row("", `${m.gelesen ? "" : '<span class="mlneu"></span>'}${esc(m.betreff)}`, esc(m.kurz || m.von_name), val(esc(mlDatum(m.zeit))), sh("mail:" + m.nr))).join("") : `<p class="muted hruhig">${icon("circle-check")}Gerade nichts Wichtiges.</p>`}</div>`;
 }
 
 /* ---------- Klicks und Formulare ---------- */
@@ -2164,6 +2204,7 @@ document.addEventListener("input", e => {
   else if (WX.edit && t.matches("[data-wxta]")) WX.edit.text = t.value;
   else if (WX.edit && t.matches("[data-wxtitel]")) WX.edit.titel = t.value;
   else if (t.id === "wxq") wxSuchen(t.value);
+  else if (t.id === "mlq") { ML.suche = t.value; ML.treffer = null; mlTrefferZeichnen(); mlSuchen(); }
 });
 document.addEventListener("keydown", e => {
   if (WX.edit && (e.metaKey || e.ctrlKey) && e.key === "s") { e.preventDefault(); wxSpeichern(document.querySelector("[data-act=wxspeichern]")); return; }
@@ -2186,7 +2227,7 @@ async function anmelden(s){
   start();
 }
 function abmelden(){ KEY = ""; try { localStorage.removeItem("zentrale-schluessel"); } catch(e) {} closeSheet(); zeigeLogin(); }
-function route(){ const h = location.hash.slice(1); if (h !== PAGE) UI.nordner = ""; PAGE = VIEWS[h] ? h : "uebersicht"; closeSheet(); renderAll(); scrollTo(0, 0); }
+function route(){ const h = location.hash.slice(1); if (h !== PAGE) UI.nordner = ""; if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); /* setHtml lässt die Seite sonst stehen, solange ein Eingabefeld den Fokus hat */ PAGE = VIEWS[h] ? h : "uebersicht"; closeSheet(); renderAll(); scrollTo(0, 0); }
 let timer = 0;
 function start(){
   $("login").hidden = true; $("app").hidden = false;

@@ -4,8 +4,8 @@ Jedes Projekt hat Status (aktiv, ruht, archiv), Orte (Gerät und Pfad), Repos, e
 Aufgaben hängen an einem Projekt oder stehen allein, haben ein Fälligkeitsdatum (optional) und gehören dem Besitzer
 oder einem Agenten („fuer“). Der Besitzer hakt seine Aufgaben selbst ab, Agenten die eigenen.
 Entfernt wird nichts endgültig: Eine entfernte Aufgabe bekommt nur „entfernt“ und ist nicht mehr zu sehen.
-Eine Aufgabe kann zu einem Wunsch gehören („wunsch“). Der Wunsch zeigt dann seine Schritte; sind alle erledigt,
-hakt die Zentrale den Wunsch selbst ab.
+Eine Aufgabe kann zu einem Wunsch gehören („wunsch“). Der Wunsch zeigt dann seine Schritte. Auch wenn alle erledigt sind,
+bleibt er offen: Ob er wirklich fertig ist, sagt der Agent oder der Besitzer, die Zentrale weist nur darauf hin.
 
 Gespeichert in DATEN/pos.json: {"projekte": [...], "aufgaben": [...]}.
 """
@@ -119,23 +119,22 @@ def projekt_aendern(von, pid, b):
 
 
 def wunsch_pruefen(wid):
-    """Sind alle Schritte eines Wunschs erledigt, hakt die Zentrale ihn ab. Kommt danach ein offener Schritt dazu,
-    öffnet sie ihn wieder, aber nur, wenn sie ihn selbst abgehakt hat."""
+    """True, wenn alle Schritte eines offenen Wunschs erledigt sind. Abgehakt wird er dadurch nicht mehr, das hat offene Wünsche
+    verschwinden lassen. Hat eine ältere Fassung ihn selbst abgehakt und es kommt ein offener Schritt dazu, öffnet sie ihn wieder."""
     if not wid:
-        return
+        return False
     with _sperre:
         S = [a for a in _lesen()["aufgaben"] if a.get("wunsch") == wid and not a.get("entfernt")]
     try:
         w = wuensche.zeigen(wid)
     except ValueError:
-        return
+        return False
     if not S:
-        return
+        return False
     fertig = all(a["erledigt"] for a in S)
-    if fertig and w["status"] == "offen":
-        wuensche.aendern("zentrale", wid, {"status": "erledigt", "ergebnis": ("Alle Schritte erledigt: " + "; ".join(a["titel"] for a in S))[:1900]})
-    elif not fertig and w["status"] == "erledigt" and w.get("erledigt_von") == "zentrale":
+    if not fertig and w["status"] == "erledigt" and w.get("erledigt_von") == "zentrale":
         wuensche.aendern("zentrale", wid, {"status": "offen"})
+    return fertig and w["status"] == "offen"
 
 
 def aufgabe_neu(von, b):
@@ -194,6 +193,7 @@ def aufgabe_aendern(von, aid, b):
             if von not in (hub.BESITZER, a["von"]):
                 raise PermissionError("Entfernen darf nur der Besitzer oder wer die Aufgabe angelegt hat.")
             a["entfernt"] = int(time.time())
+            a["grund"] = _text(b.get("grund"), 300)
         if a.get("projekt"):
             p = next((x for x in d["projekte"] if x["id"] == a["projekt"]), None)
             if p:
@@ -201,5 +201,4 @@ def aufgabe_aendern(von, aid, b):
         _schreiben(d)
     if alter_wunsch and alter_wunsch != a.get("wunsch"):
         wunsch_pruefen(alter_wunsch)
-    wunsch_pruefen(a.get("wunsch"))
-    return a
+    return dict(a, alle_schritte_fertig=wunsch_pruefen(a.get("wunsch")))

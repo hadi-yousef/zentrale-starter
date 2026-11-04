@@ -30,8 +30,9 @@ Die Bilder 01 bis 17 stammen aus einer früheren Fassung: Dort fehlen in der Lei
 | ![](bilder/16-geraet-blatt.png) | Gerät angetippt | Warnungen, Ringe (auch Temperatur und Akku), Laufwerke mit Balken und Papierkorb, Akku, System, Netzwerk, Dienste. „Vergessen“ nur bei offline. |
 | ![](bilder/17-speicher.png) | **Homelab → Speicher** | Oben alle Laufwerke zusammen, je Gerät eine Farbe. Darunter je Gerät die Laufwerke mit belegt, Papierkorb (orange) und frei. Fast volle in Rot. |
 | ![](bilder/18-kalender.png) | **Kalender** | Oben die Zahl und wohin neue Termine kommen, darunter „Neuer Termin …“. Je Tag ein Abschnitt, auch mit fälligen Aufgaben. Unten „Kalender verbinden“: Geht auch ohne Konto. |
-| ![](bilder/19-email.png) | **E-Mail** | „Wichtig“ oben, darunter „Alles andere“, dann die Postfächer und ob Agenten mitlesen dürfen (Standard: aus). |
-| ![](bilder/20-email-blatt.png) | Mail angetippt | „Wichtig“ bzw. „Nicht wichtig“ und „Erledigt“, Absender, Anhänge nur als Name, der Text. Senden und Löschen gibt es nicht. |
+| ![](bilder/19-email.png) | **E-Mail** | Suche und Filter oben. Rot „Vorsicht: sieht nach Betrug aus“, wenn etwas auffällt, dann „Wichtig“ und „Alles andere“, darunter die Postfächer und ob Agenten mitlesen dürfen (Standard: aus). |
+| ![](bilder/20-email-blatt.png) | Mail angetippt | „Wichtig“ bzw. „Nicht wichtig“ und „Erledigt“, bei einer Warnung auch „Kein Betrug“ und die Gründe. Absender, Anhänge nur als Name, der Text. Senden und Löschen gibt es nicht. |
+| ![](bilder/23-email-postfach.png) | Postfach angetippt | Wie weit zurück (7 Tage bis 1 Jahr) und, nach „Anzeigen“, welche Ordner mitgelesen werden. |
 | ![](bilder/21-inventar.png) | **Inventar** | Vier Zahlen, Eingabe für Suche oder Satz, Kategorien, Karten je Teil. Orange Menge und „nachkaufen“: unter der Mindestmenge. |
 | ![](bilder/22-inventar-blatt.png) | Teil angetippt | Plus und Minus, Kerndaten, Fotos, Verlauf aller Buchungen. |
 

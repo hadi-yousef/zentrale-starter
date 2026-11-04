@@ -333,7 +333,9 @@ class D07_Update(unittest.TestCase):
             spec.loader.exec_module(m)
             m.HIER = klon
             aus = io.StringIO()
+            # Benutzerordner leer: Auf einem Rechner mit eingerichtetem Hook würde update() sonst dessen Einrichter aufrufen
             with mock.patch.object(m.subprocess, "run", side_effect=run), mock.patch.object(m, "autostart", return_value=[]), \
+                    mock.patch.object(m.Path, "home", return_value=t / "leer"), \
                     mock.patch.object(m, "holen", side_effect=AssertionError("kein Netz")), \
                     mock.patch.object(time, "strftime", side_effect=lambda f, *a: "20261031-120000" if f == "%Y%m%d-%H%M%S" else echt_zeit(f, *a)), \
                     contextlib.redirect_stdout(aus):
@@ -767,7 +769,7 @@ class ClientTexte(unittest.TestCase):
     def test_bericht_zeigt_projekt_und_wunsch(self):
         self.z.get.return_value = {"nr": 3, "titel": "T", "von": "claude", "zeit": 0, "kurz": "", "fragen": [], "verlauf": [],
                                    "projekt": "Website", "wunsch": 7}
-        aus = self.befehl(befehl="bericht", nr="3")
+        aus = self.befehl(befehl="bericht", nr="3", abgeholt=False)
         self.assertIn("Projekt: Website", aus)
         self.assertIn("Wunsch Nr. 7", aus)
 
@@ -1035,6 +1037,141 @@ class KalenderVerbunden(unittest.TestCase):
         self.assertEqual(len(d["fehler"]), 1)
 
 
+class BerichtProjekt(unittest.TestCase):
+    def setUp(self):
+        import berichte, hub, pos
+        self.b, self.pos, self.B = berichte, pos, hub.BESITZER
+        t = Path(tempfile.mkdtemp(prefix="ber-", dir=TMP))
+        for mod, name in ((berichte, "DATEI"), (pos, "DATEI")):
+            p = mock.patch.object(mod, name, t / (name + mod.__name__))
+            p.start()
+            self.addCleanup(p.stop)
+        self.pos.projekt_neu(self.B, {"name": "Website"})
+
+    def test_name_wird_zum_richtigen_name(self):
+        self.assertEqual(self.b.neu("claude", {"titel": "T", "projekt": "website"})["projekt"], "Website")
+        self.assertEqual(self.b.neu("claude", {"titel": "T", "projekt": "aufräumen"})["projekt"], "Aufräumen")
+        self.assertEqual(self.b.neu("claude", {"titel": "T"})["projekt"], "")
+
+    def test_unbekannt_wird_abgewiesen_und_nennt_die_liste(self):
+        with self.assertRaises(ValueError) as e:
+            self.b.neu("claude", {"titel": "T", "projekt": "Umzug"})
+        self.assertIn("Website", str(e.exception))
+        self.assertIn("Aufräumen", str(e.exception))
+        self.assertEqual(self.b.liste()["berichte"], [])
+
+    def test_projekt_aendern_nur_besitzer_und_eigener_agent(self):
+        x = self.b.neu("claude", {"titel": "T"})
+        with self.assertRaises(PermissionError):
+            self.b.projekt_aendern("codex", x["id"], {"projekt": "Zentrale"})
+        self.assertEqual(self.b.projekt_aendern("claude", x["id"], {"projekt": "zentrale"})["projekt"], "Zentrale")
+        self.assertEqual(self.b.projekt_aendern(self.B, x["id"], {"projekt": ""})["projekt"], "")
+        with self.assertRaises(ValueError):
+            self.b.projekt_aendern("claude", x["id"], {"projekt": "Gibtsnicht"})
+
+    def test_erledigt_merkt_wer_es_war(self):
+        x = self.b.neu("claude", {"titel": "T", "fragen": [{"text": "Ja?"}]})
+        y = self.b.erledigt("claude", x["id"], {"antworten": ["Ja"]})
+        self.assertEqual((y["erledigt_von"], y["fragen"][0]["antwort"]["von"]), ("claude", "claude"))
+
+    def test_lesen_nimmt_anderen_chats_die_antwort_nicht_weg(self):
+        x = self.b.neu("claude", {"titel": "T"})
+        self.b.nachricht(self.B, x["id"], {"text": "Antwort"})
+        self.b.lesen("claude", x["id"])
+        self.assertEqual(len(self.b._offen_fuer(self.b._lesen(), "claude", "")), 1, "nur gelesen: bleibt neu")
+        self.b.nachricht("claude", x["id"], {"text": "Danke, mache ich"})
+        self.assertEqual(self.b._offen_fuer(self.b._lesen(), "claude", ""), [], "beantwortet: abgeholt")
+        self.b.nachricht(self.B, x["id"], {"text": "Noch was"})
+        self.b.lesen("claude", x["id"], abholen=True)
+        self.assertEqual(self.b._offen_fuer(self.b._lesen(), "claude", ""), [], "ausdrücklich abgeholt")
+        self.b.nachricht(self.B, x["id"], {"text": "Und das"})
+        self.b.erledigt("claude", x["id"], {})
+        self.assertEqual(self.b._offen_fuer(self.b._lesen(), "claude", ""), [], "geschlossen: abgeholt")
+
+
+class AufgabenUndWunsch(unittest.TestCase):
+    def setUp(self):
+        import hub, pos, wuensche
+        self.pos, self.w, self.B = pos, wuensche, hub.BESITZER
+        t = Path(tempfile.mkdtemp(prefix="auf-", dir=TMP))
+        for mod, name, d in ((pos, "DATEI", "p.json"), (wuensche, "DATEI", "w.json")):
+            p = mock.patch.object(mod, name, t / d)
+            p.start()
+            self.addCleanup(p.stop)
+        self.wid = wuensche.neu("claude", {"titel": "W", "prio": "hoch"})["id"]
+
+    def test_letzte_aufgabe_hakt_den_wunsch_nicht_mehr_ab(self):
+        a = self.pos.aufgabe_neu("claude", {"titel": "A", "wunsch": self.wid})
+        x = self.pos.aufgabe_aendern("claude", a["id"], {"erledigt": True})
+        self.assertTrue(x["alle_schritte_fertig"])
+        self.assertEqual(self.w.zeigen(self.wid)["status"], "offen")
+
+    def test_von_alter_fassung_abgehakt_oeffnet_sich_wieder(self):
+        self.w.aendern("zentrale", self.wid, {"status": "erledigt", "ergebnis": "Alle Schritte erledigt"})
+        self.pos.aufgabe_neu("claude", {"titel": "Neu", "wunsch": self.wid})
+        self.assertEqual(self.w.zeigen(self.wid)["status"], "offen")
+
+    def test_verwerfen_ist_nicht_erledigt_und_merkt_den_grund(self):
+        a = self.pos.aufgabe_neu("claude", {"titel": "Aus Test"})
+        with self.assertRaises(PermissionError):
+            self.pos.aufgabe_aendern("codex", a["id"], {"entfernen": True, "grund": "x"})
+        x = self.pos.aufgabe_aendern("claude", a["id"], {"entfernen": True, "grund": "aus einem Test"})
+        self.assertEqual((x["erledigt"], x["grund"]), (None, "aus einem Test"))
+        self.assertTrue(x["entfernt"])
+
+    def test_projekt_einer_aufgabe_aendern(self):
+        p = self.pos.projekt_neu(self.B, {"name": "Lager"})
+        a = self.pos.aufgabe_neu("claude", {"titel": "A"})
+        self.assertEqual(self.pos.aufgabe_aendern("claude", a["id"], {"projekt": "lager"})["projekt"], p["id"])
+        self.assertIsNone(self.pos.aufgabe_aendern("claude", a["id"], {"projekt": ""})["projekt"])
+
+
+class NotizTitel(unittest.TestCase):
+    def setUp(self):
+        import notizen
+        self.n = notizen
+        t = Path(tempfile.mkdtemp(prefix="ntz-", dir=TMP))
+        (t / "Geräte").mkdir()
+        p = mock.patch.object(notizen, "WURZEL", t)
+        p.start()
+        self.addCleanup(p.stop)
+
+    def test_ordner_im_titel_und_endung(self):
+        self.assertEqual(self.n.neu("", "Geräte/Drucker.md", "x")["pfad"], "Geräte/Drucker.md")
+        self.assertEqual(self.n.neu("", "Lose.md", "x")["pfad"], "Lose.md")
+
+    def test_schraegstrich_ohne_vorhandenen_ordner_bleibt_titel(self):
+        self.assertEqual(self.n.neu("", "Rechnung 3/2026", "x")["pfad"], "Rechnung 3 2026.md")
+        self.assertEqual(self.n.neu("Geräte", "Und/Oder", "x")["pfad"], "Geräte/Und Oder.md")
+
+    def test_kein_ausbruch(self):
+        pfad = self.n.neu("", "../../boese", "x")["pfad"]
+        self.assertNotIn("/", pfad)
+        self.assertTrue((self.n.WURZEL / pfad).is_file())
+
+
+class ClientSchalter(unittest.TestCase):
+    def test_text_ist_keine_kurzform_von_text_datei(self):
+        r = subprocess.run([sys.executable, "-I", str(HIER / "zentrale_client.py"), "wunsch-notiz", "1", "--text-dat", "x"], capture_output=True, encoding="utf-8", errors="replace")
+        self.assertEqual(r.returncode, 2)
+        self.assertIn("--text-dat", r.stderr)
+        import argparse
+        import zentrale_client as c
+        self.assertEqual(c.text_aus(argparse.Namespace(text=None, text_schalter="Stand: x")), "Stand: x")
+
+
+class LaufTitel(unittest.TestCase):
+    def test_folge_nachricht_ersetzt_den_titel_nicht(self):
+        import laeufe
+        laeufe.melden("claude", {"aktion": "start", "lauf": "chat-t", "titel": "Rechnungen ordnen", "quelle": "hook"})
+        x = laeufe.melden("claude", {"aktion": "start", "lauf": "chat-t", "titel": "ja mach", "quelle": "hook"})
+        self.assertEqual(x["titel"], "Rechnungen ordnen")
+        x = laeufe.melden("claude", {"aktion": "stand", "lauf": "chat-t", "schritt": "Block 2", "titel": "Rechnungen und Belege"})
+        self.assertEqual((x["titel"], x["schritt"]), ("Rechnungen und Belege", "Block 2"))
+        x = laeufe.melden("claude", {"aktion": "start", "lauf": "chat-t", "titel": "weiter", "quelle": "hook"})
+        self.assertEqual(x["titel"], "Rechnungen und Belege")
+
+
 class Mails(unittest.TestCase):
     def setUp(self):
         import mails
@@ -1069,14 +1206,14 @@ class Mails(unittest.TestCase):
             return ("OK", [b"1 (RFC822.SIZE 10)"]) if "SIZE" in a[1] else ("OK", [(b"x", roh)])
         fake.uid.side_effect = uid
         with mock.patch.object(self.M, "_imap", return_value=fake):
-            neu, letzte, _ = self.M._holen({"host": "h", "adresse": ADR, "passwort": "p"})
+            neu, st, _ = self.M._holen({"host": "h", "adresse": ADR, "passwort": "p"})
         fake.select.assert_called_once_with("INBOX", readonly=True)
         abrufe = [c.args[2] for c in fake.uid.call_args_list if c.args[0] == "fetch"]
         self.assertTrue(all("PEEK" in x or "SIZE" in x for x in abrufe), abrufe)
         for verboten in ("store", "expunge", "append", "delete", "copy", "move"):
             self.assertFalse(getattr(fake, verboten).called, verboten)
         self.assertFalse([c for c in fake.uid.call_args_list if c.args[0].lower() not in ("search", "fetch")])
-        self.assertEqual((len(neu), letzte, neu[0]["betreff"]), (2, 2, "Hallo"))
+        self.assertEqual((len(neu), st["INBOX"]["uid"], neu[0]["betreff"]), (2, 2, "Hallo"))
 
     def test_html_und_kaputte_bytes(self):
         roh = (b'From: =?utf-8?q?M=C3=BCller?= <m' + AT + b'b.example>\r\nSubject: =?bad?q?x?= \xff\r\nContent-Type: text/html; charset=nix\r\n\r\n'
@@ -1128,6 +1265,188 @@ class Mails(unittest.TestCase):
             self.M._einsortieren(self.M._konf(), [self.mail(uid=3, message_id="3", von="c" + chr(64) + "example.org")])
         self.M.aendern("besitzer", 3, {"wichtig": False})
         self.assertFalse(self.M.bewerten("claude", 3, {"wichtig": True})["wichtig"], "die Regel des Besitzers geht vor")
+
+    # ---------- Zeitraum, Ordner, Suche ----------
+
+    def fake_imap(self, uids, roh=None):
+        roh = roh or (b"From: A <a" + AT + b"b.example>\r\nSubject: Hallo\r\nDate: Tue, 1 Jan 2030 10:00:00 +0000\r\n\r\nText")
+        fake = mock.Mock()
+        fake.untagged_responses = {"UIDVALIDITY": [b"7"]}
+        fake.select.return_value = ("OK", [b"1"])
+        fake.status.return_value = ("OK", [b"X (UIDNEXT %d)" % (max(uids + [0]) + 1)])
+
+        def uid(befehl, *a):
+            if befehl == "search":
+                if a[1] == "SINCE":
+                    return "OK", [" ".join(map(str, uids)).encode()]
+                unten = int(a[1].split()[1].split(":")[0])
+                return "OK", [" ".join(str(u) for u in uids if u >= unten).encode() or str(max(uids)).encode()]
+            return ("OK", [b"1 (FLAGS (\\Seen) RFC822.SIZE 10)"]) if "SIZE" in a[1] else ("OK", [(b"x", roh)])
+        fake.uid.side_effect = uid
+        return fake
+
+    def test_zeitraum_holt_aelteres_in_kleinen_schritten_ohne_luecke(self):
+        fake = self.fake_imap(list(range(1, 751)))
+        x = {"host": "h", "adresse": ADR, "passwort": "p", "tage": 90}
+        geholt = []
+        with mock.patch.object(self.M, "_imap", return_value=fake):
+            for _ in range(4):
+                neu, x["stand"], f = self.M._holen(x)
+                self.assertEqual(f, "")
+                self.assertLessEqual(len(neu), self.M.MAX_RUNDE)
+                geholt += [m["uid"] for m in neu]
+        self.assertEqual(sorted(geholt), list(range(1, 751)))
+        self.assertEqual(x["stand"]["INBOX"]["fertig"], 90)
+        self.assertFalse(self.M._holt_nach(x))
+        self.assertTrue(self.M._holt_nach(dict(x, tage=365)), "größerer Zeitraum holt weiter nach")
+
+    def test_alter_stand_der_fassung_davor_holt_nichts_doppelt(self):
+        fake = self.fake_imap([1, 2, 3])
+        x = {"host": "h", "adresse": ADR, "passwort": "p", "uid": 2, "uidvalidity": "7"}
+        with mock.patch.object(self.M, "_imap", return_value=fake):
+            neu, st, _ = self.M._holen(x)
+        self.assertEqual([m["uid"] for m in neu], [3])
+        self.assertEqual(st["INBOX"]["uid"], 3)
+
+    def test_ordner_der_nicht_geht_haelt_die_anderen_nicht_auf(self):
+        fake = self.fake_imap([1])
+        fake.select.side_effect = lambda o, readonly=False: ("NO", []) if "Weg" in o else ("OK", [b"1"])
+        with mock.patch.object(self.M, "_imap", return_value=fake):
+            neu, st, f = self.M._holen({"host": "h", "adresse": ADR, "passwort": "p", "ordner": ["Weg", "INBOX"]})
+        self.assertEqual(len(neu), 1)
+        self.assertIn("Weg", f)
+        self.assertNotIn("Weg", st)
+        self.assertTrue(all(c.kwargs.get("readonly") for c in fake.select.call_args_list), "nur lesend")
+
+    def test_ordnernamen_lesen(self):
+        self.assertEqual(self.M.ordner_name("Entw&APw-rfe"), "Entwürfe")
+        self.assertEqual(self.M.ordner_name("INBOX"), "Posteingang")
+        self.assertEqual(self.M.ordner_name("A&-B"), "A&B")
+        z = [b'(\\HasNoChildren) "/" "INBOX"', b'(\\Noselect) "/" "Oben"', b'(\\Junk) "." "Spam"', b'() NIL Archiv', (b'() "/" {6}', b'Lang"x')]
+        A = self.M._ordner_lesen(z)
+        self.assertEqual([o["id"] for o in A], ["INBOX", "Archiv", 'Lang"x', "Spam"])
+        self.assertEqual(next(o["art"] for o in A if o["id"] == "Spam"), "Werbung")
+        self.assertEqual(self.M._q('Ein "x"'), '"Ein \\"x\\""')
+
+    def test_einstellen_nur_was_das_postfach_nennt(self):
+        with mock.patch.object(self.M, "_imap"):
+            self.M.verbinden("andere", ADR, "p", "imap.example.org", tage=30)
+        kid = ADR.lower()
+        self.assertEqual(self.M.stand()["konten"][0]["tage"], 30)
+        with mock.patch.object(self.M, "ordner_liste", return_value={"ordner": [{"id": "Shop"}], "gewaehlt": []}):
+            self.M.einstellen(kid, {"ordner": ["INBOX", "Shop"], "tage": 90})
+            for falsch in ({"ordner": ["Boese\r\nLOGOUT"]}, {"ordner": []}, {"tage": 5}):
+                with self.assertRaises(ValueError):
+                    self.M.einstellen(kid, falsch)
+        s = self.M.stand()["konten"][0]
+        self.assertEqual((s["tage"], [o["id"] for o in s["ordner"]]), (90, ["INBOX", "Shop"]))
+        with self.assertRaises(ValueError):
+            self.M.verbinden("andere", ADR, "p", "imap.example.org", tage=11)
+
+    def test_neues_passwort_behaelt_ordner_und_stand(self):
+        with mock.patch.object(self.M, "_imap"):
+            self.M.verbinden("andere", ADR, "p", "imap.example.org", tage=30)
+            k = self.M._konf()
+            k["konten"][ADR.lower()].update(ordner=["INBOX", "Shop"], stand={"INBOX": {"uid": 9, "validity": "7", "bis": None, "fertig": 30}})
+            self.M._konf_schreiben(k)
+            self.M.verbinden("andere", ADR, "p2", "imap.example.org")
+        x = self.M._konf()["konten"][ADR.lower()]
+        self.assertEqual((x["passwort"], x["tage"], x["ordner"], x["stand"]["INBOX"]["uid"]), ("p2", 30, ["INBOX", "Shop"], 9))
+
+    def test_suche_findet_text_auch_in_erledigtem(self):
+        with self.M._sperre:
+            self.M._einsortieren({}, [self.mail(uid=1, message_id="1", betreff="Anfrage Heizkörper"), self.mail(uid=2, message_id="2", text="Bitte Angebot für Tür"), self.mail(uid=3, message_id="3", betreff="Sonstiges")])
+        self.M.aendern("besitzer", 2, {"erledigt": True})
+        self.assertNotIn("treffer", self.M.liste())
+        self.assertEqual([m["nr"] for m in self.M.liste(suche="heizkörper")["treffer"]], [1])
+        self.assertEqual([m["nr"] for m in self.M.liste(suche="ANGEBOT tür")["treffer"]], [2])
+        self.assertEqual(self.M.liste(suche="angebot heizung")["treffer"], [])
+        self.assertEqual([m["nr"] for m in self.M.liste(art="erledigt")["treffer"]], [2])
+        self.assertNotIn("text", self.M.liste(suche="tür")["treffer"][0])
+
+    def test_nummer_wird_nicht_wiederverwendet_und_die_aeltesten_fallen_weg(self):
+        with mock.patch.object(self.M, "MAX_MAILS", 2), self.M._sperre:
+            self.M._einsortieren({}, [self.mail(uid=1, message_id="1", zeit=300), self.mail(uid=2, message_id="2", zeit=200)])
+            self.M._einsortieren({}, [self.mail(uid=3, message_id="3", zeit=100)])   # nachgeholt: alt, Nummer neu
+            self.M._einsortieren({}, [self.mail(uid=4, message_id="4", zeit=400)])
+        M = self.M._mails()["mails"]
+        self.assertEqual(sorted(m["uid"] for m in M), [1, 4])
+        self.assertEqual(next(m for m in M if m["uid"] == 4)["nr"], 4)
+
+    def test_gleiche_nummer_in_zwei_ordnern_ohne_kennung(self):
+        with self.M._sperre:
+            self.M._einsortieren({}, [self.mail(uid=1, message_id="", ordner="INBOX"), self.mail(uid=1, message_id="", ordner="Shop")])
+        self.assertEqual(self.M.liste()["gesamt"], 2)
+
+    def test_lange_warteschlange_kommt_mit_neuen_zuerst(self):
+        with self.M._sperre:
+            self.M._einsortieren({}, [self.mail(uid=1, message_id="1", zeit=100, alt=True), self.mail(uid=2, message_id="2", zeit=50, alt=False), self.mail(uid=3, message_id="3", zeit=200, alt=True)])
+        self.assertEqual([m["zeit"] for m in self.M.offen()["mails"]], [50, 200, 100])
+
+    # ---------- Warnung vor Betrug ----------
+
+    def warn(self, von, name="Jemand", konto="ich" + chr(64) + "firma.example", auth="", betreff="B", text="T", vertraut=None):
+        return self.M.warnung({"von": von, "von_name": name, "konto": konto, "auth": auth, "betreff": betreff, "text": text}, vertraut)
+
+    def test_betrug_wie_er_vorkommt(self):
+        at = chr(64)
+        for von, name in (("x" + at + "beispiel-mail.c\u014dm".encode("idna").decode(), "Support"),   # Endung nachgebaut, verschlüsselt geschrieben
+                          ("x" + at + "be\u03b9spiel.d\u0119", "Support"),                # griechisches i, Endung mit Akzent
+                          ("x" + at + "\u0430\u0440\u0440\u04cf\u0435.com", "Support"),    # ganz in fremder Schrift
+                          ("x" + at + "paypa1.com", "Support"),                          # 1 statt l
+                          ("x" + at + "kleinanzeigen-support.example", "Support"),        # Name in der Adresse
+                          ("x" + at + "post.example", "Kleinanzeigen"),                  # Name stimmt nicht zur Adresse
+                          ("x" + at + "post.example", "service" + at + "paypal.com")):    # andere Adresse im Namen
+            w = self.warn(von, name)
+            self.assertEqual((w or {}).get("stufe"), "hoch", von)
+
+    def test_kein_fehlalarm_bei_echten_absendern(self):
+        at = chr(64)
+        for von, name in (("noreply" + at + "mail.kleinanzeigen.de", "Kleinanzeigen"), ("service" + at + "paypal.de", "PayPal"), ("x" + at + "m\u00fcller-heizung.de", "Müller"),
+                          ("x" + at + "xn--mller-kva.de", "Müller"), ("anna" + at + "beispiel.example", "Anna Berger"), ("x" + at + "applebees.example", "Applebees")):
+            self.assertIsNone(self.warn(von, name), von)
+
+    def test_echte_mail_der_marke_mit_druckwoertern_bleibt_ruhig(self):
+        at = chr(64)
+        t = "Ihr Zertifikat läuft ab, Konto bestätigen"
+        self.assertIsNone(self.warn("x" + at + "mail.ionos.de", "IONOS", text=t))
+        self.assertEqual(self.warn("x" + at + "post.example", text=t)["stufe"], "vorsicht")
+
+    def test_eigene_adresse_als_absender(self):
+        at = chr(64)
+        k = "ich" + at + "firma.example"
+        self.assertEqual(self.warn("ich" + at + "firma.example", konto=k, auth="mx.x; spf=none; dkim=none")["stufe"], "hoch")
+        self.assertEqual(self.warn("ich" + at + "firma.example", konto=k)["stufe"], "vorsicht")
+        self.assertIsNone(self.warn("ich" + at + "firma.example", konto=k, auth="mx.x; dmarc=pass"))
+
+    def test_nur_die_oberste_pruefzeile_zaehlt(self):
+        roh = (b"Authentication-Results: mx.echt; dmarc=fail\r\nAuthentication-Results: boese; dmarc=pass\r\nFrom: a" + AT + b"b.example\r\nSubject: S\r\n\r\nT")
+        m = self.M._zerlegen(roh, "x", 1, False)
+        self.assertIn("dmarc=fail", m["auth"])
+        self.assertNotIn("dmarc=pass", m["auth"])
+        self.assertEqual(self.M.warnung(m)["stufe"], "hoch")
+
+    def test_verdacht_steht_nicht_unter_wichtig_auch_mit_regel(self):
+        at = chr(64)
+        boese = "x" + at + "paypa1.com"
+        with self.M._sperre:
+            self.M._einsortieren({"regeln": {boese: True}}, [self.mail(von=boese)])
+        d = self.M.liste()
+        self.assertEqual(([m["nr"] for m in d["verdacht"]], d["wichtig"], d["rest"]), ([1], [], []))
+        self.assertEqual([m["nr"] for m in self.M.liste(art="verdacht")["treffer"]], [1])
+
+    def test_kein_betrug_sagt_nur_der_besitzer_und_gilt_fuer_den_absender(self):
+        at = chr(64)
+        von = "x" + at + "post.example"
+        with self.M._sperre:
+            self.M._einsortieren({}, [self.mail(von=von, von_name="Kleinanzeigen", uid=1, message_id="1"), self.mail(von=von, von_name="Kleinanzeigen", uid=2, message_id="2", auth="mx; dmarc=fail")])
+        with self.assertRaises(PermissionError):
+            self.M.aendern("claude", 1, {"kein_betrug": True})
+        self.assertEqual(len(self.M.liste()["verdacht"]), 2)
+        self.M.aendern("besitzer", 1, {"kein_betrug": True})
+        d = self.M.liste()
+        self.assertEqual([m["nr"] for m in d["verdacht"]], [2], "fällt die Prüfung des Anbieters durch, bleibt die Warnung")
+        self.assertEqual(self.M.liste(art="verdacht")["treffer_gesamt"], 1)
 
     def test_keine_doppelten(self):
         with self.M._sperre:

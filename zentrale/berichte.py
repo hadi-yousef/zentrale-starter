@@ -22,6 +22,7 @@ import hub
 DATEI = hub.STATE_DIR / "berichte.json"
 ID = re.compile(r"^[0-9a-f]{6}$")
 B = hub.BESITZER
+THEMEN = ("Zentrale", "Aufräumen", "Finanzen")   # für Berichte, die zu keinem einzelnen Projekt gehören
 _sperre = threading.Lock()
 _neu = threading.Condition(_sperre)
 
@@ -89,7 +90,40 @@ def _aufteilen(text):
     return teile
 
 
+def _projekt_name(name):
+    """Der richtige Name eines Projekts oder Themas (Groß- und Kleinschreibung egal). Sonst Fehler mit der Liste: Freier Text
+    führte zu „zentrale“ neben „Zentrale“ im Filter."""
+    name = _text(name, 80)
+    if not name:
+        return ""
+    import pos   # erst hier: pos braucht beim Start die Wünsche
+    P = pos._lesen()["projekte"]
+    p = next((x for x in P if x["id"] == name or x["name"].lower() == name.lower()), None)
+    if p:
+        return p["name"]
+    t = next((t for t in THEMEN if t.lower() == name.lower()), None)
+    if t:
+        return t
+    namen = sorted(x["name"] for x in P if x.get("status") != "archiv")
+    raise ValueError(f"Das Projekt „{name}“ gibt es nicht. Möglich sind: {', '.join((namen[:30] + list(THEMEN)))}. "
+                     "Ein neues Projekt legst du mit projekt-neu an.")
+
+
+def projekt_aendern(von, bid, b):
+    """Den Bericht einem anderen Projekt zuordnen (leer: ohne Projekt). Dürfen der Besitzer und der Agent des Berichts."""
+    name = _projekt_name(b.get("projekt"))
+    with _sperre:
+        d = _lesen()
+        x = _finden(d, bid)
+        if von not in (B, x["von"]):
+            raise PermissionError("Das Projekt ändern dürfen nur der Besitzer und der Agent, der den Bericht angelegt hat.")
+        x["projekt"] = name
+        _schreiben(d)
+    return x
+
+
 def neu(von, b):
+    projekt = _projekt_name(b.get("projekt"))
     fragen = []
     for f in (b.get("fragen") or [])[:80]:
         f = f if isinstance(f, dict) else {"text": f}
@@ -104,7 +138,7 @@ def neu(von, b):
             raise ValueError("Zu viele Berichte gespeichert.")
         x = {"id": hub.neue_id(d["berichte"]), "nr": max([b.get("nr") or 0 for b in d["berichte"]] + [0]) + 1,
              "titel": _text(b.get("titel"), 200, True), "kurz": _text(b.get("kurz"), 1000), "text": _text(b.get("text"), 200_000),
-             "von": von, "sitzung": _text(b.get("sitzung"), 120), "projekt": _text(b.get("projekt"), 80), "wunsch": _text(b.get("wunsch"), 6),
+             "von": von, "sitzung": _text(b.get("sitzung"), 120), "projekt": projekt, "wunsch": _text(b.get("wunsch"), 6),
              "zeit": int(time.time()), "gelesen": False, "fragen": fragen, "verlauf": []}
         d["berichte"].append(x)
         _schreiben(d)
@@ -129,6 +163,8 @@ def nachricht(von, bid, b):
         x["verlauf"].append(m)
         if von == B:
             x["gelesen"] = True
+        else:
+            _abgeholt_alle(x, m["zeit"])   # wer antwortet, hat gelesen
         _schreiben(d)
         _neu.notify_all()
     return x
@@ -147,10 +183,13 @@ def erledigt(von, bid, b):
         jetzt, n = int(time.time()), 0
         for f in x["fragen"]:
             if not f.get("antwort"):
-                f["antwort"] = {"text": (A[n] if n < len(A) and A[n] else notiz), "zeit": jetzt, "woanders": True}
+                f["antwort"] = {"text": (A[n] if n < len(A) and A[n] else notiz), "zeit": jetzt, "woanders": True, "von": von}
                 n += 1
         x["gelesen"] = True
         x["erledigt"] = jetzt
+        x["erledigt_von"] = von
+        if von == x["von"]:
+            _abgeholt_alle(x, jetzt)
         _schreiben(d)
     return x
 
@@ -210,14 +249,20 @@ def abgeholt(von, bid, ids):
     return {"ok": True, "bestaetigt": n}
 
 
-def lesen(von, bid):
-    """Ein Bericht mit Verlauf. Liest ihn sein Agent, gelten die Nachrichten des Besitzers als abgeholt."""
+def _abgeholt_alle(x, jetzt):
+    for m in x["verlauf"]:
+        if m["von"] == B and not m.get("abgeholt"):
+            m["abgeholt"] = jetzt
+
+
+def lesen(von, bid, abholen=False):
+    """Ein Bericht mit Verlauf. Lesen allein macht eine Antwort nicht zu „abgeholt“: Mehrere Chats desselben Agenten teilen sich
+    einen Schlüssel, sonst wäre sie für die anderen weg. Abgeholt ist sie, wenn der Agent antwortet oder schließt, nach
+    berichte-warten, oder wenn er es hier ausdrücklich sagt."""
     with _sperre:
         d = _lesen()
         x = _finden(d, bid)
-        if von == x["von"] and any(m["von"] == B and not m.get("abgeholt") for m in x["verlauf"]):
-            for m in x["verlauf"]:
-                if m["von"] == B and not m.get("abgeholt"):
-                    m["abgeholt"] = int(time.time())
+        if abholen and von == x["von"] and any(m["von"] == B and not m.get("abgeholt") for m in x["verlauf"]):
+            _abgeholt_alle(x, int(time.time()))
             _schreiben(d)
     return x

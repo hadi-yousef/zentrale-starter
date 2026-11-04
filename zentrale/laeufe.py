@@ -71,7 +71,8 @@ def melden(aid, d):
             vorher = alt or next((x for x in reversed(_fertig) if x["agent"] == aid and x["lauf"] == lauf), None) or {}
             # Der Hook nimmt die Nummer nur beim ersten Start: Eine zitierte Nummer verschiebt den laufenden Chat nicht
             w = (vorher.get("wunsch") or w) if felder["quelle"] == "hook" else (w or vorher.get("wunsch"))
-            felder["titel"] = felder["titel"] or vorher.get("titel", "")
+            # Der Hook schickt die erste Zeile jeder Nachricht. Sie darf den Titel nicht ersetzen, sonst steht „ja mach“ auf der Seite
+            felder["titel"] = (vorher.get("titel") or felder["titel"]) if felder["quelle"] == "hook" else (felder["titel"] or vorher.get("titel", ""))
         if aktion == "start" or not alt:
             if alt and aktion == "start" and jetzt - alt["start"] >= 60:   # nie fertig gemeldet: als abgebrochen ablegen
                 _fertig.append(dict(alt, ende=alt.get("t") or jetzt, status="abgebrochen"))

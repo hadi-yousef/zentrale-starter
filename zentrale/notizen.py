@@ -154,7 +154,22 @@ def speichern(rel, text, version):
     return lesen(rel)
 
 
+def _titel_ordnen(ordner, titel):
+    """„Geräte/Drucker.md“ als Titel: Endung weg, und ein vorhandener Ordner wird zum Ordner. Sonst entstand eine lose Notiz „… .md.md“."""
+    t = re.sub(r"\.md$", "", str(titel or "").strip(), flags=re.I).strip()
+    teile = [x.strip() for x in re.split(r"[\\/]", t) if x.strip()]
+    if not ordner and len(teile) > 1:
+        kopf = "/".join(teile[:-1])
+        try:
+            if (WURZEL / _ordner_sicher(kopf)).is_dir():
+                return kopf, teile[-1]
+        except ValueError:
+            pass
+    return ordner, t
+
+
 def neu(ordner, titel, text=""):
+    ordner, titel = _titel_ordnen(ordner, titel)
     ordner = _ordner_sicher(ordner)
     name = _dateiname(titel)
     inhalt = str(text or "").replace("\r\n", "\n")

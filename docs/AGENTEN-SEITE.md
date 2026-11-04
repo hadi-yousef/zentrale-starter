@@ -39,6 +39,7 @@ Für Codex gibt es hier keinen Hook. Deshalb gilt: **Jede Arbeit, die länger al
 | Nachsehen | `laeufe` |
 
 - Titel wie beim Wunsch: aus Sicht des Besitzers, kurz. `--wunsch` immer angeben, wenn es einen gibt.
+- Der Text bei `lauf stand` ist der Schritt, nicht der Titel. Den Titel änderst du mit `lauf stand "…" --titel "Neuer Titel"`. Der Hook von Claude nimmt die erste Nachricht eines Chats als Titel, spätere Nachrichten ändern ihn nicht.
 - Zwei Arbeiten gleichzeitig: jeder eine eigene Kennung geben, `--lauf fotos` bei allen drei Befehlen.
 - Ein Lauf ersetzt nicht die Stand-Notiz am Wunsch (`docs/WUENSCHE.md`). Der Lauf zeigt **jetzt**, die Notiz hält den
   Stand **für später** fest. Fertig heißt: `lauf fertig` und, wenn der Wunsch erledigt ist, `wunsch-erledigt`.

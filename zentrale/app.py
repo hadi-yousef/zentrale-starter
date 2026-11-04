@@ -144,7 +144,7 @@ class Handler(BaseHTTPRequestHandler):
                     return self._json(400, {"fehler": "Warten ist für Agenten."})
                 return self._json(200, berichte.warten(aid, arg("sitzung"), arg("sekunden", "600")))
             if url.path.startswith("/api/berichte/") and len(teile) == 1:
-                return self._json(200, berichte.lesen(aid, teile[0]))
+                return self._json(200, berichte.lesen(aid, teile[0], arg("abholen") == "1"))
             if url.path == "/api/laeufe":
                 return self._json(200, laeufe.lage())
             if url.path == "/api/papierkorb":
@@ -174,7 +174,11 @@ class Handler(BaseHTTPRequestHandler):
             if url.path == "/api/mail" or url.path.startswith("/api/mail/"):
                 mails.darf(aid)
                 if url.path == "/api/mail":
-                    return self._json(200, mails.liste(arg("anzahl", "60")))
+                    return self._json(200, mails.liste(arg("anzahl", "60"), arg("suche"), arg("art"), arg("konto")))
+                if url.path == "/api/mail/ordner":
+                    if aid != hub.BESITZER:
+                        raise PermissionError("Die Ordner wählt nur der Besitzer, in der Oberfläche.")
+                    return self._json(200, mails.ordner_liste(arg("konto")))
                 if url.path == "/api/mail/offen":
                     return self._json(200, mails.offen(arg("anzahl", "10")))
                 if len(teile) == 1:
@@ -261,6 +265,8 @@ class Handler(BaseHTTPRequestHandler):
                 return berichte.nachricht(aid, teile[0], b)
             if teile[1] == "abgeholt":
                 return berichte.abgeholt(aid, teile[0], b.get("nachrichten"))
+            if teile[1] == "projekt":
+                return berichte.projekt_aendern(aid, teile[0], b)
             if teile[1] == "erledigt":
                 return berichte.erledigt(aid, teile[0], b)
             if teile[1] == "gelesen":
@@ -300,11 +306,13 @@ class Handler(BaseHTTPRequestHandler):
             if teile == ["buchen"]:
                 return inventar.buchen(aid, b)
         if pfad.startswith("/api/mail/"):
-            if teile in (["verbinden"], ["trennen"], ["agenten"]):
+            if teile in (["verbinden"], ["trennen"], ["agenten"], ["einstellen"]):
                 if aid != hub.BESITZER:
                     raise PermissionError("Postfächer verbindet nur der Besitzer, in der Oberfläche.")
                 if teile == ["verbinden"]:
-                    return mails.verbinden(str(b.get("art") or ""), b.get("adresse"), b.get("passwort"), b.get("host"), bool(b.get("vom_kalender")))
+                    return mails.verbinden(str(b.get("art") or ""), b.get("adresse"), b.get("passwort"), b.get("host"), bool(b.get("vom_kalender")), b.get("tage"))
+                if teile == ["einstellen"]:
+                    return mails.einstellen(b.get("id"), b)
                 return mails.trennen(b.get("id")) if teile == ["trennen"] else mails.agenten_erlauben(b.get("ja"))
             mails.darf(aid)
             if teile == ["abrufen"]:

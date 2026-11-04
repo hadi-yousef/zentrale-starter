@@ -107,6 +107,8 @@ Im Chat und in Berichten immer „Wunsch Nr. 7“, nie die Kennung wie `a1b2c3`.
 
 - **Aufgaben** gehören zu einem Wunsch: `aufgabe "Alte Installer prüfen" --projekt Aufräumen --wunsch 7`.
   Muss der Besitzer selbst etwas tun (Passwort eingeben, Platte anstecken): `--fuer besitzer`.
+  Ist die letzte Aufgabe erledigt, bleibt der Wunsch offen und der Client weist darauf hin. Abhaken tust du ihn, wenn er wirklich fertig ist.
+  Eine Aufgabe, die nicht mehr gilt: `aufgabe-verwerfen <id> --grund "…"`, nicht als erledigt schließen.
 - **Fragen an den Besitzer:** Ist er im Chat, fragst du im Chat. Ist er nicht da, schreibst du einen Bericht mit dem
   Wunsch dazu: `bericht-neu "Downloads: Installer löschen?" --kurz "…" --frage "In den Papierkorb?" --vorschlaege "Ja|Nein" --wunsch 7`.
   In die Stand-Notiz kommt `Wartet auf: Besitzer (Bericht Nr. 4)`.
