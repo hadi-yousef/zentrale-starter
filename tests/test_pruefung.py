@@ -743,6 +743,24 @@ class ClientTexte(unittest.TestCase):
             self.c.ausfuehren(self.z, argparse.Namespace(**kw))
         return aus.getvalue()
 
+    def test_bericht_zeigt_den_ganzen_text(self):
+        self.z.get.return_value = {"nr": 5, "titel": "T", "von": "claude", "zeit": 0, "kurz": "Kurz", "text": "| Ort | Neu |\n|---|---|", "fragen": [], "verlauf": [], "projekt": "", "wunsch": ""}
+        self.assertIn("| Ort | Neu |", self.befehl(befehl="bericht", nr="5", abgeholt=False))
+
+    def test_liegengebliebene_fragen(self):
+        alt, neu = time.time() - 30 * 3600, time.time() - 3600
+        self.z.get.return_value = {"berichte": [
+            {"nr": 1, "titel": "Alt", "von": "claude", "zeit": alt, "fragen": [{"text": "Ja?", "antwort": None}]},
+            {"nr": 2, "titel": "Neu", "von": "claude", "zeit": neu, "fragen": [{"text": "Ja?", "antwort": None}]},
+            {"nr": 3, "titel": "Fertig", "von": "claude", "zeit": alt, "fragen": [{"text": "Ja?", "antwort": {"text": "Ja"}}]},
+            {"nr": 4, "titel": "Nachgefragt", "von": "codex", "zeit": alt, "fragen": [{"text": "A?", "antwort": {"text": "zeig"}}, {"text": "B?", "antwort": None, "zeit": neu}]}]}
+        aus = self.befehl(befehl="berichte", offen=24, anzahl=20)
+        self.assertIn("Bericht Nr. 1", aus)
+        self.assertNotIn("Bericht Nr. 2", aus)
+        self.assertNotIn("Bericht Nr. 3", aus)
+        self.assertNotIn("Bericht Nr. 4", aus, "die angehängte Frage ist neu")
+        self.assertIn("Bericht Nr. 2", self.befehl(befehl="berichte", offen=0.5, anzahl=20))
+
     def test_text_aus_datei_kommt_unversehrt_an(self):
         d = neuer_ordner("text") / "t.md"
         d.write_text("Text mit `backticks` und $(befehl)\n", encoding="utf-8")
@@ -759,6 +777,36 @@ class ClientTexte(unittest.TestCase):
         with self.assertRaises(self.c.Fehler):
             self.befehl(befehl="wunsch-notiz", nr="3", text=None, text_datei=None)
         self.z.post.assert_not_called()
+
+    def test_inventar_merkmale_als_name_wert(self):
+        self.z.get.return_value = {"teile": [], "standorte": [], "vorlagen": {}}
+        self.z.post.return_value = {"id": "a1b2c3", "name": "HK", "menge": 0, "einheit": "Stück", "kategorie": "Heizkörper", "ort": "x"}
+        leer = dict.fromkeys(("beschreibung", "kategorie", "ort", "einheit", "min", "zaehlung", "link", "notiz", "projekte"))
+        self.befehl(befehl="inventar-neu", name="HK", artnr="HK-1", merkmal=["Typ=22", "Gewicht=ca. 30 kg"], vergleich=["Zählung 19.10.=79"], **leer)
+        self.assertEqual(self.z.post.call_args[0], ("/api/inventar/teile", {"artnr": "HK-1", "werte": {"Typ": "22", "Gewicht": "ca. 30 kg"},
+                                                                          "vergleich": {"Zählung 19.10.": "79"}, "name": "HK"}))
+        with self.assertRaises(self.c.Fehler):
+            self.befehl(befehl="inventar-neu", name="HK", artnr=None, merkmal=["Typ"], vergleich=None, **leer)
+
+    def test_inventar_import_laesst_die_zentrale_alles_pruefen(self):
+        L = [{"name": "HK 1", "artnr": "HK-1", "werte": {"Typ": "22"}}, {"name": "HK 2"}]
+        self.z.post.return_value = {"teile": [{"id": "a1b2c3", "name": "HK 1", "artnr": "HK-1", "werte": {"Typ": "22"}}, {"id": "b2c3d4", "name": "HK 2"}]}
+        d = neuer_ordner("import") / "teile.json"
+        d.write_text(json.dumps(L), encoding="utf-8")
+        self.assertIn("Probe, nichts angelegt", self.befehl(befehl="inventar-import", datei=str(d), los=False))
+        self.assertEqual(self.z.post.call_args[0], ("/api/inventar/import", {"teile": L, "probe": True}))
+        self.assertIn("2 Teile angelegt", self.befehl(befehl="inventar-import", datei=str(d), los=True))
+        self.assertEqual(self.z.post.call_args[0][1]["probe"], False)
+        self.z.post.reset_mock()
+        d.write_text(json.dumps({"name": "keine Liste"}), encoding="utf-8")
+        with self.assertRaises(self.c.Fehler):
+            self.befehl(befehl="inventar-import", datei=str(d), los=True)
+        self.z.post.assert_not_called()
+
+    def test_inventar_zaehlen_ohne_standort_in_der_antwort(self):
+        self.z.post.return_value = {"teil": {"name": "A", "menge": 5, "einheit": "Stück"}, "buchung": {"delta": 5, "vorher": 0, "nachher": 5}}
+        aus = self.befehl(befehl="inventar-zaehlen", teil="A", ort="Lager", menge="5", text=None)
+        self.assertIn("Gebucht +5", aus)
 
     def test_schalter_steht_in_der_hilfe(self):
         for b in ("wunsch-notiz", "bericht-antwort"):
@@ -879,6 +927,237 @@ class Inventar(unittest.TestCase):
         for teil, datei in ((b["id"], d), (a["id"], "../inventar.json")):
             with self.assertRaises(ValueError):
                 self.I.foto_pfad(teil, datei)
+
+    # ---------- Standorte, Zählen, Artikelnummer, Vorlagen (z. B. Laden, Lager, Beschädigt) ----------
+
+    def orte(self):
+        self.I.standort("besitzer", {"name": "Laden", "adresse": "Straße 1"})
+        self.I.standort("besitzer", {"name": "Lager"})
+        self.I.standort("besitzer", {"name": "Beschädigt", "verkaufbar": False})
+
+    def test_mengen_je_ort_summe_ohne_beschaedigt(self):
+        self.orte()
+        t = self.I.teil_neu("besitzer", {"name": "Heizkörper A"})
+        for ort, n in (("Laden", 3), ("lager", 5), ("Beschädigt", 2)):
+            self.I.buchen("besitzer", {"teil": t["id"], "delta": n, "standort": ort})
+        t = self.I.stand()["teile"][0]
+        self.assertEqual(t["mengen"], {"Laden": 3, "Lager": 5, "Beschädigt": 2})
+        self.assertEqual(t["menge"], 8, "Beschädigt zählt nicht zum Bestand")
+        b = next(b for b in self.I.stand()["buchungen"] if b["standort"] == "Beschädigt")   # alle in derselben Sekunde
+        self.assertEqual((b["vorher"], b["nachher"], b["delta"]), (0, 2, 2))
+
+    def test_nicht_mehr_entnehmen_als_am_ort(self):
+        self.orte()
+        t = self.I.teil_neu("besitzer", {"name": "Heizkörper A"})
+        self.I.buchen("besitzer", {"teil": t["id"], "delta": 2, "standort": "Lager"})
+        self.I.buchen("besitzer", {"teil": t["id"], "delta": 10, "standort": "Laden"})
+        with self.assertRaises(ValueError):
+            self.I.buchen("besitzer", {"teil": t["id"], "delta": -3, "standort": "Lager"})
+        s = self.I.stand()
+        self.assertEqual((s["teile"][0]["mengen"], s["teile"][0]["menge"], len(s["buchungen"])), ({"Lager": 2, "Laden": 10}, 12, 2))
+
+    def test_zaehlen_bucht_den_unterschied(self):
+        self.orte()
+        t = self.I.teil_neu("besitzer", {"name": "Heizkörper A", "artnr": "HK-60-100-22"})
+        r = self.I.zaehlen("besitzer", {"teil": "hk-60-100-22", "standort": "Lager", "menge": 47})
+        self.assertEqual((r["buchung"]["delta"], r["buchung"]["quelle"], r["teil"]["menge"]), (47, "zaehlung", 47))
+        r = self.I.zaehlen("besitzer", {"teil": t["id"], "standort": "Lager", "menge": "45"})
+        self.assertEqual((r["buchung"]["delta"], r["buchung"]["vorher"], r["buchung"]["nachher"]), (-2, 47, 45))
+        r = self.I.zaehlen("besitzer", {"teil": t["id"], "standort": "Lager", "menge": 45})
+        self.assertIsNone(r["buchung"], "gleiche Zahl: keine Buchung")
+        self.assertIn("Lager", r["teil"]["gezaehlt"])
+        self.assertEqual(len(self.I.stand()["buchungen"]), 2)
+        with self.assertRaises(ValueError):
+            self.I.zaehlen("besitzer", {"teil": t["id"], "standort": "Lager", "menge": -1})
+
+    def test_ungezaehlt_ist_nicht_null(self):
+        self.orte()
+        t = self.I.teil_neu("besitzer", {"name": "Heizkörper A"})
+        S = self.I.stand()["standorte"]
+        self.assertEqual((t["mengen"], t["gezaehlt"]), ({}, {}))
+        self.assertEqual(self.I.orte_text(S, t), "Laden – · Lager – · Beschädigt –")
+        t = self.I.zaehlen("besitzer", {"teil": t["id"], "standort": "Lager", "menge": 0})["teil"]
+        self.assertEqual(self.I.orte_text(S, t), "Laden – · Lager 0 · Beschädigt –")
+
+    def test_alter_artikel_ohne_mengen_erst_zaehlen(self):
+        t = self.I.teil_neu("besitzer", {"name": "Dübel", "ort": "Regal 2"})
+        self.I.buchen("besitzer", {"teil": t["id"], "delta": 10})
+        self.orte()
+        self.assertNotIn("mengen", self.I.stand()["teile"][0], "Teil mit Bestand bleibt, wie es ist")
+        self.I.buchen("besitzer", {"teil": t["id"], "delta": 1})   # ohne Standort geht wie vorher
+        with self.assertRaises(ValueError):
+            self.I.buchen("besitzer", {"teil": t["id"], "delta": 1, "standort": "Lager"})
+        with self.assertRaises(ValueError):
+            self.I.zaehlen("besitzer", {"teil": t["id"], "standort": "Beschädigt", "menge": 1})
+        r = self.I.zaehlen("besitzer", {"teil": t["id"], "standort": "Lager", "menge": 7})
+        self.assertEqual((r["buchung"]["vorher"], r["buchung"]["nachher"], r["buchung"]["delta"]), (11, 7, -4))
+        t = self.I.buchen("besitzer", {"teil": t["id"], "delta": 1, "standort": "Laden"})["teil"]
+        self.assertEqual((t["mengen"], t["menge"], t["ort"]), ({"Lager": 7, "Laden": 1}, 8, "Regal 2"))
+
+    def test_erste_zaehlung_bringt_nichts_faelschlich_auf_die_einkaufsliste(self):
+        t = self.I.teil_neu("besitzer", {"name": "Schrauben", "min": 5})
+        self.I.buchen("besitzer", {"teil": t["id"], "delta": 11})
+        self.orte()
+        t = self.I.zaehlen("besitzer", {"teil": t["id"], "standort": "Laden", "menge": 3})["teil"]
+        self.assertEqual((t["menge"], t.get("zaehlung_offen")), (3, True))
+        self.assertFalse(self.I.wenig(t), "das Lager ist noch nicht gezählt")
+        t = self.I.zaehlen("besitzer", {"teil": t["id"], "standort": "Lager", "menge": 1})["teil"]
+        self.assertNotIn("zaehlung_offen", t)
+        self.assertTrue(self.I.wenig(t), "jetzt ist überall gezählt: 4 unter 5")
+
+    def test_artikelnummer_nur_aus_punkten_geht_nicht(self):
+        for falsch in ("..", "."):
+            with self.assertRaises(ValueError):
+                self.I.teil_neu("besitzer", {"name": "X" + falsch, "artnr": falsch})
+
+    def test_unbekannter_oder_fehlender_standort(self):
+        self.orte()
+        t = self.I.teil_neu("besitzer", {"name": "Heizkörper A"})
+        for b in ({"teil": t["id"], "delta": 1, "standort": "Keller"}, {"teil": t["id"], "delta": 1}):
+            with self.assertRaises(ValueError):
+                self.I.buchen("besitzer", b)
+        with self.assertRaises(ValueError):
+            self.I.zaehlen("besitzer", {"teil": t["id"], "menge": 3})
+        self.assertEqual(self.I.stand()["buchungen"], [])
+
+    def test_standort_aendern_nur_wenn_leer(self):
+        self.orte()
+        t = self.I.teil_neu("besitzer", {"name": "Heizkörper A"})
+        self.I.zaehlen("besitzer", {"teil": t["id"], "standort": "Beschädigt", "menge": 2})
+        for b in ({"name": "beschädigt", "verkaufbar": True}, {"name": "Beschädigt", "entfernen": True}):
+            with self.assertRaises(ValueError):
+                self.I.standort("besitzer", b)
+        self.I.zaehlen("besitzer", {"teil": t["id"], "standort": "Beschädigt", "menge": 0})
+        S = self.I.standort("besitzer", {"name": "Beschädigt", "entfernen": True})["standorte"]
+        self.assertEqual([s["name"] for s in S], ["Laden", "Lager"])
+        self.assertEqual(self.I.standort("besitzer", {"name": "LADEN", "adresse": "Straße 2"})["standorte"][0], {"name": "Laden", "adresse": "Straße 2", "verkaufbar": True})
+
+    def test_artnr_eindeutig_und_nicht_wie_eine_kennung(self):
+        a = self.I.teil_neu("besitzer", {"name": "A", "artnr": "HK-60-100-22"})
+        for b in ({"name": "B", "artnr": "hk-60-100-22"}, {"name": "C", "artnr": "a1b2c3"}, {"name": "D", "artnr": "mit leer"}):
+            with self.assertRaises(ValueError):
+                self.I.teil_neu("besitzer", b)
+        b = self.I.teil_neu("besitzer", {"name": "B", "artnr": "HK-60-60-22"})
+        with self.assertRaises(ValueError):
+            self.I.teil_aendern("besitzer", b["id"], {"artnr": "HK-60-100-22", "beschreibung": "x"})
+        self.assertEqual(self.I.stand()["teile"][1]["beschreibung"], "", "ein Fehler ändert nichts")
+        self.assertEqual(self.I.teil_aendern("besitzer", "HK-60-100-22", {"name": "A", "ort": "Regal 1"})["id"], a["id"], "gleicher Name bei sich selbst geht")
+
+    def test_vorlage_standardwerte_und_merkmal_entfernen(self):
+        self.I.vorlage("besitzer", {"kategorie": "Heizkörper", "merkmale": ["Typ", "Hersteller=Muster", {"name": "Farbe", "standard": "Weiß"}]})
+        t = self.I.teil_neu("besitzer", {"name": "A", "kategorie": "heizkörper", "werte": {"Typ": "22", "Farbe": "Grau"}})
+        self.assertEqual(t["werte"], {"Typ": "22", "Farbe": "Grau", "Hersteller": "Muster"})
+        with self.assertRaises(ValueError):   # Typ hat bei A einen Wert
+            self.I.vorlage("besitzer", {"kategorie": "Heizkörper", "merkmale": ["Hersteller", "Farbe"]})
+        V = self.I.vorlage("besitzer", {"kategorie": "Heizkörper", "merkmale": ["Typ", "Hersteller=Muster", "Farbe", "Prüfdruck"]})["vorlagen"]
+        self.assertEqual([m["name"] for m in V["Heizkörper"]], ["Typ", "Hersteller", "Farbe", "Prüfdruck"])
+        with self.assertRaises(ValueError):
+            self.I.vorlage("besitzer", {"kategorie": "Heizkörper", "merkmale": ["Typ", "typ"]})
+
+    def test_merkmale_bis_60(self):
+        t = self.I.teil_neu("besitzer", {"name": "A", "werte": {f"M{i}": str(i) for i in range(30)}})
+        self.assertEqual(len(t["werte"]), 30)
+        self.assertEqual(len(self.I.teil_aendern("besitzer", t["id"], {"werte": {f"N{i}": "x" for i in range(30)}})["werte"]), 60)
+        with self.assertRaises(ValueError):
+            self.I.teil_aendern("besitzer", t["id"], {"werte": {"noch eins": "x"}})
+
+    def test_vergleich_nie_in_menge(self):
+        self.orte()
+        t = self.I.teil_neu("besitzer", {"name": "A", "vergleich": {"Zählung 19.10.": "79", "Shop 04.11.": "76"}})
+        t = self.I.teil_aendern("besitzer", t["id"], {"vergleich": {"Shop 04.11.": ""}})
+        self.assertEqual((t["vergleich"], t["menge"]), ({"Zählung 19.10.": "79"}, 0))
+
+    def test_satz_mit_standort_und_artnr(self):
+        self.orte()
+        t = self.I.teil_neu("besitzer", {"name": "Heizkörper Typ 22 · 60 × 100 cm", "artnr": "HK-60-100-22"})
+        self.I.teil_neu("besitzer", {"name": "Lager-Regal"})
+        v = self.I.verstehen("3 HK-60-100-22 Laden entnommen")
+        self.assertEqual((v["standort"], v["richtung"], v["menge"], [x["id"] for x in v["treffer"]]), ("Laden", -1, 3, [t["id"]]))
+        v = self.I.verstehen("Wie viele HK-60-100-22 im Lager?")
+        self.assertEqual((v["art"], v["standort"], v["treffer"][0]["id"]), ("frage", "Lager", t["id"]))
+        v = self.I.verstehen("2 Lager-Regal dazu")
+        self.assertEqual((v["standort"], v["treffer"][0]["name"]), ("", "Lager-Regal"), "Standort nur als ganzes Wort")
+
+    def test_standorte_weg_und_wieder_ohne_verlust(self):
+        """Kalte Durchsicht 05.11.2026, Befund 1: Bestand darf sich nie ohne Buchung ändern."""
+        self.I.standort("besitzer", {"name": "Lager"})
+        t = self.I.teil_neu("besitzer", {"name": "A"})
+        self.I.standort("besitzer", {"name": "Lager", "entfernen": True})
+        self.assertNotIn("mengen", self.I.stand()["teile"][0], "ohne Standorte: eine Menge je Teil")
+        self.I.buchen("besitzer", {"teil": t["id"], "delta": 10})
+        self.I.standort("besitzer", {"name": "Lager"})
+        with self.assertRaises(ValueError):   # erst zählen
+            self.I.buchen("besitzer", {"teil": t["id"], "delta": 1, "standort": "Lager"})
+        self.I.zaehlen("besitzer", {"teil": t["id"], "standort": "Lager", "menge": 10})
+        t = self.I.buchen("besitzer", {"teil": t["id"], "delta": 1, "standort": "Lager"})["teil"]
+        s = self.I.stand()
+        self.assertEqual((t["menge"], sum(b["delta"] for b in s["buchungen"])), (11, 11), "Bestand = Summe der Buchungen")
+
+    def test_standort_entfernen_vergisst_seine_zahlen(self):
+        self.orte()
+        t = self.I.teil_neu("besitzer", {"name": "A"})
+        self.I.zaehlen("besitzer", {"teil": t["id"], "standort": "Laden", "menge": 0})
+        self.I.standort("besitzer", {"name": "Laden", "entfernen": True})
+        self.I.standort("besitzer", {"name": "Laden"})
+        S = self.I.stand()["standorte"]
+        self.assertEqual(self.I.orte_text(S, self.I.stand()["teile"][0]), "Lager – · Beschädigt – · Laden –")
+
+    def test_merkmal_gross_klein_ist_derselbe_eintrag(self):
+        t = self.I.teil_neu("besitzer", {"name": "A", "werte": {"typ": "22"}})
+        self.assertEqual(self.I.teil_aendern("besitzer", t["id"], {"werte": {"Typ": "33"}})["werte"], {"typ": "33"})
+        self.assertEqual(self.I.teil_aendern("besitzer", t["id"], {"werte": {"TYP": ""}})["werte"], {})
+
+    def test_vergleich_alle_zeilen_ersetzen(self):
+        alt = {f"Alt {i}": str(i) for i in range(20)}
+        t = self.I.teil_neu("besitzer", {"name": "A", "vergleich": alt})
+        neu = {**{k: "" for k in list(alt)[10:]}, **{f"Neu {i}": "x" for i in range(10)}}   # 10 behalten, 10 ersetzen
+        self.assertEqual(len(self.I.teil_aendern("besitzer", t["id"], {"vergleich": neu})["vergleich"]), 20)
+
+    def test_import_ganz_oder_gar_nicht(self):
+        self.I.teil_neu("besitzer", {"name": "Alt", "artnr": "HK-9"})
+        for falsch in ([{"name": "HK 1"}, {"name": "HK 2", "artnr": "HK 2"}], [{"name": "Neu", "artnr": "hk-9"}], [{"name": "A"}, {"name": "a"}],
+                       [{"name": "A", "menge": 5}], [{"name": "A", "werte": ["x"]}], ["kein Teil"]):
+            with self.assertRaises(ValueError):
+                self.I.teile_import("besitzer", {"teile": falsch})
+        self.assertEqual([t["name"] for t in self.I.stand()["teile"]], ["Alt"], "nach einem Fehler ist nichts angelegt")
+        r = self.I.teile_import("besitzer", {"teile": [{"name": "HK 1", "artnr": "HK-1"}, {"name": "HK 2"}], "probe": True})
+        self.assertEqual((len(r["teile"]), len(self.I.stand()["teile"])), (2, 1), "Probe legt nichts an")
+        self.I.teile_import("besitzer", {"teile": [{"name": "HK 1", "artnr": "HK-1"}, {"name": "HK 2"}]})
+        self.assertEqual(sorted(t["name"] for t in self.I.stand()["teile"]), ["Alt", "HK 1", "HK 2"])
+
+    def test_zaehlen_mit_standort_ohne_standorte_abgelehnt(self):
+        t = self.I.teil_neu("besitzer", {"name": "A"})
+        with self.assertRaises(ValueError):
+            self.I.zaehlen("besitzer", {"teil": t["id"], "standort": "Lager", "menge": 5})
+        self.assertEqual((self.I.stand()["teile"][0]["menge"], self.I.stand()["buchungen"]), (0, []))
+
+    def test_zaehlen_am_standort_heisst_gezaehlt(self):
+        self.orte()
+        t = self.I.teil_neu("besitzer", {"name": "A", "zaehlung": "offen"})
+        t = self.I.zaehlen("besitzer", {"teil": t["id"], "standort": "Lager", "menge": 47})["teil"]
+        self.assertEqual((t["zaehlung"], self.I.menge_text(t)), ("", "47 Stk."))
+
+    def test_lange_saetze_bleiben_schnell(self):
+        self.orte()
+        start = time.time()
+        with self.assertRaises(ValueError):
+            self.I.verstehen("im " * 8000 + "x")
+        self.assertLess(time.time() - start, 1)
+        self.assertEqual(self.I.verstehen("2 Dübel aus dem Lager entnommen")["standort"], "Lager")
+
+    def test_artnr_kennungsform_sagt_warum(self):
+        with self.assertRaises(ValueError) as e:
+            self.I.teil_neu("besitzer", {"name": "A", "artnr": "123456"})
+        self.assertIn("wie eine Kennung", str(e.exception))
+
+    def test_export_zeigt_orte_und_artnr(self):
+        self.orte()
+        t = self.I.teil_neu("besitzer", {"name": "Heizkörper A", "artnr": "HK-1"})
+        self.I.zaehlen("besitzer", {"teil": t["id"], "standort": "Lager", "menge": 47})
+        l = self.I.text_liste()
+        self.assertIn("Heizkörper A (HK-1)", l)
+        self.assertIn("47 Stk. (Laden – · Lager 47 · Beschädigt –)", l)
+        self.assertIn("Beschädigt, zählt nicht zum Bestand", l)
 
 
 class KalenderLokal(unittest.TestCase):
@@ -1145,6 +1424,124 @@ class BerichtProjekt(unittest.TestCase):
         self.b.nachricht(self.B, x["id"], {"text": "Und das"})
         self.b.erledigt("claude", x["id"], {})
         self.assertEqual(self.b._offen_fuer(self.b._lesen(), "claude", ""), [], "geschlossen: abgeholt")
+
+
+class HookEinrichten(unittest.TestCase):
+    """Rückmeldung eines Kollegen (5.11.2026): Das Update schrieb settings.json jedes Mal neu, mit neuer Reihenfolge und neuer Kopie."""
+    def setUp(self):
+        t = Path(tempfile.mkdtemp(prefix="hke-", dir=TMP))
+        spec = importlib.util.spec_from_file_location("hooks_einrichten", HIER / "hooks" / "einrichten.py")
+        self.m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.m)
+        self.m.DATEI = t / "settings.json"
+        self.t = t
+
+    def lauf(self, *args):
+        with mock.patch.object(sys, "argv", ["x", *args]), contextlib.redirect_stdout(io.StringIO()):
+            self.m.main()
+        return json.loads(self.m.DATEI.read_text(encoding="utf-8"))
+
+    def kopien(self):
+        return sorted(p.name for p in self.t.glob("settings.json.vor-zentrale-*"))
+
+    def test_zweiter_lauf_aendert_nichts_und_legt_keine_kopie(self):
+        fremd = {"type": "command", "command": "eigener-melder"}
+        self.m.DATEI.write_text(json.dumps({"hooks": {"Stop": [{"hooks": [fremd]}]}}), encoding="utf-8")
+        d1 = self.lauf()
+        self.assertEqual(d1["hooks"]["Stop"][0]["hooks"][0], fremd, "fremder Hook bleibt vorn")
+        self.assertEqual(sorted(d1["hooks"]), ["Stop", "StopFailure", "UserPromptSubmit"])
+        roh, k = self.m.DATEI.read_bytes(), self.kopien()
+        self.lauf()
+        self.assertEqual((self.m.DATEI.read_bytes(), self.kopien()), (roh, k), "nichts geschrieben, keine neue Kopie")
+
+    def test_anderer_python_pfad_bleibt_stehen_kaputter_wird_ersetzt(self):
+        gut = {"type": "command", "command": f'"/anderes/python3" "{self.m.HOOK.as_posix()}"', "timeout": 5}
+        kaputt = {"type": "command", "command": '"py" "/gibt/es/nicht/claude_lauf.py"'}
+        self.m.DATEI.write_text(json.dumps({"hooks": {"Stop": [{"hooks": [gut]}], "UserPromptSubmit": [{"hooks": [kaputt]}]}}), encoding="utf-8")
+        d = self.lauf()
+        self.assertEqual(d["hooks"]["Stop"][0]["hooks"], [gut])
+        self.assertNotIn("/gibt/es/nicht", json.dumps(d))
+        self.assertIn("StopFailure", d["hooks"])
+
+    def test_weg_traegt_aus(self):
+        self.lauf()
+        self.assertNotIn("hooks", self.lauf("--weg"))
+
+    def test_abbruch_wird_als_fehler_gemeldet(self):
+        self.assertIn('"quelle": "hook", "fehler": True', (HIER / "hooks" / "claude_lauf.py").read_text(encoding="utf-8"))
+
+
+class BerichtFrage(unittest.TestCase):
+    """Neue Frage an einen bestehenden Bericht (Vorschlag eines Kollegen): Die Antwort des Besitzers war eine Bitte
+    („zeig mir welche“), danach hatte der Bericht keine offene Frage mehr. Mit der angehängten Frage ist er wieder offen."""
+    def setUp(self):
+        import berichte, hub
+        self.b, self.B = berichte, hub.BESITZER
+        t = Path(tempfile.mkdtemp(prefix="bfr-", dir=TMP))
+        p = mock.patch.object(berichte, "DATEI", t / "b.json")
+        p.start()
+        self.addCleanup(p.stop)
+        x = berichte.neu("claude", {"titel": "Aufräumen", "fragen": [{"text": "Welche Ordner?", "vorschlaege": ["Alle", "Keine"]}]})
+        self.id = x["id"]
+        berichte.nachricht(self.B, self.id, {"text": "zeig mir welche", "frage": x["fragen"][0]["id"]})
+
+    def test_angehaengte_frage_macht_den_bericht_wieder_offen(self):
+        self.b.erledigt("claude", self.id, {})
+        x = self.b.frage_dazu("claude", self.id, {"fragen": [{"text": "Diese drei in den Papierkorb?", "vorschlaege": ["Ja", "Nein"]}]})
+        f = x["fragen"][-1]
+        self.assertEqual((len(x["fragen"]), f["vorschlaege"], f["antwort"]), (2, ["Ja", "Nein"], None))
+        self.assertNotEqual(f["id"], x["fragen"][0]["id"])
+        self.assertTrue(f.get("zeit"))
+        x = self.b.lesen("claude", self.id)
+        self.assertEqual(self.b.offene_fragen(x), 1)
+        self.assertNotIn("erledigt", x)
+        self.assertFalse(x["gelesen"])
+        self.assertEqual(self.b._offen_fuer(self.b._lesen(), "claude", ""), [], "wer nachfragt, hat die Antwort davor gelesen")
+
+    def test_antwort_auf_die_neue_frage_kommt_beim_agenten_an(self):
+        f = self.b.frage_dazu("claude", self.id, {"fragen": [{"text": "Alle drei?", "vorschlaege": ["Ja", "Nein"]}]})["fragen"][-1]
+        self.b.nachricht(self.B, self.id, {"text": "Ja", "frage": f["id"]})
+        neu = [m for m in self.b.warten("claude", sekunden=1)["neu"] if m["text"] == "Ja"]
+        self.assertEqual([m["offen"] for m in neu], [0])
+
+    def test_nur_besitzer_und_anleger_und_grenzen(self):
+        with self.assertRaises(PermissionError):
+            self.b.frage_dazu("codex", self.id, {"fragen": [{"text": "Fremd?"}]})
+        for b in ({}, {"fragen": []}, {"fragen": [{"text": "  "}]}, {"fragen": [{"text": f"F{i}?"} for i in range(80)]}):
+            with self.assertRaises(ValueError):
+                self.b.frage_dazu("claude", self.id, b)
+        self.assertEqual(len(self.b.lesen("claude", self.id)["fragen"]), 1, "nichts gespeichert")
+        self.assertEqual(len(self.b.frage_dazu(self.B, self.id, {"fragen": [{"text": "Selbst?"}]})["fragen"]), 2)
+
+    def test_seite_zeigt_die_frage_nach_der_nachricht_davor(self):
+        for datei in ("index.src.html", "index.html"):
+            self.assertIn("E.push([Math.max(seit, f.zeit || 0), f.zeit ? 1e6 + k : 2 * k + 1,", (HIER / "zentrale" / datei).read_text(encoding="utf-8"), datei)
+
+
+class LaufZwischennachricht(unittest.TestCase):
+    def test_nachricht_mitten_in_der_antwort_bricht_nichts_ab(self):
+        import laeufe
+        t0 = time.time() - 400   # echte Zeit: lage() legt sonst alte Läufe ohne Lebenszeichen ab
+        with mock.patch.object(laeufe.time, "time", return_value=t0):
+            laeufe.melden("claude", {"aktion": "start", "lauf": "chat-zw", "titel": "Aufgabe", "quelle": "hook"})
+        with mock.patch.object(laeufe.time, "time", return_value=t0 + 300):
+            x = laeufe.melden("claude", {"aktion": "start", "lauf": "chat-zw", "titel": "noch was", "quelle": "hook"})
+        self.assertEqual((x["start"], x["titel"]), (t0, "Aufgabe"), "derselbe Lauf läuft weiter")
+        self.assertFalse([f for f in laeufe.lage()["fertig"] if f["lauf"] == "chat-zw" and f["status"] == "abgebrochen"])
+        with mock.patch.object(laeufe.time, "time", return_value=t0 + 390):
+            laeufe.melden("claude", {"aktion": "start", "lauf": "chat-zw", "titel": "Neues Thema", "quelle": "hand"})
+        self.assertTrue([f for f in laeufe.lage()["fertig"] if f["lauf"] == "chat-zw" and f["status"] == "abgebrochen"], "ein neuer Lauf von Hand legt den alten ab")
+
+
+class LaufAbo(unittest.TestCase):
+    def test_abo_bleibt_beim_chat_und_wird_gemerkt(self):
+        import laeufe
+        laeufe.melden("claude", {"aktion": "start", "lauf": "chat-abo1", "titel": "T", "quelle": "hook", "abo": "claude-2"})
+        x = laeufe.melden("claude", {"aktion": "start", "lauf": "chat-abo1", "titel": "weiter", "quelle": "hook"})
+        self.assertEqual(x["abo"], "claude-2")
+        self.assertEqual(laeufe.lage()["abos"]["claude-2"]["agent"], "claude")
+        y = laeufe.melden("claude", {"aktion": "start", "lauf": "chat-abo2", "titel": "Ohne", "quelle": "hook"})
+        self.assertFalse(y.get("abo"), "ohne Abo wie bisher")
 
 
 class AufgabenUndWunsch(unittest.TestCase):
@@ -1470,6 +1867,12 @@ class Mails(unittest.TestCase):
         self.assertIsNone(self.warn("x" + at + "mail.ionos.de", "IONOS", text=t))
         self.assertEqual(self.warn("x" + at + "post.example", text=t)["stufe"], "vorsicht")
 
+    def test_englische_druckwoerter_von_freemail(self):
+        at = chr(64)
+        w = self.warn("shop.team" + at + "freemail.example", name="Store Support", text="Your store is at risk. Verify your identity within 24 hours.")
+        self.assertEqual((w or {}).get("stufe"), "vorsicht")
+        self.assertEqual(self.warn("x" + at + "post.example", name="Shopify", text="Your store is at risk")["stufe"], "hoch")
+
     def test_eigene_adresse_als_absender(self):
         at = chr(64)
         k = "ich" + at + "firma.example"
@@ -1540,6 +1943,17 @@ class Schnittstelle(unittest.TestCase):
         except urllib.error.HTTPError as e:
             return e.code, e.read(), ""
 
+    def test_standorte_entfernen_und_umstellen_nur_der_besitzer(self):
+        self.assertEqual(self.frage("claude", "/api/inventar/standorte", {"name": "Lager"})[0], 200, "anlegen dürfen Agenten")
+        self.assertEqual(self.frage("claude", "/api/inventar/standorte", {"name": "Lager", "verkaufbar": False})[0], 403)
+        self.assertEqual(self.frage("claude", "/api/inventar/standorte", {"name": "Lager", "entfernen": True})[0], 403)
+        self.assertEqual(self.frage("besitzer", "/api/inventar/standorte", {"name": "Lager", "entfernen": True})[0], 200)
+
+    def test_grosser_import_ueber_der_normalen_grenze(self):
+        L = [{"name": f"Teil {i:04d}", "beschreibung": "x" * 120} for i in range(700)]   # deutlich über 64 KB
+        c, b, _ = self.frage("claude", "/api/inventar/import", {"teile": L, "probe": True})
+        self.assertEqual(c, 200, b[:200])
+
     def test_verbinden_nur_der_besitzer(self):
         for pfad in ("/api/kalender/einrichten", "/api/kalender/waehlen", "/api/kalender/trennen", "/api/mail/verbinden", "/api/mail/trennen", "/api/mail/agenten"):
             self.assertEqual(self.frage("claude", pfad, {"ja": True})[0], 403, pfad)
@@ -1584,6 +1998,27 @@ class Schnittstelle(unittest.TestCase):
         self.assertIn(b'"konto"', self.frage("besitzer", "/api/kalender")[1])
         self.assertNotIn(b'"konto"', self.frage("claude", "/api/kalender")[1])
         self.assertEqual(self.frage("besitzer", "/api/kalender/termine?tage=abc")[0], 400)
+
+    def test_wege_inventar_standorte_zaehlen_vorlagen(self):
+        self.assertEqual(self.frage("besitzer", "/api/inventar/standorte", {"name": "Lager"})[0], 200)
+        self.assertEqual(self.frage("claude", "/api/inventar/standorte", {"name": "Beschädigt", "verkaufbar": False})[0], 200)
+        self.assertEqual(self.frage("claude", "/api/inventar/vorlagen", {"kategorie": "Heizkörper", "merkmale": ["Typ", "Hersteller=Muster"]})[0], 200)
+        c, b, _ = self.frage("claude", "/api/inventar/teile", {"name": "HK", "kategorie": "Heizkörper", "artnr": "HK-1"})
+        self.assertEqual((c, json.loads(b)["werte"]), (200, {"Hersteller": "Muster"}))
+        c, b, _ = self.frage("claude", "/api/inventar/zaehlen", {"teil": "HK-1", "standort": "lager", "menge": 5})
+        self.assertEqual((c, json.loads(b)["teil"]["menge"]), (200, 5))
+        self.assertEqual(self.frage("claude", "/api/inventar/zaehlen", {"teil": "HK-1", "standort": "Keller", "menge": 5})[0], 400)
+        self.assertEqual(self.frage("claude", "/api/inventar/buchen", {"teil": "HK-1", "delta": 1})[0], 400, "ohne Standort")
+        d = json.loads(self.frage("claude", "/api/inventar")[1])
+        self.assertEqual(([s["name"] for s in d["standorte"]], list(d["vorlagen"])), (["Lager", "Beschädigt"], ["Heizkörper"]))
+        from urllib.parse import quote
+        for nr in ("HK+1", "Größe-1"):   # Kalte Durchsicht 05.11.2026: Artikelnummer im Pfad kommt kodiert an
+            self.assertEqual(self.frage("claude", "/api/inventar/teile", {"name": "T " + nr, "artnr": nr})[0], 200)
+            c, b, _ = self.frage("claude", f"/api/inventar/teile/{quote(nr)}", {"ort": "Regal 3"})
+            self.assertEqual((c, json.loads(b)["ort"]), (200, "Regal 3"), nr)
+        c, b, _ = self.frage("claude", "/api/inventar/import", {"teile": [{"name": "I1"}, {"name": "I2", "artnr": "mit leer"}]})
+        self.assertEqual(c, 400)
+        self.assertNotIn("I1", [t["name"] for t in json.loads(self.frage("claude", "/api/inventar")[1])["teile"]])
 
 
 # ---------- Fehler aus der Rückmeldung des Kollegen ----------

@@ -38,6 +38,9 @@ Die Bilder 01 bis 17 stammen aus einer früheren Fassung: Dort fehlen in der Lei
 | ![](bilder/24-projekt-blatt.png) | Projekt angetippt | Knöpfe für „Als Nächstes“ und Status, Angaben, die Zeile **Pinwand**, darunter die Aufgaben. |
 | ![](bilder/25-pinwand.png) | **Pinwand** (aus dem Projektblatt) | Ganzer Bildschirm: Gruppen mit Rahmen, Karten mit Marke (Punkt grün „im Inventar“, orange „fehlt“). Oben Zoom, „Entfernte Karten“, „Anpinnen“, „Fertig“ führt zurück ins Blatt. Doppelklick auf eine freie Stelle: neue Karte. |
 | ![](bilder/26-pinwand-leiste.png) | Karte angetippt | Blauer Rand, Griff für die Größe, darüber die Leiste: Farbe, S/M/L, Symbol, Öffnen, Duplizieren, Entfernen. Am Handy steht die Leiste unten. |
+| ![](bilder/27-inventar-orte.png) | Inventar mit **Standorten** | Leiste „Alle Orte“ und je Standort, Kachel „Zählung …“ mit Fortschritt, Zeilen je Gruppe (Kategorie und erstes Merkmal der Vorlage) mit einer Zahl je Standort: „–“ dort nie gezählt, grün heute gezählt, rot „… beschädigt“. Teile ohne Standorte darunter als Karten wie bisher. |
+| ![](bilder/28-inventar-orte-blatt.png) | Teil mit Standorten | Je Standort eine Karte mit Plus und Minus, darunter rot ein Standort, der nicht zum Bestand zählt. Gesamt und „Zählen“, alte Stände nur zum Vergleich, Merkmale in der Reihenfolge der Vorlage („fehlt“ orange, antippen ändert). |
+| ![](bilder/29-inventar-zaehlen.png) | Zählen | Standort oben, ein Teil nach dem anderen in der Reihenfolge der Liste, das Feld startet leer, „Weiter“ speichert als Buchung, darunter alle Teile mit Haken für heute gezählt. |
 
 Die Leiste hat oben Übersicht, Agenten, Berichte, Wünsche, unter „Persönlich“ Projekte, Kalender, E-Mail, Inventar, Finanzen, Notizen und unter
 „Homelab“ Geräte, Dienste (nur wenn ein Linux-Gerät meldet), Netzwerk, Speicher, Papierkorb.

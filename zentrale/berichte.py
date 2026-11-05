@@ -8,7 +8,7 @@ Der Agent holt die Antworten ab:
   - Mit „sitzung“ kann ein Agent mehrere Chats auseinanderhalten.
 
 Gespeichert in DATEN/berichte.json: {"berichte": [{id, nr, titel, kurz, text, von, sitzung, projekt, wunsch, zeit, gelesen,
-  fragen: [{id, text, vorschlaege, antwort}], verlauf: [{id, von, text, zeit, frage, abgeholt}]}]}
+  fragen: [{id, text, vorschlaege, antwort, zeit (nur angehängte Fragen)}], verlauf: [{id, von, text, zeit, frage, abgeholt}]}]}
 Jeder Bericht hat eine fortlaufende Nummer „nr“. Überall, wo eine id erwartet wird, geht auch die Nummer.
 """
 import json
@@ -122,16 +122,46 @@ def projekt_aendern(von, bid, b):
     return x
 
 
-def neu(von, b):
-    projekt = _projekt_name(b.get("projekt"))
+def _fragen(roh, vorhanden=()):
+    """Fragen mit Vorschlägen prüfen und aufteilen; die Kennungen sind neu, auch gegenüber den schon vorhandenen Fragen."""
     fragen = []
-    for f in (b.get("fragen") or [])[:80]:
+    for f in (roh or [])[:80]:
         f = f if isinstance(f, dict) else {"text": f}
         t = _text(f.get("text"), 1000)
         vor = [_text(v, 120) for v in (f.get("vorschlaege") or [])[:6] if _text(v, 120)]
         for teil in (_aufteilen(t) if t else []):
-            fragen.append({"id": hub.neue_id(fragen), "text": teil, "antwort": None, "vorschlaege": vor})
-    fragen = fragen[:80]
+            fragen.append({"id": hub.neue_id(vorhanden, fragen), "text": teil, "antwort": None, "vorschlaege": vor})
+    return fragen
+
+
+def frage_dazu(von, bid, b):
+    """Neue Fragen an einen Bericht hängen (b: {"fragen": [{text, vorschlaege}]}), etwa nachdem der Besitzer „zeig mir welche“
+    geantwortet hat. Danach ist der Bericht wieder offen, auch wenn er schon geschlossen war. (Vorschlag eines Kollegen, 5.11.2026)"""
+    with _sperre:
+        d = _lesen()
+        x = _finden(d, bid)
+        if von not in (B, x["von"]):
+            raise PermissionError("Fragen anhängen dürfen nur der Besitzer und der Agent, der den Bericht angelegt hat.")
+        neue, jetzt = _fragen(b.get("fragen"), x["fragen"]), int(time.time())
+        if not neue:
+            raise ValueError("Frage fehlt.")
+        if len(x["fragen"]) + len(neue) > 80:
+            raise ValueError("Ein Bericht hat höchstens 80 Fragen. Bitte einen neuen Bericht anlegen.")
+        for f in neue:
+            f["zeit"] = jetzt   # damit die Seite sie nach den Nachrichten zeigt, die vorher kamen
+        x["fragen"] += neue
+        x.pop("erledigt", None)
+        x.pop("erledigt_von", None)
+        x["gelesen"] = False
+        if von == x["von"]:
+            _abgeholt_alle(x, jetzt)   # wer nachfragt, hat die Antwort davor gelesen
+        _schreiben(d)
+    return x
+
+
+def neu(von, b):
+    projekt = _projekt_name(b.get("projekt"))
+    fragen = _fragen(b.get("fragen"))[:80]
     with _sperre:
         d = _lesen()
         if len(d["berichte"]) >= 5000:

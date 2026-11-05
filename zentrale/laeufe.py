@@ -25,12 +25,13 @@ _lock = threading.Lock()
 _d = hub._json_laden(DATEI, {})
 _aktiv = dict(_d.get("aktiv") or {})
 _fertig = list(_d.get("fertig") or [])[-FERTIG_MAX:]
+_abos = dict(_d.get("abos") or {})   # Abo-Name -> {agent, zuletzt}: jedes Abo, das je gemeldet hat (mehrere Abos je Anbieter)
 
 
 def _sichern():
     """Aufrufen, während _lock gehalten wird."""
     try:
-        hub.json_schreiben(DATEI, {"aktiv": _aktiv, "fertig": _fertig})
+        hub.json_schreiben(DATEI, {"aktiv": _aktiv, "fertig": _fertig, "abos": _abos})
     except OSError:
         pass
 
@@ -58,7 +59,7 @@ def melden(aid, d):
         raise ValueError("lauf: nur Buchstaben, Ziffern und ._:- (bis 80 Zeichen)")
     jetzt = time.time()
     felder = {"titel": _txt(d.get("titel"), 160), "schritt": _txt(d.get("schritt"), 200),
-              "quelle": _txt(d.get("quelle"), 20), "sitzung": _txt(d.get("sitzung"), 80)}
+              "quelle": _txt(d.get("quelle"), 20), "sitzung": _txt(d.get("sitzung"), 80), "abo": _txt(d.get("abo"), 30)}
     w = wunsch_nr(d.get("wunsch")) or wunsch_nr(felder["titel"])
     fp = d.get("fortschritt")
     fp = max(0, min(100, fp)) if isinstance(fp, (int, float)) and not isinstance(fp, bool) else None
@@ -73,7 +74,12 @@ def melden(aid, d):
             w = (vorher.get("wunsch") or w) if felder["quelle"] == "hook" else (w or vorher.get("wunsch"))
             # Der Hook schickt die erste Zeile jeder Nachricht. Sie darf den Titel nicht ersetzen, sonst steht „ja mach“ auf der Seite
             felder["titel"] = (vorher.get("titel") or felder["titel"]) if felder["quelle"] == "hook" else (felder["titel"] or vorher.get("titel", ""))
-        if aktion == "start" or not alt:
+        if aktion == "start" and not felder["abo"]:   # Abo bleibt beim Chat
+            felder["abo"] = ((alt or {}).get("abo") or next((x.get("abo", "") for x in reversed(_fertig) if x["agent"] == aid and x["lauf"] == lauf), ""))
+        # Eine Nachricht mitten in einer laufenden Antwort (Besitzer oder Meldung im Hintergrund) löst beim Hook wieder „start“ aus.
+        # Dann läuft derselbe Lauf weiter, statt als abgebrochen abgelegt zu werden (gemeldet von einem Kollegen, 5.11.2026).
+        weiter = aktion == "start" and alt and felder["quelle"] == "hook"
+        if (aktion == "start" and not weiter) or not alt:
             if alt and aktion == "start" and jetzt - alt["start"] >= 60:   # nie fertig gemeldet: als abgebrochen ablegen
                 _fertig.append(dict(alt, ende=alt.get("t") or jetzt, status="abgebrochen"))
             alt = {"agent": aid, "lauf": lauf, "start": jetzt, "titel": "", "schritt": "", "quelle": "", "sitzung": "",
@@ -86,6 +92,10 @@ def melden(aid, d):
             x["wunsch"] = w
         if fp is not None:
             x["fortschritt"] = fp
+        if x.get("abo"):
+            _abos[x["abo"]] = {"agent": aid, "zuletzt": jetzt}
+            if len(_abos) > 20:   # Grenze: Namen kommen von den Agenten
+                del _abos[min(_abos, key=lambda n: _abos[n]["zuletzt"])]
         if aktion == "fertig":
             _aktiv.pop(k, None)
             x.update(ende=jetzt, status="fehler" if d.get("fehler") else "fertig", ergebnis=_txt(d.get("ergebnis"), 600))
@@ -111,5 +121,6 @@ def lage(n=60):
             _sichern()
         aktiv = [dict(x, still=jetzt - x.get("t", x["start"]) > STILL_S) for x in _aktiv.values()]
         fertig = list(reversed(_fertig[-n:]))
+        abos = {k: dict(v) for k, v in _abos.items()}
     aktiv.sort(key=lambda x: x["start"])
-    return {"aktiv": aktiv, "fertig": fertig, "jetzt": jetzt}
+    return {"aktiv": aktiv, "fertig": fertig, "jetzt": jetzt, "abos": abos}

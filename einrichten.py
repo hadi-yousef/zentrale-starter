@@ -11,7 +11,8 @@ suchen, alt-zeigen und pruefen ändern nichts, sie lesen und zeigen nur.
                                    Ende mit Code 0 = alles getrennt, 1 = etwas ist noch vermischt.
   py einrichten.py update          neue Fassung holen, ohne dass etwas verloren geht: Daten zählen, eigene Änderungen in
                                    einen Sicherungszweig, holen (auch nach neu geschriebener Geschichte), Regeln verteilen,
-                                   Zentrale neu starten, Fassung und Daten prüfen. --ordner <Zentrale>, wenn von woanders gestartet
+                                   Zentrale neu starten, Fassung und Daten prüfen. --ordner <Zentrale>, wenn von woanders gestartet.
+                                   --ohne-hooks: die Einstellungen von Claude Code nicht anfassen
   (Mac und Linux: python3 statt py)
 
 Ablauf und was der Agent dabei tut: docs/EINRICHTEN.md.
@@ -484,7 +485,9 @@ def update():
         hook_da = "claude_lauf.py" in einstellungen.read_text(encoding="utf-8-sig")
     except OSError:
         hook_da = False
-    if hook_da:   # nur wenn der Besitzer den Hook schon wollte: neue Ereignisse nachtragen (vorher wird eine Kopie gelegt)
+    if hook_da and "--ohne-hooks" in sys.argv:
+        print("Hook-Schritt ausgelassen (--ohne-hooks). Fehlt ein Ereignis, später selbst: hooks/einrichten.py")
+    elif hook_da:   # nur wenn der Besitzer den Hook schon wollte: fehlende Ereignisse nachtragen; ist alles da, bleibt die Datei unverändert
         subprocess.run([sys.executable, str(HIER / "hooks" / "einrichten.py")])
     aufgabe = [x for x in autostart() if x[3] and x[1].lower() != "disabled"]
     lief = False

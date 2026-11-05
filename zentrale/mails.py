@@ -495,7 +495,8 @@ MARKEN = {"paypal": ("paypal.com", "paypal.de"), "amazon": ("amazon.de", "amazon
           "netflix": ("netflix.com",), "klarna": ("klarna.com", "klarna.de"), "telekom": ("telekom.de", "t-online.de"), "vodafone": ("vodafone.de", "vodafone.com"),
           "shopify": ("shopify.com",)}
 DRUCK = ("verifizieren", "verifizierung", "gesperrt", "sperrung", "eingeschränkt", "zertifikat", "läuft ab", "innerhalb von 24", "24 stunden", "passwort bestätigen",
-         "zugangsdaten", "konto bestätigen", "kontodaten", "identität bestätigen", "letzte mahnung", "sofort handeln")
+         "zugangsdaten", "konto bestätigen", "kontodaten", "identität bestätigen", "letzte mahnung", "sofort handeln",
+         "domain bestätigen", "schließung", "at risk", "verify your", "suspended", "will be closed", "confirm your identity", "within 24 hours")
 ZEICHEN = str.maketrans({"ο": "o", "о": "o", "а": "a", "е": "e", "р": "p", "с": "c", "і": "i", "у": "y", "х": "x", "ı": "i", "ł": "l", "ν": "v", "α": "a", "1": "l", "0": "o"})
 
 

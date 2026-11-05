@@ -9,6 +9,7 @@ Der Hook hält Claude nicht auf: Die Zentrale läuft auf diesem Rechner, gewarte
 Fehler (Zentrale aus, Schlüssel fehlt) werden verschluckt. Schlüssel: der von `py start.py agent-neu claude`.
 """
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -57,9 +58,11 @@ def main():
         erste = re.sub(r"^\s*wunsch\s*(?:nr\.?|nummer)\s*\d{1,5}\s*[:·,.-]?\s*", "", erste, flags=re.I) or erste
         d = {"aktion": "start", "lauf": lauf, "titel": erste[:150], "wunsch": m.group(1) if m else "", "quelle": "hook", "sitzung": sitzung}
     elif ereignis == "StopFailure":
-        d = {"aktion": "fertig", "lauf": lauf, "nur_wenn_aktiv": True, "quelle": "hook", "ergebnis": "Abgebrochen: " + str(h.get("last_assistant_message") or h.get("error") or "Fehler")[:200]}
+        d = {"aktion": "fertig", "lauf": lauf, "nur_wenn_aktiv": True, "quelle": "hook", "fehler": True, "ergebnis": "Abgebrochen: " + str(h.get("last_assistant_message") or h.get("error") or "Fehler")[:200]}
     else:
         d = {"aktion": "fertig", "lauf": lauf, "nur_wenn_aktiv": True, "quelle": "hook", "ergebnis": letzte_antwort(h.get("transcript_path"))}
+    if os.environ.get("ZENTRALE_ABO"):   # mehrere Abos: je Abo eine Karte auf der Seite „Agenten“
+        d["abo"] = os.environ["ZENTRALE_ABO"][:30]
     try:
         from zentrale_client import Zentrale
         Zentrale(agent="claude")._anfrage("/api/laeufe", d, timeout=2)

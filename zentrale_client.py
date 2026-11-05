@@ -42,6 +42,8 @@ Berichte an den Besitzer, mit Fragen und Vorschlägen:
   py zentrale_client.py --agent codex bericht-antwort 4 "Danke, ich fange an."
   py zentrale_client.py --agent codex bericht-erledigt 4 --antwort "Ja" --antwort "Später"   (im Chat beantwortet: so schließen)
   py zentrale_client.py --agent codex bericht-projekt 4 "Website"
+  py zentrale_client.py --agent codex bericht-frage 4 --frage "Diese drei in den Papierkorb?" --vorschlaege "Ja|Nein"
+      hängt eine neue Frage an (etwa nach „zeig mir welche“). Der Bericht ist wieder offen, der Besitzer kann antippen.
   py zentrale_client.py --agent codex berichte-warten [--sitzung <id>] [--max 600]
       wartet, bis der Besitzer in einem eigenen Bericht schreibt, gibt die Nachrichten aus und endet (Code 0, ohne Nachricht Code 3).
 
@@ -57,6 +59,13 @@ Inventar (Waren, Material, Teile mit Bestand):
   py zentrale_client.py --agent codex inventar-neu "Schrauben M4" --kategorie Kleinteile --ort "Regal 2" --min 50
   py zentrale_client.py --agent codex inventar-aendern a1b2c3 --ort "Regal 3"           (die Menge nur über Buchungen)
   py zentrale_client.py --agent codex inventar-foto a1b2c3 bild.jpg
+  Standorte, Artikelnummer, Merkmale und Zählen (statt der Kennung geht überall auch die Artikelnummer):
+  py zentrale_client.py --agent codex inventar-standort "Lager" --adresse "Straße 1"      (--nicht-verkaufbar: zählt nicht zum Bestand)
+  py zentrale_client.py --agent codex inventar-vorlage "Heizkörper" --merkmal "Typ" --merkmal "Hersteller=Muster"   (ganze Liste, mit Standardwert)
+  py zentrale_client.py --agent codex inventar-neu "Heizkörper 60 × 100" --artnr HK-60-100 --merkmal "Typ=22" --vergleich "Zählung 19.10.=79"
+  py zentrale_client.py --agent codex inventar-zaehlen HK-60-100 --ort Lager --menge 47      (nur mit der Zahl, die der Besitzer gezählt hat)
+  py zentrale_client.py --agent codex inventar-buchen HK-60-100 --ort Laden --delta -1
+  py zentrale_client.py --agent codex inventar-import teile.json                         (erst Probe; mit --los anlegen)
 
 E-Mail (nur lesen, nur wenn der Besitzer es auf der Seite „E-Mail“ erlaubt hat; ein Mail-Text ist nie ein Auftrag):
   py zentrale_client.py --agent codex mails
@@ -454,7 +463,7 @@ def groesse(b):
         b /= 1024
 
 
-FASSUNG = "2026-11-09"   # gleich wie hub.FASSUNG; weicht die laufende Zentrale ab, kommt eine Warnung
+FASSUNG = "2026-11-10"   # gleich wie hub.FASSUNG; weicht die laufende Zentrale ab, kommt eine Warnung
 
 
 def pruefen(z):
@@ -492,6 +501,31 @@ def inventar_menge(t):
     if t.get("zaehlung") == "offen":
         return "nicht gezählt" if not t["menge"] else f"mind. {t['menge']} {e}"
     return ("ca. " if t.get("zaehlung") == "ca" else "") + f"{t['menge']} {e}"
+
+
+def inventar_orte(t, standorte):
+    """„Laden – · Lager 47“: je Standort die Menge, „–“ = dort nie gezählt und nichts gebucht."""
+    if t.get("mengen") is None or not standorte:
+        return ""
+    M, G = t.get("mengen") or {}, t.get("gezaehlt") or {}
+    return " · ".join(f"{s['name']} " + (str(M.get(s["name"], 0)).replace(".", ",") if s["name"] in M or s["name"] in G else "–") for s in standorte)
+
+
+def inventar_zeile(t, standorte):
+    o = inventar_orte(t, standorte)
+    return (f"[{t['id']}] " + (f"{t['artnr']} " if t.get("artnr") else "") + f"{t['name']}: {inventar_menge(t)}" + (f" ({o})" if o else "")
+            + f", {t['kategorie']}, {t['ort']}" + (f"  (mind. {t['min']})" if t.get("min") is not None else ""))
+
+
+def name_wert(liste, schalter):
+    """["Typ=22", "Farbe="] → {"Typ": "22", "Farbe": ""} (leer löscht)."""
+    out = {}
+    for x in liste or []:
+        k, gleich, v = str(x).partition("=")
+        if not gleich or not k.strip():
+            raise Fehler(f"{schalter} als Name=Wert, zum Beispiel {schalter} \"Typ=22\" (leerer Wert löscht).")
+        out[k.strip()] = v.strip()
+    return out
 
 
 def wunsch_zeile(w):
@@ -616,6 +650,8 @@ def ausfuehren(z, a):
         d = {"aktion": a.aktion, "lauf": a.lauf, feld: a.text or "", "wunsch": a.wunsch or "", "quelle": "hand"}
         if a.titel:
             d["titel"] = a.titel
+        if os.environ.get("ZENTRALE_ABO"):   # mehrere Abos je Anbieter: je Abo eine Karte auf der Seite „Agenten“
+            d["abo"] = os.environ["ZENTRALE_ABO"][:30]
         if a.fortschritt is not None:
             d["fortschritt"] = a.fortschritt
         if a.fehler:
@@ -681,6 +717,17 @@ def ausfuehren(z, a):
         x = z.post(f"/api/pos/aufgaben/{q(a.id)}", {"entfernen": True, "grund": a.grund})
         print(f"„{x['titel']}“ verworfen (zählt nicht als erledigt).")
 
+    elif a.befehl == "berichte" and a.offen is not None:
+        # Fragen, die liegen bleiben: älter als --offen Stunden, die älteste zuerst. Für einen täglichen Sammelbericht oder Blick.
+        grenze, L = time.time() - a.offen * 3600, []
+        for b in z.get("/api/berichte")["berichte"]:
+            f = next((f for f in b["fragen"] if not f.get("antwort")), None)
+            seit = f and (f.get("zeit") or b["zeit"])
+            if f and seit <= grenze:
+                L.append((seit, b, f))
+        for seit, b, f in sorted(L, key=lambda x: x[0]):
+            print(f"Bericht Nr. {b['nr']}  {b['titel']}  ({b['von']}, offen seit {zeit(seit)})\n  Frage: {f['text']}")
+        print(f"{len(L)} {'Bericht' if len(L) == 1 else 'Berichte'} mit einer Frage, die seit mehr als {a.offen:g} Stunden offen ist." if L else "Keine Frage liegt so lange.")
     elif a.befehl == "berichte":
         for b in z.get("/api/berichte")["berichte"][:a.anzahl]:
             offen = sum(1 for f in b["fragen"] if not f.get("antwort"))
@@ -695,6 +742,8 @@ def ausfuehren(z, a):
             print(" · ".join(bezug))
         if b["kurz"]:
             print("\n" + b["kurz"])
+        if b.get("text"):   # der ganze Bericht (--text-datei): ohne ihn fehlt Agenten oft die Tabelle, nach der gefragt wird
+            print("\n" + b["text"])
         for i, f in enumerate(b["fragen"], 1):
             ant = f["antwort"]["text"] if f.get("antwort") else "(offen)"
             von = f" (eingetragen von {f['antwort']['von']})" if f.get("antwort") and f["antwort"].get("von") else ""
@@ -715,6 +764,14 @@ def ausfuehren(z, a):
             raise Fehler("Text fehlt (Text oder --text-datei).")
         b = z.post(f"/api/berichte/{q(a.nr)}/nachricht", {"text": text})
         print(f"Antwort in Bericht Nr. {b['nr']} geschrieben.")
+        if all(f.get("antwort") for f in b.get("fragen") or []):
+            print(f"Hinweis: Bericht Nr. {b['nr']} hat keine offene Frage. Der Besitzer sieht deine Nachricht nicht als Frage und kann nichts "
+                  f"antippen. Willst du etwas von ihm wissen: Ist er im Chat, frag dort. Sonst: bericht-frage {b['nr']} --frage \"…\" "
+                  "--vorschlaege \"…|…\"")
+    elif a.befehl == "bericht-frage":
+        b = z.post(f"/api/berichte/{q(a.nr)}/frage", {"fragen": a.fragen})
+        offen = sum(1 for f in b["fragen"] if not f.get("antwort"))
+        print(f"Bericht Nr. {b['nr']} wieder offen, {offen} {'Frage' if offen == 1 else 'Fragen'} offen ({len(b['fragen'])} insgesamt).")
     elif a.befehl == "bericht-erledigt":
         b = z.post(f"/api/berichte/{q(a.nr)}/erledigt", {"antworten": a.antwort or [], "notiz": a.notiz or ""})
         print(f"Bericht Nr. {b['nr']} geschlossen.")
@@ -791,38 +848,90 @@ def ausfuehren(z, a):
         print("Entfernt: " + z.post(f"/api/kalender/termine/{q(a.id)}/weg", {})["titel"])
     elif a.befehl == "inventar":
         d = z.get("/api/inventar")
-        T = [t for t in d["teile"] if (not a.einkauf or (t.get("min") is not None and t["menge"] < t["min"])) and (not a.suche or a.suche.lower() in " ".join([t["name"], t.get("beschreibung", ""), t["kategorie"], t["ort"]]).lower())]
+        S = d.get("standorte") or []
+        T = [t for t in d["teile"] if (not a.einkauf or (t.get("min") is not None and t["menge"] < t["min"] and not t.get("zaehlung_offen"))) and (not a.suche or a.suche.lower() in " ".join([t["name"], t.get("artnr") or "", t.get("beschreibung", ""), t["kategorie"], t["ort"]]).lower())]
         for t in T:
-            print(f"[{t['id']}] {t['name']}: {inventar_menge(t)}, {t['kategorie']}, {t['ort']}" + (f"  (mind. {t['min']})" if t.get("min") is not None else ""))
+            print(inventar_zeile(t, S))
         if not T:
             print("Nichts gefunden.")
     elif a.befehl == "inventar-satz":
         v = z.get("/api/inventar/verstehen?text=" + q(a.satz))
+        S = z.get("/api/inventar").get("standorte") or []
         if v["art"] == "frage":
-            print("\n".join(f"{t['name']}: {inventar_menge(t)}, {t['ort']}" for t in v["treffer"]) or f"Kein Teil gefunden zu „{v['suche']}“.")
+            print("\n".join(f"{t['name']}: {inventar_menge(t)}" + (f" ({inventar_orte(t, S)})" if inventar_orte(t, S) else "") + f", {t['ort']}" for t in v["treffer"]) or f"Kein Teil gefunden zu „{v['suche']}“.")
             return
         if len(v["treffer"]) > 1:
             print("Mehrere Teile passen: " + ", ".join(f"{t['name']} [{t['id']}]" for t in v["treffer"]) + ". Nichts gebucht, bitte genauer.")
             return
         delta = v["menge"] * v["richtung"]
-        wort = f"{abs(delta)} {v['einheit']} {'dazu' if delta > 0 else 'entnommen'}"
+        am_ort = bool(S) and (not v["treffer"] or v["treffer"][0].get("mengen") is not None)   # Teile von vor den Standorten: ohne
+        ort = (a.standort or v.get("standort") or "") if am_ort else ""
+        wort = f"{abs(delta)} {v['einheit']} {'dazu' if delta > 0 else 'entnommen'}" + (f", Standort {ort}" if ort else "")
         ziel = v["treffer"][0]["name"] if v["treffer"] else f"neues Teil „{v['name']}“"
+        if am_ort and not ort:
+            print(f"Vorschlag: {ziel}, {wort}. Nichts gebucht: An welchem Standort? --standort " + " | ".join(s["name"] for s in S))
+            return
         if not a.buchen:
             print(f"Vorschlag: {ziel}, {wort}. Nichts gebucht. Zum Buchen: --buchen" + ("" if v["richtung_sicher"] else " (Richtung nicht genannt, „dazu“ angenommen)"))
             return
-        b = {"delta": delta, "text": v["text"], "quelle": "satz"}
+        b = {"delta": delta, "text": v["text"], "quelle": "satz", "standort": ort}
         b.update({"teil": v["treffer"][0]["id"]} if v["treffer"] else {"neu": {"name": v["name"], "einheit": v["einheit"]}})
         r = z.post("/api/inventar/buchen", b)["buchung"]
-        print(f"Gebucht: {r['name']}, {r['vorher']} → {r['nachher']}")
+        print(f"Gebucht: {r['name']}" + (f", {r['standort']}" if r.get("standort") else "") + f", {r['vorher']} → {r['nachher']}")
+    elif a.befehl == "inventar-zaehlen":
+        r = z.post("/api/inventar/zaehlen", {"teil": a.teil, "standort": a.ort or "", "menge": a.menge, "text": a.text or ""})
+        t, x = r["teil"], r["buchung"]
+        print(f"Gezählt: {t['name']}" + (f", Standort {(x or {}).get('standort') or a.ort}" if a.ort else "") + f": {a.menge}. "
+              + (f"Gebucht {x['delta']:+} ({x['vorher']} → {x['nachher']})." if x else "Gleich wie vorher, nichts gebucht.")
+              + f" Bestand jetzt {inventar_menge(t)}" + (f" ({inventar_orte(t, z.get('/api/inventar').get('standorte') or [])})" if t.get("mengen") is not None else "") + ".")
+    elif a.befehl == "inventar-buchen":
+        r = z.post("/api/inventar/buchen", {"teil": a.teil, "delta": a.delta, "standort": a.ort or "", "quelle": "hand", "text": a.text or ""})["buchung"]
+        print(f"Gebucht: {r['name']}" + (f", {r['standort']}" if r.get("standort") else "") + f", {r['vorher']} → {r['nachher']}")
+    elif a.befehl == "inventar-standort":
+        if not a.name:
+            S = z.get("/api/inventar").get("standorte") or []
+        else:
+            b = {"name": a.name}
+            if a.adresse is not None:
+                b["adresse"] = a.adresse
+            if a.nicht_verkaufbar or a.verkaufbar:
+                b["verkaufbar"] = bool(a.verkaufbar)
+            if a.entfernen:
+                b["entfernen"] = True
+            S = z.post("/api/inventar/standorte", b)["standorte"]
+        print("\n".join(s["name"] + (f" ({s['adresse']})" if s.get("adresse") else "") + ("" if s.get("verkaufbar", True) else ", zählt nicht zum Bestand") for s in S)
+              or "Noch keine Standorte. Anlegen: inventar-standort \"Lager\" --adresse \"…\"")
+    elif a.befehl == "inventar-vorlage":
+        if not a.merkmal and not a.leeren:
+            V = z.get("/api/inventar").get("vorlagen") or {}
+        else:
+            V = z.post("/api/inventar/vorlagen", {"kategorie": a.kategorie, "merkmale": [] if a.leeren else a.merkmal})["vorlagen"]
+        L = next((v for k, v in V.items() if k.lower() == a.kategorie.lower()), [])
+        print(f"Vorlage „{a.kategorie}“: " + (", ".join(m["name"] + (f" = {m['standard']}" if m.get("standard") else "") for m in L) or "keine"))
+    elif a.befehl == "inventar-import":
+        with open(a.datei, encoding="utf-8-sig") as f:
+            L = json.load(f)
+        if not isinstance(L, list) or not all(isinstance(x, dict) for x in L):
+            raise Fehler('Die Datei muss eine Liste von Teilen sein: [{"name": "…", "artnr": "…", "werte": {"Typ": "22"}}, …]')
+        # Die Zentrale prüft alles mit denselben Regeln wie beim einzelnen Anlegen und legt ganz oder gar nicht an.
+        T = z.post("/api/inventar/import", {"teile": L, "probe": not a.los})["teile"]
+        for t in T[:5] if not a.los else T:
+            print(("  neu: " if not a.los else f"[{t['id']}] ") + (f"{t['artnr']} " if t.get("artnr") else "") + t["name"]
+                  + (f" ({len(t.get('werte') or {})} Merkmale, {len(t.get('vergleich') or {})} Vergleichswerte)" if not a.los else ""))
+        print(f"{len(T)} Teile in der Datei, alle geprüft. Probe, nichts angelegt. Zum Anlegen: --los" if not a.los else f"{len(T)} Teile angelegt.")
     elif a.befehl in ("inventar-neu", "inventar-aendern"):
-        b = {k: getattr(a, k) for k in ("beschreibung", "kategorie", "ort", "einheit", "min", "zaehlung", "link", "notiz") if getattr(a, k) is not None}
+        b = {k: getattr(a, k) for k in ("beschreibung", "kategorie", "ort", "einheit", "min", "zaehlung", "link", "notiz", "artnr") if getattr(a, k) is not None}
         if a.projekte is not None:
             b["projekte"] = a.projekte
+        if a.merkmal:
+            b["werte"] = name_wert(a.merkmal, "--merkmal")
+        if a.vergleich:
+            b["vergleich"] = name_wert(a.vergleich, "--vergleich")
         if a.befehl == "inventar-neu":
             t = z.post("/api/inventar/teile", dict(b, name=a.name))
         else:
             t = z.post(f"/api/inventar/teile/{q(a.id)}", dict(b, **({"name": a.name} if a.name else {}), **({"entfernen": True} if a.entfernen else {})))
-        print(f"[{t['id']}] {t['name']}: {inventar_menge(t)}, {t['kategorie']}, {t['ort']}" + ("  (entfernt)" if t.get("entfernt") else ""))
+        print(inventar_zeile(t, z.get("/api/inventar").get("standorte") or []) + ("  (entfernt)" if t.get("entfernt") else ""))
     elif a.befehl == "inventar-foto":
         with open(a.datei, "rb") as f:
             t = z.post(f"/api/inventar/teile/{q(a.id)}/foto", {"bild": base64.b64encode(f.read()).decode(), "text": a.text or ""})
@@ -934,8 +1043,13 @@ def main():
     p = P("aufgabe-verwerfen", "Aufgabe verwerfen (nicht erledigt, z. B. aus einem Test)"); p.add_argument("id"); p.add_argument("--grund", required=True)
 
     p = P("berichte", "Berichte zeigen"); p.add_argument("--anzahl", type=int, default=20)
+    p.add_argument("--offen", type=float, nargs="?", const=24, metavar="STUNDEN", help="nur Berichte mit einer Frage, die länger offen ist (Standard 24 Stunden)")
     p = P("bericht", "ein Bericht mit Verlauf"); p.add_argument("nr"); p.add_argument("--abgeholt", action="store_true", help="neue Antworten gelten danach als abgeholt (sonst erst, wenn du antwortest oder schließt)")
     p = P("bericht-projekt", "Bericht einem anderen Projekt zuordnen"); p.add_argument("nr"); p.add_argument("projekt", help="Name; leer (\"\") für ohne Projekt")
+    p = P("bericht-frage", "neue Frage an einen Bericht hängen, er ist dann wieder offen"); p.add_argument("nr")
+    p.add_argument("--frage", action=FrageDazu, dest="fragen_dummy", required=True, help="Frage, mehrfach möglich")
+    p.add_argument("--vorschlaege", action=VorschlaegeDazu, dest="vorschlaege_dummy", help="Vorschläge zur letzten Frage, getrennt mit |")
+    p.set_defaults(fragen=None)
     p = P("bericht-neu", "Bericht mit Fragen an den Besitzer"); p.add_argument("titel"); p.add_argument("--kurz")
     p.add_argument("--text"); p.add_argument("--text-datei"); p.add_argument("--sitzung"); p.add_argument("--projekt"); p.add_argument("--wunsch")
     p.add_argument("--frage", action=FrageDazu, dest="fragen_dummy", help="Frage, mehrfach möglich")
@@ -961,13 +1075,26 @@ def main():
     p = P("termin-weg", "eigenen Termin entfernen"); p.add_argument("id")
     p = P("inventar", "Teile mit Bestand und Ort"); p.add_argument("suche", nargs="?"); p.add_argument("--einkauf", action="store_true", help="nur unter der Mindestmenge")
     p = P("inventar-satz", "Satz wie „25x Schrauben M4 dazu“: Vorschlag zeigen, mit --buchen auch buchen"); p.add_argument("satz"); p.add_argument("--buchen", action="store_true")
+    p.add_argument("--standort", help="Standort, wenn er nicht im Satz steht")
     for name, hilfe in (("inventar-neu", "neues Teil anlegen"), ("inventar-aendern", "Angaben eines Teils ändern (die Menge nur über Buchungen)")):
-        p = P(name, hilfe); p.add_argument("name" if name == "inventar-neu" else "id")
+        p = P(name, hilfe); p.add_argument("name" if name == "inventar-neu" else "id", help=None if name == "inventar-neu" else "Kennung oder Artikelnummer")
         if name == "inventar-aendern":
             p.add_argument("--name"); p.add_argument("--entfernen", action="store_true")
-        for k in ("beschreibung", "kategorie", "ort", "min", "link", "notiz", "projekte"):
+        for k in ("beschreibung", "kategorie", "ort", "min", "link", "notiz", "projekte", "artnr"):
             p.add_argument("--" + k)
+        p.add_argument("--merkmal", action="append", help="Name=Wert, mehrfach möglich; leerer Wert löscht")
+        p.add_argument("--vergleich", action="append", help="Name=Wert nur zum Ansehen (alte Stände), mehrfach möglich")
         p.add_argument("--einheit", choices=["Stück", "m", "kg", "l", "Karton", "Packung"]); p.add_argument("--zaehlung", choices=["", "ca", "offen"], help="leer = gezählt")
+    p = P("inventar-zaehlen", "gezählte Menge eintragen: die Zentrale bucht den Unterschied"); p.add_argument("teil", help="Kennung oder Artikelnummer")
+    p.add_argument("--ort", help="Standort (Pflicht, wenn es Standorte gibt)"); p.add_argument("--menge", required=True); p.add_argument("--text")
+    p = P("inventar-buchen", "dazu oder entnommen an einem Standort"); p.add_argument("teil", help="Kennung oder Artikelnummer")
+    p.add_argument("--delta", required=True, help="+ dazu, - entnommen"); p.add_argument("--ort", help="Standort"); p.add_argument("--text")
+    p = P("inventar-standort", "Standorte zeigen, anlegen oder ändern"); p.add_argument("name", nargs="?"); p.add_argument("--adresse")
+    p.add_argument("--nicht-verkaufbar", action="store_true", help="zählt nicht zum Bestand (z. B. Beschädigt)"); p.add_argument("--verkaufbar", action="store_true")
+    p.add_argument("--entfernen", action="store_true", help="nur ohne Bestand")
+    p = P("inventar-vorlage", "Merkmale einer Kategorie zeigen oder setzen (ganze Liste)"); p.add_argument("kategorie")
+    p.add_argument("--merkmal", action="append", help="Name oder Name=Standardwert, mehrfach, in der Reihenfolge der Anzeige"); p.add_argument("--leeren", action="store_true")
+    p = P("inventar-import", "viele Teile aus einer JSON-Datei anlegen (erst Probe)"); p.add_argument("datei"); p.add_argument("--los", action="store_true")
     p = P("inventar-foto", "Foto an ein Teil hängen (JPEG oder PNG)"); p.add_argument("id"); p.add_argument("datei"); p.add_argument("--text")
     p = P("mails", "E-Mails: Verdächtiges und Wichtiges zuerst, dann die neuesten"); p.add_argument("--anzahl", type=int, default=30)
     p.add_argument("--suche", help="Wörter in Betreff, Absender und Text, auch in Erledigtem"); p.add_argument("--art", choices=["ungelesen", "wichtig", "verdacht", "erledigt"]); p.add_argument("--konto", help="nur dieses Postfach (Adresse)")

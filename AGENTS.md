@@ -64,7 +64,7 @@ http://127.0.0.1:8090. So sieht sie aus: `docs/REFERENZ.md` (Bilder).
 Wenn der Besitzer sagt „Update holen“ oder `ich` eine ACHTUNG-Zeile zur Fassung zeigt:
 1. `py einrichten.py update`. Es zählt die Einträge, legt eigene Änderungen am Code (auch committete und neue Dateien)
    in einen Zweig `sicherung-vor-update-…`, holt die neue Fassung (auch wenn die Geschichte neu geschrieben wurde),
-   verteilt die Regeln, trägt beim Hook neue Ereignisse nach (nur wenn er schon eingerichtet ist; danach Claude Code einmal neu starten), startet die Zentrale über die Aufgabenplanung neu und vergleicht die Einträge vorher und nachher.
+   verteilt die Regeln, trägt beim Hook fehlende Ereignisse nach (nur wenn er schon eingerichtet ist, sonst bleibt `settings.json` unverändert; `--ohne-hooks` lässt den Schritt aus; danach Claude Code einmal neu starten), startet die Zentrale über die Aufgabenplanung neu und vergleicht die Einträge vorher und nachher.
    `daten\` und `REGELN.lokal.md` fasst es nie an. Hat jemand `REGELN.md` selbst geändert, landen die eigenen Zeilen in
    `REGELN.lokal.md`: dem Besitzer zeigen. Gab es eine Sicherung: dem Besitzer zeigen, was darin ist (`git diff --stat`), Gewolltes als
    Wunsch neu einbauen, den Zweig nicht löschen. Läuft die Zentrale ohne Aufgabenplanung, startest du sie selbst neu
@@ -307,15 +307,17 @@ Erst wenn der Besitzer es will, je mit eigener Freigabe:
 | Stand festhalten | `wunsch-notiz 3 "Stand: … · Als Nächstes: … · Wartet auf: …"` |
 | Wunsch abhaken | `wunsch-erledigt 3 --ergebnis "…"` |
 | Frage an den Besitzer | `bericht-neu "Titel" --kurz "…" --frage "…" --vorschlaege "Ja\|Nein" --frage "…"` (je Frage ein `--frage`, er bekommt sie nacheinander) |
+| Liegengebliebene Fragen | `berichte --offen` (älter als 24 Stunden, `--offen 48` für zwei Tage); gut für einen täglichen Blick oder Sammelbericht |
 | Auf Antwort warten | `berichte-warten` (endet, sobald er antwortet; Code 3 = keine Antwort) |
 | Im Chat beantwortet | `bericht-erledigt 4 --antwort "Ja"` |
+| Noch eine Frage im selben Bericht | `bericht-frage 4 --frage "…" --vorschlaege "Ja\|Nein"` (der Bericht ist wieder offen; eine bloße `bericht-antwort` kann der Besitzer nicht antippen) |
 | Bericht einem anderen Projekt zuordnen | `bericht-projekt 4 "Website"` |
 | Projekte und Aufgaben | `projekte`, `projekt-neu`, `projekt-schritt`, `aufgabe`, `aufgabe-erledigt`, `aufgabe-projekt <id> "Website"`, `aufgabe-verwerfen <id> --grund "…"` (nicht erledigt, z. B. aus einem Test) |
 | Pinwand eines Projekts | `pin "Titel" --projekt Website --gruppe … [--marke fehlt] [--text …]`, `pins --projekt Website`, `pin-aendern <id> …`, `pin-weg <id>`, `pin-zurueck <id>`, `pin-import datei.json --projekt Website` |
 | Notizen | `notizen`, `notiz-suche`, `notiz-zeigen`, `notiz-ergaenzen`, `notiz-neu` (siehe unten) |
 | Papierkorb ansehen | `papierkorb` (zurücklegen: `aufraeumen\rueckgaengig.py <Schritt>`) |
 | Kalender | `termine --tage 14`, `termin "Titel" --start "2030-10-24 14:00" --dauer 30`, `termin-weg <id>` |
-| Inventar | `inventar [suche] [--einkauf]`, `inventar-satz "25x Schrauben M4 dazu" [--buchen]`, `inventar-neu`, `inventar-aendern`, `inventar-foto` |
+| Inventar | `inventar [suche] [--einkauf]`, `inventar-satz "25x Schrauben M4 dazu" [--buchen]`, `inventar-neu`, `inventar-aendern`, `inventar-foto`, `inventar-standort`, `inventar-vorlage`, `inventar-zaehlen`, `inventar-buchen`, `inventar-import` |
 | E-Mail (nur mit Erlaubnis) | `mails [--suche "…"] [--art ungelesen\|wichtig\|verdacht\|erledigt] [--konto …]`, `mail <nr>`, `mail-markieren <nr> gelesen`, `mails-offen`, `mail-bewerten <nr> --wichtig --grund "…"` |
 | Arbeit melden (Seite „Agenten“) | `lauf start "Titel" --wunsch 3`, `lauf stand "…" --fortschritt 40`, `lauf fertig "Ergebnis"`, `laeufe` |
 
@@ -408,6 +410,14 @@ nicht danach, und du liest sie nicht aus `daten\kalender.json` oder `daten\mail.
   `inventar-satz` zeigt erst den Vorschlag, gebucht wird mit `--buchen`, und nur, wenn der Besitzer das so gesagt hat. Unter der Mindestmenge
   steht ein Teil auf der Einkaufsliste (`inventar --einkauf`). Die ganze Liste steht als Notiz in `Inventar/Bestand.md`, dort nichts ändern.
   Nicht verwechseln: `aufraeumen\inventur.py` ist die Bestandsaufnahme deiner Dateien, das Inventar sind Dinge im Regal.
+  **Standorte** (z. B. Laden, Lager; `inventar-standort`, mit `--nicht-verkaufbar` etwa für „Beschädigt“): Dann hat jedes Teil eine Menge je
+  Standort, und die Menge des Teils ist die Summe der Standorte, die zum Bestand zählen. „–“ heißt: dort nie gezählt, nicht 0.
+  Standorte anlegen darfst du, entfernen oder umstellen, ob einer zum Bestand zählt, nur der Besitzer. Mitten in der ersten Zählung je
+  Standort ist die Menge eines alten Teils vorläufig zu klein; es steht dann nicht auf der Einkaufsliste, bis jeder Standort einmal gezählt ist.
+  `inventar-zaehlen <Artikelnummer> --ort Lager --menge 47` nur mit der Zahl, die der Besitzer selbst gezählt hat; die Zentrale bucht den
+  Unterschied. `inventar-buchen … --ort Laden --delta -1` bucht an einem Standort. Merkmale je Kategorie (Reihenfolge, Standardwerte) mit
+  `inventar-vorlage`, viele Teile auf einmal mit `inventar-import datei.json` (zeigt erst die Probe, legt mit `--los` an). Statt der Kennung
+  geht überall die Artikelnummer.
 
 ## Pinwand
 

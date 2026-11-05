@@ -172,7 +172,7 @@ class Handler(BaseHTTPRequestHandler):
             if url.path == "/api/inventar/verstehen":
                 return self._json(200, inventar.verstehen(arg("text")))
             if url.path.startswith("/api/inventar/teile/") and len(teile) == 4 and teile[2] == "foto":   # /teile/<id>/foto/<datei>
-                pfad = inventar.foto_pfad(teile[1], teile[3])
+                pfad = inventar.foto_pfad(unquote(teile[1]), teile[3])   # statt der Kennung geht die Artikelnummer, auch mit + oder Umlaut
                 return self._send(200, pfad.read_bytes(), "image/png" if pfad.suffix == ".png" else "image/jpeg")
             if url.path == "/api/mail" or url.path.startswith("/api/mail/"):
                 mails.darf(aid)
@@ -216,6 +216,7 @@ class Handler(BaseHTTPRequestHandler):
         # Finanzen: Kontoauszüge kommen als Datei (base64, bis 10 MB)
         grenze = finanzen.UPLOAD_MAX if url.path == "/api/finanzen/upload" else 4 * 1024 * 1024 if url.path.startswith("/api/finanzen/") \
             else 15 * 1024 * 1024 if url.path.startswith("/api/inventar/teile/") and url.path.endswith("/foto") \
+            else 4 * 1024 * 1024 if url.path == "/api/inventar/import" \
             else GROSS if url.path.startswith(("/api/berichte", "/api/notizen", "/api/pinwand")) else hub.MAX_BODY
         if n < 0 or n > grenze:
             return self._json(413, {"fehler": "Die Anfrage ist zu groß."})
@@ -280,6 +281,8 @@ class Handler(BaseHTTPRequestHandler):
                 return berichte.abgeholt(aid, teile[0], b.get("nachrichten"))
             if teile[1] == "projekt":
                 return berichte.projekt_aendern(aid, teile[0], b)
+            if teile[1] == "frage":
+                return berichte.frage_dazu(aid, teile[0], b)
             if teile[1] == "erledigt":
                 return berichte.erledigt(aid, teile[0], b)
             if teile[1] == "gelesen":
@@ -313,11 +316,22 @@ class Handler(BaseHTTPRequestHandler):
             if teile == ["teile"]:
                 return inventar.teil_neu(aid, b)
             if len(teile) == 2 and teile[0] == "teile":
-                return inventar.teil_aendern(aid, teile[1], b)
+                return inventar.teil_aendern(aid, unquote(teile[1]), b)
             if len(teile) == 3 and teile[0] == "teile" and teile[2] == "foto":
-                return inventar.foto_neu(aid, teile[1], b)
+                return inventar.foto_neu(aid, unquote(teile[1]), b)
             if teile == ["buchen"]:
                 return inventar.buchen(aid, b)
+            if teile == ["zaehlen"]:
+                return inventar.zaehlen(aid, b)
+            if teile == ["standorte"]:
+                # Anlegen dürfen auch Agenten (sie richten es für den Besitzer ein), entfernen und „zählt zum Bestand“ umschalten nur er
+                if aid != hub.BESITZER and (b.get("entfernen") or "verkaufbar" in b and inventar.standort_da(b.get("name"))):
+                    raise PermissionError("Einen Standort entfernen oder umstellen, ob er zum Bestand zählt, darf nur der Besitzer, auf der Seite „Inventar“.")
+                return inventar.standort(aid, b)
+            if teile == ["vorlagen"]:
+                return inventar.vorlage(aid, b)
+            if teile == ["import"]:
+                return inventar.teile_import(aid, b)
         if pfad.startswith("/api/mail/"):
             if teile in (["verbinden"], ["trennen"], ["agenten"], ["einstellen"]):
                 if aid != hub.BESITZER:
