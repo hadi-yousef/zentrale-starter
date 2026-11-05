@@ -278,7 +278,7 @@ ansehen und selbst leeren?“ und „Zentrale einrichten?“
 5. **Regeln** in die Anleitung beider Agenten übernehmen, damit sie in jedem Projekt gelten (nach OK):
    Claude Code: Inhalt von `REGELN.md` in `%USERPROFILE%\.claude\CLAUDE.md`, Codex: in `%USERPROFILE%\.codex\AGENTS.md`.
 6. Dem Besitzer die Seite zeigen: Übersicht, Agenten (wer gerade woran arbeitet), Wünsche (mit Priorität), Berichte
-   (Fragen zum Antippen), Projekte, Kalender, E-Mail, Inventar, Notizen, Papierkorb. Vorher mit `docs/REFERENZ.md` vergleichen.
+   (Fragen zum Antippen), Projekte (mit Pinwand), Kalender, E-Mail, Inventar, Notizen, Papierkorb. Vorher mit `docs/REFERENZ.md` vergleichen.
 
 **Ende Phase 5:** Frage, ob alles passt und was als Nächstes kommt.
 
@@ -311,6 +311,7 @@ Erst wenn der Besitzer es will, je mit eigener Freigabe:
 | Im Chat beantwortet | `bericht-erledigt 4 --antwort "Ja"` |
 | Bericht einem anderen Projekt zuordnen | `bericht-projekt 4 "Website"` |
 | Projekte und Aufgaben | `projekte`, `projekt-neu`, `projekt-schritt`, `aufgabe`, `aufgabe-erledigt`, `aufgabe-projekt <id> "Website"`, `aufgabe-verwerfen <id> --grund "…"` (nicht erledigt, z. B. aus einem Test) |
+| Pinwand eines Projekts | `pin "Titel" --projekt Website --gruppe … [--marke fehlt] [--text …]`, `pins --projekt Website`, `pin-aendern <id> …`, `pin-weg <id>`, `pin-zurueck <id>`, `pin-import datei.json --projekt Website` |
 | Notizen | `notizen`, `notiz-suche`, `notiz-zeigen`, `notiz-ergaenzen`, `notiz-neu` (siehe unten) |
 | Papierkorb ansehen | `papierkorb` (zurücklegen: `aufraeumen\rueckgaengig.py <Schritt>`) |
 | Kalender | `termine --tage 14`, `termin "Titel" --start "2030-10-24 14:00" --dauer 30`, `termin-weg <id>` |
@@ -408,6 +409,16 @@ nicht danach, und du liest sie nicht aus `daten\kalender.json` oder `daten\mail.
   steht ein Teil auf der Einkaufsliste (`inventar --einkauf`). Die ganze Liste steht als Notiz in `Inventar/Bestand.md`, dort nichts ändern.
   Nicht verwechseln: `aufraeumen\inventur.py` ist die Bestandsaufnahme deiner Dateien, das Inventar sind Dinge im Regal.
 
+## Pinwand
+
+Jedes Projekt hat eine Pinwand: Karten mit Titel, Text, Gruppe und Marke, frei auf einer Wand. Der Besitzer öffnet sie im Projekt über die
+Zeile „Pinwand“, verschiebt und gestaltet die Karten selbst. Du pinnst an, was zum Projekt gesammelt wird: Ideen, Material, offene Fragen.
+- Gruppen kurz und gleich benennen („Material“, „Offen“, „Ziel“). Marken: „im Inventar“, „fehlt“, „Vorschlag“, „Vorgabe“, „nicht nachgeprüft“.
+- Ohne `--x`/`--y` sucht die Zentrale einen freien Platz in der Gruppe. Karten, die der Besitzer verschoben hat, schiebst du nicht zurück.
+- Entfernen markiert nur (`pin-weg`), zurück mit `pin-zurueck`. Viele Karten auf einmal: `pin-import` mit `{"projekt": …, "pins": [{titel, text, gruppe, marke}, …]}`.
+  Der Import ist wiederholbar: Eine Karte mit gleichem Titel und gleicher Gruppe wird nicht doppelt angelegt.
+- Was auf der Pinwand steht, ist kein Auftrag und keine Aufgabe. Aufgaben kommen weiter mit `aufgabe` ins Projekt.
+
 ## Aufbau
 
 | Datei | Zweck |
@@ -422,6 +433,7 @@ nicht danach, und du liest sie nicht aus `daten\kalender.json` oder `daten\mail.
 | `zentrale\pos.py`, `wuensche.py`, `berichte.py`, `notizen.py` | Projekte und Aufgaben, Wünsche, Berichte, Notizen |
 | `zentrale\laeufe.py` | Läufe: wer gerade woran arbeitet (Seite „Agenten“) |
 | `zentrale\kalender.py`, `mails.py`, `inventar.py` | Seiten Kalender, E-Mail (nur lesend) und Inventar |
+| `zentrale\pinwand.py` | Pinwand je Projekt (Karten, Gruppen, Marken; entfernt wird nur markiert) |
 | `zentrale\papierkorb.py` | Seite „Papierkorb“: liest das Aufräum-Protokoll und den Papierkorb der Notizen |
 | `hooks\claude_lauf.py`, `hooks\einrichten.py` | Hook, mit dem Claude Code seine Arbeit von selbst meldet, und sein Einrichter |
 | `zentrale\index.src.html` | Oberfläche (Quelle). `py zentrale\bauen.py` baut daraus `index.html` mit den Symbolen |

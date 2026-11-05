@@ -15,7 +15,7 @@ README, `CONTRIBUTING.en.md` and `SECURITY.md` are available in English.
 
 | Part | What it does |
 |---|---|
-| **Hub** | A web page on your own computer: overview, agents (who is working on what, what is finished), trash, projects with tasks, wishes with priority and notes, reports with tap-to-answer questions, notes as Markdown files. Light and dark mode. Python only, no other packages. |
+| **Hub** | A web page on your own computer: overview, agents (who is working on what, what is finished), trash, projects with tasks and a pin board, wishes with priority and notes, reports with tap-to-answer questions, notes as Markdown files. Light and dark mode. Python only, no other packages. |
 | **Calendar, email, stock** | Your own appointments without an account, optionally plus iCloud or another CalDAV calendar. Mailboxes read only (iCloud, Gmail, IMAP), with search, folders and a warning for scam mail, agents read them only if you switch it on. Goods and materials with stock levels, shopping list and bookings, also as a sentence ("25x Schrauben M4 dazu"). |
 | **Homelab** | Old laptops, computers and a server: each device reports CPU, memory, disks, battery and services through a small reporter (Windows, Mac, Linux). Pages for devices, services, network and storage, with warnings. Your agent sets it up with you following `docs/HOMELAB.md`, including server, Tailscale and nightly backup. |
 | **Agents** | Each agent has its own key and uses `zentrale_client.py` to record what it is doing and what it wants to ask you. |

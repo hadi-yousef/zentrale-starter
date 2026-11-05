@@ -26,6 +26,13 @@ Projekte und Aufgaben:
   py zentrale_client.py --agent codex aufgabe-projekt a1b2c3 "Website"
   py zentrale_client.py --agent codex aufgabe-verwerfen a1b2c3 --grund "aus einem Test"
 
+Pinwand eines Projekts (der Besitzer öffnet sie im Projekt über „Pinwand“):
+  py zentrale_client.py --agent codex pin "Holzbretter" --projekt Gartenhaus --gruppe Material --marke fehlt --text "20 Stück"
+  py zentrale_client.py --agent codex pins --projekt Gartenhaus                 (mit --entfernte: was entfernt wurde)
+  py zentrale_client.py --agent codex pin-aendern a1b2c3 --marke "im Inventar"  (auch --x/--y, --breite, --farbe, --groesse, --symbol)
+  py zentrale_client.py --agent codex pin-weg a1b2c3                            (nur markiert, zurück mit pin-zurueck)
+  py zentrale_client.py --agent codex pin-import karten.json --projekt Gartenhaus
+
 Berichte an den Besitzer, mit Fragen und Vorschlägen:
   py zentrale_client.py --agent codex bericht-neu "Plan: Ordner aufräumen" --kurz "Drei Schritte." --text-datei plan.md `
       --frage "Passt der Plan?" --vorschlaege "Ja|Nein" --frage "Alte Downloads in den Papierkorb?" --vorschlaege "Ja|Später"
@@ -447,7 +454,7 @@ def groesse(b):
         b /= 1024
 
 
-FASSUNG = "2026-11-08"   # gleich wie hub.FASSUNG; weicht die laufende Zentrale ab, kommt eine Warnung
+FASSUNG = "2026-11-09"   # gleich wie hub.FASSUNG; weicht die laufende Zentrale ab, kommt eine Warnung
 
 
 def pruefen(z):
@@ -491,6 +498,71 @@ def wunsch_zeile(w):
     prio = f"[{w['prio']}] " if w.get("prio") else ""
     gruppe = f"  ({w['gruppe']})" if w.get("gruppe") else ""
     return f"Wunsch Nr. {w['nr']}  {prio}{w['titel']}{gruppe}"
+
+
+def projekt_id(z, name):
+    """Projekt per Name (Groß und klein egal) oder Kennung."""
+    name = str(name or "").strip()
+    for p in z.get("/api/pos")["projekte"]:
+        if p["id"] == name or p["name"].lower() == name.lower():
+            return p["id"]
+    raise Fehler(f"Das Projekt „{name}“ gibt es nicht (Liste: projekte).")
+
+
+def pin_projekt(z, kid, projekt=None, entfernte=False):
+    """Projekt einer Karte: angegeben, sonst alle Projekte mit Pinwand durchsuchen."""
+    if projekt:
+        return projekt_id(z, projekt)
+    for p in z.get("/api/pos")["projekte"]:
+        if p.get("pinwand"):
+            r = z.get(f"/api/pinwand/{p['id']}" + ("?entfernte=1" if entfernte else ""))
+            if any(k["id"] == kid for k in r["entfernte" if entfernte else "pins"]):
+                return p["id"]
+    raise Fehler(f"Die Karte {kid} gibt es nicht.")
+
+
+def pinwand_befehl(z, a):
+    q = urllib.parse.quote
+    ort = lambda k: f"({k['gruppe']}, x {k['x']}, y {k['y']}, id {k['id']})"
+    gestalt = lambda: {n: getattr(a, n) for n in ("farbe", "groesse", "symbol") if getattr(a, n, None) is not None}
+    if a.befehl == "pin-zurueck":
+        k = z.post(f"/api/pinwand/{pin_projekt(z, a.id, a.projekt, True)}/pins/{q(a.id)}/zurueck", {})
+        print(f"Zurückgeholt: {k['titel']}  {ort(k)}")
+    elif a.befehl == "pin-weg":
+        k = z.post(f"/api/pinwand/{pin_projekt(z, a.id, a.projekt)}/pins/{q(a.id)}", {"entfernen": True})
+        print(f"Entfernt (bleibt in den Daten, zurück mit pin-zurueck): {k['titel']}  (id {k['id']})")
+    elif a.befehl == "pin-aendern":
+        f = {n: getattr(a, n) for n in ("titel", "text", "gruppe", "marke", "x", "y") if getattr(a, n, None) is not None}
+        f.update(gestalt())
+        if a.breite is not None:
+            f["b"] = a.breite
+        if not f:
+            raise Fehler("Nichts zu ändern: --titel, --text, --gruppe, --marke, --x/--y, --breite, --farbe, --groesse oder --symbol angeben.")
+        k = z.post(f"/api/pinwand/{pin_projekt(z, a.id, a.projekt)}/pins/{q(a.id)}", f)
+        print(f"{k['titel']}  {ort(k)}")
+    elif a.befehl == "pins":
+        P = z.get(f"/api/pinwand/{projekt_id(z, a.projekt)}" + ("?entfernte=1" if a.entfernte else ""))["entfernte" if a.entfernte else "pins"]
+        for k in P:
+            print(f"{k['id']}  [{k['gruppe']}] " + (k.get("symbol", "") + " " if k.get("symbol") else "") + k["titel"] + (f"  ({k['marke']})" if k.get("marke") else "") + f"  x {k['x']}, y {k['y']}")
+        if not P:
+            print("Keine entfernten Karten." if a.entfernte else "Keine Karten.")
+    elif a.befehl == "pin-import":
+        D = json.loads(Path(a.datei).read_text(encoding="utf-8-sig"))
+        if not isinstance(D, dict) or not isinstance(D.get("pins"), list):
+            raise Fehler('Die Datei muss {"projekt": …, "pins": [...]} enthalten.')
+        projekt = a.projekt or D.get("projekt")
+        if not projekt:
+            raise Fehler("Welches Projekt? --projekt angeben oder das Feld „projekt“ in die Datei schreiben.")
+        N = z.post(f"/api/pinwand/{projekt_id(z, projekt)}/pins", {"pins": D["pins"]})
+        print(f"{len(N)} Karten an der Pinwand von {projekt} (schon vorhandene mit gleichem Titel und gleicher Gruppe wurden nicht doppelt angelegt).")
+    else:
+        k = {"titel": a.titel, "text": a.text or "", "gruppe": a.gruppe or "", "marke": a.marke or ""}
+        for n, v in (("x", a.x), ("y", a.y), ("b", a.breite)):
+            if v is not None:
+                k[n] = v
+        k.update(gestalt())
+        k = z.post(f"/api/pinwand/{projekt_id(z, a.projekt)}/pins", k)
+        print(f"Gepinnt: {k['titel']}  {ort(k)}")
 
 
 def ausfuehren(z, a):
@@ -588,6 +660,8 @@ def ausfuehren(z, a):
     elif a.befehl == "projekt-schritt":
         p = z.post(f"/api/pos/projekte/{q(a.projekt)}", {"naechster_schritt": a.text})
         print(f"{p['name']}: als Nächstes „{p['naechster_schritt']}“.")
+    elif a.befehl in ("pin", "pins", "pin-aendern", "pin-weg", "pin-zurueck", "pin-import"):
+        pinwand_befehl(z, a)
     elif a.befehl == "projekt-status":
         p = z.post(f"/api/pos/projekte/{q(a.projekt)}", {"status": a.status})
         print(f"{p['name']}: {p['status']}.")
@@ -824,6 +898,21 @@ def main():
     p = P("wunsch-erledigt", "Wunsch abhaken"); p.add_argument("nr"); p.add_argument("--ergebnis", required=True)
     p = P("wunsch-verwerfen", "Wunsch verwerfen"); p.add_argument("nr"); p.add_argument("--grund", required=True)
     p = P("wunsch-prio", "Priorität ändern"); p.add_argument("nr"); p.add_argument("prio", choices=["hoch", "mittel", "niedrig"])
+
+    p = P("pin", "Pinwand: Karte an die Pinwand eines Projekts pinnen (ohne --x/--y sucht die Zentrale einen freien Platz)")
+    p.add_argument("titel"); p.add_argument("--projekt", required=True, help="Name oder Kennung"); p.add_argument("--text"); p.add_argument("--gruppe")
+    p.add_argument("--marke", help="kurzes Etikett, z. B. „im Inventar“, „fehlt“, „Vorschlag“")
+    p.add_argument("--x", type=float); p.add_argument("--y", type=float); p.add_argument("--breite", type=float)
+    p.add_argument("--farbe", help="blau, gruen, orange, rot, lila, gelb oder grau"); p.add_argument("--groesse", help="S, M oder L"); p.add_argument("--symbol", help="ein Emoji vor dem Titel")
+    p = P("pins", "Pinwand: Karten eines Projekts"); p.add_argument("--projekt", required=True); p.add_argument("--entfernte", action="store_true", help="die entfernten Karten zeigen")
+    p = P("pin-aendern", "Pinwand: Karte ändern oder verschieben"); p.add_argument("id"); p.add_argument("--projekt")
+    for f in ("titel", "text", "gruppe", "marke"):
+        p.add_argument("--" + f)
+    p.add_argument("--x", type=float); p.add_argument("--y", type=float); p.add_argument("--breite", type=float)
+    p.add_argument("--farbe", help="blau, gruen, orange, rot, lila, gelb, grau; leer \"\" = Standard"); p.add_argument("--groesse", help="S, M oder L"); p.add_argument("--symbol", help="ein Emoji; leer \"\" = keins")
+    p = P("pin-weg", "Pinwand: Karte entfernen (nur markiert, bleibt in den Daten)"); p.add_argument("id"); p.add_argument("--projekt")
+    p = P("pin-zurueck", "Pinwand: eine entfernte Karte zurückholen (Liste: pins --entfernte)"); p.add_argument("id"); p.add_argument("--projekt")
+    p = P("pin-import", "Pinwand: viele Karten aus einer JSON-Datei ({\"projekt\": …, \"pins\": […]}), wiederholbar"); p.add_argument("datei"); p.add_argument("--projekt")
 
     p = P("lauf", "melden, woran du gerade arbeitest (Start, Zwischenstand, Fertig)")
     p.add_argument("aktion", choices=["start", "stand", "fertig"]); p.add_argument("text", nargs="?", help="Titel, Schritt oder Ergebnis")

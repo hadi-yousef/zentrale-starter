@@ -1037,6 +1037,64 @@ class KalenderVerbunden(unittest.TestCase):
         self.assertEqual(len(d["fehler"]), 1)
 
 
+class Pinwand(unittest.TestCase):
+    def setUp(self):
+        import hub, pinwand, pos
+        self.pw, self.pos, self.B = pinwand, pos, hub.BESITZER
+        t = Path(tempfile.mkdtemp(prefix="pin-", dir=TMP))
+        for mod, d in ((pinwand, "pw.json"), (pos, "p.json")):
+            p = mock.patch.object(mod, "DATEI", t / d)
+            p.start()
+            self.addCleanup(p.stop)
+        self.pid = pos.projekt_neu(self.B, {"name": "Gartenhaus"})["id"]
+
+    def test_erste_karte_markiert_das_projekt_und_findet_platz(self):
+        a = self.pw.neu("claude", self.pid, {"titel": "Holz", "gruppe": "Material"})
+        b = self.pw.neu("claude", self.pid, {"titel": "Schrauben", "gruppe": "Material"})
+        self.assertTrue(next(p for p in self.pos.stand()["projekte"] if p["id"] == self.pid).get("pinwand"))
+        self.assertNotEqual((a["x"], a["y"]), (b["x"], b["y"]), "zwei Karten liegen nicht aufeinander")
+        self.assertEqual(json.loads(self.pw.DATEI.read_bytes().decode("utf-8"))["pins"][0]["titel"], "Holz", "immer UTF-8, auch unter Windows")
+
+    def test_sammelanlage_ist_wiederholbar_und_alles_oder_nichts(self):
+        L = [{"titel": "A", "gruppe": "G"}, {"titel": "B", "gruppe": "G"}]
+        self.pw.neu("claude", self.pid, {"pins": L})
+        self.pw.neu("claude", self.pid, {"pins": L})
+        self.assertEqual(len(self.pw.pins(self.pid)["pins"]), 2)
+        with self.assertRaises(ValueError):
+            self.pw.neu("claude", self.pid, {"pins": [{"titel": "C"}, {"titel": ""}]})
+        self.assertEqual(len(self.pw.pins(self.pid)["pins"]), 2, "nichts Halbes")
+
+    def test_entfernen_markiert_nur_und_laesst_sich_zurueckholen(self):
+        k = self.pw.neu("claude", self.pid, {"titel": "Weg damit"})
+        self.pw.aendern(self.B, self.pid, k["id"], {"entfernen": True})
+        r = self.pw.pins(self.pid, entfernte=True)
+        self.assertEqual((r["pins"], [x["id"] for x in r["entfernte"]]), ([], [k["id"]]))
+        self.assertEqual(len(json.loads(self.pw.DATEI.read_text(encoding="utf-8"))["pins"]), 1, "bleibt in den Daten")
+        self.pw.zurueckholen("claude", self.pid, k["id"])
+        self.assertEqual([x["id"] for x in self.pw.pins(self.pid)["pins"]], [k["id"]])
+
+    def test_verschieben_alles_oder_nichts(self):
+        a = self.pw.neu("claude", self.pid, {"titel": "A", "x": 10, "y": 10})
+        with self.assertRaises(ValueError):
+            self.pw.verschieben("claude", self.pid, {"pins": [{"id": a["id"], "x": 300, "y": 300}, {"id": "ffffff", "x": 1, "y": 1}]})
+        self.assertEqual((self.pw.pins(self.pid)["pins"][0]["x"]), 10)
+        self.pw.verschieben("claude", self.pid, {"pins": [{"id": a["id"], "x": 300, "y": 300}]})
+        self.assertEqual((self.pw.pins(self.pid)["pins"][0]["x"]), 300)
+
+    def test_eingaben_werden_geprueft(self):
+        k = self.pw.neu("claude", self.pid, {"titel": "K"})
+        for falsch in ({"x": 99999, "y": 1}, {"x": 1}, {"farbe": "pink"}, {"groesse": "XL"}, {"titel": ""}, {"titel": ["Liste"]}, {"b": True}):
+            with self.assertRaises(ValueError, msg=falsch):
+                self.pw.aendern("claude", self.pid, k["id"], falsch)
+        for falsch in ("ffffff", "../x", ""):
+            with self.assertRaises(ValueError):
+                self.pw.pins(falsch)
+        self.pw.aendern("claude", self.pid, k["id"], {"farbe": "gelb", "groesse": "L", "symbol": "🔧"})
+        self.pw.aendern("claude", self.pid, k["id"], {"farbe": ""})
+        x = self.pw.pins(self.pid)["pins"][0]
+        self.assertEqual((x.get("farbe"), x["groesse"], x["symbol"]), (None, "L", "🔧"))
+
+
 class BerichtProjekt(unittest.TestCase):
     def setUp(self):
         import berichte, hub, pos

@@ -35,6 +35,9 @@ Die Bilder 01 bis 17 stammen aus einer früheren Fassung: Dort fehlen in der Lei
 | ![](bilder/23-email-postfach.png) | Postfach angetippt | Wie weit zurück (7 Tage bis 1 Jahr) und, nach „Anzeigen“, welche Ordner mitgelesen werden. |
 | ![](bilder/21-inventar.png) | **Inventar** | Vier Zahlen, Eingabe für Suche oder Satz, Kategorien, Karten je Teil. Orange Menge und „nachkaufen“: unter der Mindestmenge. |
 | ![](bilder/22-inventar-blatt.png) | Teil angetippt | Plus und Minus, Kerndaten, Fotos, Verlauf aller Buchungen. |
+| ![](bilder/24-projekt-blatt.png) | Projekt angetippt | Knöpfe für „Als Nächstes“ und Status, Angaben, die Zeile **Pinwand**, darunter die Aufgaben. |
+| ![](bilder/25-pinwand.png) | **Pinwand** (aus dem Projektblatt) | Ganzer Bildschirm: Gruppen mit Rahmen, Karten mit Marke (Punkt grün „im Inventar“, orange „fehlt“). Oben Zoom, „Entfernte Karten“, „Anpinnen“, „Fertig“ führt zurück ins Blatt. Doppelklick auf eine freie Stelle: neue Karte. |
+| ![](bilder/26-pinwand-leiste.png) | Karte angetippt | Blauer Rand, Griff für die Größe, darüber die Leiste: Farbe, S/M/L, Symbol, Öffnen, Duplizieren, Entfernen. Am Handy steht die Leiste unten. |
 
 Die Leiste hat oben Übersicht, Agenten, Berichte, Wünsche, unter „Persönlich“ Projekte, Kalender, E-Mail, Inventar, Finanzen, Notizen und unter
 „Homelab“ Geräte, Dienste (nur wenn ein Linux-Gerät meldet), Netzwerk, Speicher, Papierkorb.

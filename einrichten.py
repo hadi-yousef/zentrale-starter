@@ -368,7 +368,8 @@ def daten_zaehlen():
     z = {"Wünsche": len(lade("wuensche.json").get("wuensche", [])), "Berichte": len(lade("berichte.json").get("berichte", [])),
          "Projekte": len(pos.get("projekte", [])), "Aufgaben": len(pos.get("aufgaben", [])),
          "Notizen": sum(1 for x in (d / "notizen").rglob("*.md")) if (d / "notizen").is_dir() else 0,
-         "Termine": len(lade("termine.json").get("termine", [])), "Teile im Inventar": len(lade("inventar.json").get("teile", [])), "Mails": len(lade("mails.json").get("mails", []))}
+         "Termine": len(lade("termine.json").get("termine", [])), "Teile im Inventar": len(lade("inventar.json").get("teile", [])), "Mails": len(lade("mails.json").get("mails", [])),
+         "Karten der Pinwand": len(lade("pinwand.json").get("pins", []))}
     return d, z
 
 

@@ -24,6 +24,7 @@ import laeufe
 import mails
 import notizen
 import papierkorb
+import pinwand
 import pos
 import wuensche
 
@@ -133,6 +134,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(200, hub.agenten())
             if url.path == "/api/pos":
                 return self._json(200, pos.stand())
+            if url.path.startswith("/api/pinwand/") and len(teile) == 1:
+                return self._json(200, pinwand.pins(teile[0], arg("entfernte") in ("1", "ja", "true")))
             if url.path == "/api/wuensche":
                 return self._json(200, wuensche.liste())
             if url.path.startswith("/api/wuensche/") and len(teile) == 1:
@@ -213,7 +216,7 @@ class Handler(BaseHTTPRequestHandler):
         # Finanzen: Kontoauszüge kommen als Datei (base64, bis 10 MB)
         grenze = finanzen.UPLOAD_MAX if url.path == "/api/finanzen/upload" else 4 * 1024 * 1024 if url.path.startswith("/api/finanzen/") \
             else 15 * 1024 * 1024 if url.path.startswith("/api/inventar/teile/") and url.path.endswith("/foto") \
-            else GROSS if url.path.startswith(("/api/berichte", "/api/notizen")) else hub.MAX_BODY
+            else GROSS if url.path.startswith(("/api/berichte", "/api/notizen", "/api/pinwand")) else hub.MAX_BODY
         if n < 0 or n > grenze:
             return self._json(413, {"fehler": "Die Anfrage ist zu groß."})
         teile = url.path.split("/")[3:]
@@ -239,6 +242,16 @@ class Handler(BaseHTTPRequestHandler):
             return geraete.vergessen(teile[0])
         if pfad.startswith("/api/finanzen/"):
             return finanzen.api_post(aid, teile, b)
+        if pfad.startswith("/api/pinwand/"):
+            # Pinwand eines Projekts: Besitzer und Agenten (Geräte-Schlüssel kommen oben schon nicht durch)
+            if len(teile) == 2 and teile[1] == "pins":
+                return pinwand.neu(aid, teile[0], b)
+            if len(teile) == 3 and teile[1] == "pins":
+                return pinwand.aendern(aid, teile[0], teile[2], b)
+            if len(teile) == 4 and teile[1] == "pins" and teile[3] == "zurueck":
+                return pinwand.zurueckholen(aid, teile[0], teile[2])
+            if len(teile) == 2 and teile[1] == "verschieben":
+                return pinwand.verschieben(aid, teile[0], b)
         if pfad.startswith("/api/pos/"):
             # /api/pos/projekte[/<id>], /api/pos/aufgaben[/<id>]
             if teile == ["projekte"]:

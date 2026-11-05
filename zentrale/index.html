@@ -559,6 +559,124 @@ i.fein{background:var(--green)}i.faus{background:var(--orange)}
 body.pv-zu .pv{color:transparent!important;text-shadow:0 0 9px color-mix(in srgb,var(--ink) 75%,transparent);-webkit-user-select:none;user-select:none}
 body.pv-zu .pv .pv{text-shadow:none}
 body.pv-zu .sheet[data-pv] .inp:not(:focus):not(:placeholder-shown),body.pv-zu .sheet[data-pv] textarea:not(:focus){color:transparent;text-shadow:0 0 8px var(--ink)}
+/* Vollbild (wie im Vorbild): darin liegt die Pinwand */
+.viewer{position:fixed;inset:0;z-index:60;background:var(--bg);display:none;flex-direction:column}
+.viewer.open{display:flex}
+.vbar{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:.5px solid var(--sep);flex-wrap:wrap}
+.vbar h2{font:600 17px var(--disp)}
+/* Pinwand (Baustein wie im Vorbild, „Freie Wand“) */
+.pwbar .grow{flex:1}
+.pw{--pwcard:var(--card);--pwbg:#FAFAFC;--pwdot:rgba(60,60,67,.16);margin:6px 0 18px;background:var(--card);border-radius:22px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;min-width:0}
+@media (prefers-color-scheme:dark){.pw{--pwcard:var(--grp2);--pwbg:#0C0C0E;--pwdot:rgba(235,235,245,.13)}}
+.pwbar{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:.5px solid var(--sep);flex:none;flex-wrap:wrap}
+.pwbar h2{font:600 17px var(--disp)}
+.pwhint{flex-basis:100%;order:5;color:var(--ink2);font-size:12.5px;line-height:1.4;margin-top:-4px}
+.pwhint .hm{display:inline}.pwhint .ht{display:none}
+@media (hover:none){.pwhint .hm{display:none}.pwhint .ht{display:inline}}
+.btn.pwb{height:34px;border-radius:17px;padding:0 14px;font-weight:500;color:var(--ink)}
+.btn.pwb.pri{color:#fff;font-weight:600;padding:0 18px;box-shadow:0 2px 8px color-mix(in srgb,var(--blue) 35%,transparent)}
+.pwzoom{display:flex;align-items:center;background:var(--fill);border-radius:17px;height:34px}
+.pwzoom button{height:34px;min-width:34px;display:grid;place-items:center;border-radius:17px;padding:0 8px;font-size:13px;font-weight:500}
+.pwzoom button:hover:not(:disabled){background:var(--fill)}.pwzoom button:disabled{opacity:.35;cursor:default}
+.pw .fin{display:none}.pw.voll .fin{display:inline-flex}.pw.voll .vb{display:none}
+.pwview{max-height:min(78vh,860px);min-height:300px;overflow:auto;background:var(--pwbg);background-image:radial-gradient(circle,var(--pwdot) 1px,transparent 1.4px);background-size:22px 22px;padding:16px 20px 20px 28px;overscroll-behavior:auto;position:relative}
+.pw.voll{margin:0;border-radius:0;box-shadow:none;flex:1;min-height:0}
+.pw.voll .pwbar{padding:14px 24px}.pw.voll .pwbar h2{font-size:19px}
+.pw.voll .pwview{max-height:none;flex:1;min-height:0;overscroll-behavior:contain;padding:20px 24px 24px 36px}
+.viewer .pw.voll{height:100%}
+.pwsz{position:relative}.pwcv{position:absolute;left:0;top:0;transform-origin:0 0}
+.pwg{position:absolute;z-index:1;pointer-events:none;border-radius:24px;border:1px solid color-mix(in srgb,var(--c) 24%,transparent);background:color-mix(in srgb,var(--c) 7%,transparent)}
+.pwg h3{pointer-events:auto;position:absolute;left:12px;top:10px;display:flex;align-items:center;gap:8px;font:600 15px var(--disp);margin:0;cursor:grab;padding:5px 10px 5px 6px;border-radius:10px;touch-action:pan-x pan-y;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;max-width:calc(100% - 24px);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.pwg h3 i{width:10px;height:10px;border-radius:50%;background:var(--c);flex:none}
+.pwg h3:hover{background:var(--fill)}.pwg h3.zieh{cursor:grabbing;background:var(--fill)}
+.pwk{position:absolute;z-index:2;display:flex;flex-direction:column;gap:3px;background:var(--pwcard);border-radius:16px;box-shadow:var(--shadow);padding:11px 12px 11px 16px;min-width:0;cursor:grab;touch-action:pan-x pan-y;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;transition:box-shadow .18s}
+@media (prefers-color-scheme:dark){.pwk{box-shadow:0 0 0 .5px var(--sep)}}
+.pwk:hover{box-shadow:var(--shadow2)}
+.pwk::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:0 3px 3px 0;background:var(--c)}
+.pwk.zieh{cursor:grabbing;z-index:6;box-shadow:var(--shadow2),0 0 0 2px color-mix(in srgb,var(--c) 40%,transparent);transition:none}
+.pwk.ung{box-shadow:0 0 0 2px var(--orange)}
+.pwk b{font:600 14px/1.3 var(--disp);overflow-wrap:anywhere}
+.pwk em{font-style:normal;color:var(--ink2);font-size:12.5px;line-height:1.35;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line}
+.pwtag{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--ink2);margin-top:3px}
+.pwtag i{width:7px;height:7px;border-radius:50%;background:var(--m)}
+.pwleer{padding:40px 12px;text-align:center;color:var(--ink2)}
+.pwmeld{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 16px;background:color-mix(in srgb,var(--red) 12%,var(--card));color:var(--badink);font-size:13.5px;border-bottom:.5px solid var(--sep)}
+.pwmeld span{flex:1;min-width:180px}
+.pwdlg{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.38);padding:16px}
+.pwbox{background:var(--sheet);color:var(--ink);border-radius:20px;width:min(480px,100%);max-height:calc(100dvh - 32px);overflow:auto;padding:20px 20px 16px;box-shadow:0 20px 60px rgba(0,0,0,.3);display:flex;flex-direction:column;gap:12px}
+.pwbox h3{font:700 20px/1.25 var(--disp);overflow-wrap:anywhere}
+.pwbox label{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:500;color:var(--ink2)}
+.pwbox .inp{width:100%;font-size:16px;color:var(--ink)}   /* die Beschriftung ist grau, der eingetippte Text nicht (wie .maform .inp) */
+.pwbox textarea.inp{height:auto;min-height:96px;padding:10px 12px;resize:vertical;line-height:1.4}
+.pwbox .pwtext{white-space:pre-wrap;overflow-wrap:anywhere;font-size:15px;line-height:1.45;margin:0}
+.pwchips{display:flex;flex-wrap:wrap;gap:6px}
+.pwchip{height:28px;padding:0 11px;border-radius:14px;background:var(--fill);font-size:13px;font-weight:500;color:var(--ink)}
+.pwchip.on{background:var(--blue);color:#fff}
+.pwakt{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:4px}
+.pwfehler{margin:0;color:var(--badink);font-size:13.5px}
+.pwmeta{color:var(--ink2);font-size:13px}
+@media (max-width:700px){.pwbar{padding:10px 12px;gap:8px}.pwbar h2{flex:1}.pwbar .grow{display:none}.pwbar .vb,.pwbar .fin{order:2}.pwzoom{order:3}.pwbar .pri:not(.fin){order:4}.pwhint{order:5;flex-basis:100%}.pwview{max-height:min(72vh,720px);padding:12px 12px 16px 14px}.pw.voll .pwview{padding:12px 12px 16px 16px}.pwdlg{align-items:flex-end;padding:0}.pwbox{border-radius:20px 20px 0 0;width:100%}}
+/* Pinwand: Karten gestalten, hinzufügen, entfernen */
+.pw{position:relative}
+.pwk[data-f=blau]{--pwcard:#DCEBFF}.pwk[data-f=gruen]{--pwcard:#DDF5E3}.pwk[data-f=orange]{--pwcard:#FFE9CC}.pwk[data-f=rot]{--pwcard:#FFE0DE}
+.pwk[data-f=lila]{--pwcard:#EDE0FA}.pwk[data-f=gelb]{--pwcard:#FFF3C4}.pwk[data-f=grau]{--pwcard:#E8E8EC}
+@media (prefers-color-scheme:dark){
+  .pwk[data-f=blau]{--pwcard:#1F3A5C}.pwk[data-f=gruen]{--pwcard:#1E4030}.pwk[data-f=orange]{--pwcard:#4D3417}.pwk[data-f=rot]{--pwcard:#4F2523}
+  .pwk[data-f=lila]{--pwcard:#3C2A55}.pwk[data-f=gelb]{--pwcard:#473F1A}.pwk[data-f=grau]{--pwcard:#3A3A3D}
+}
+.pwk[data-f] em{color:color-mix(in srgb,var(--ink2) 50%,var(--ink))}
+.pwtag{color:var(--tc,var(--ink2))}
+.pwk[data-f] .pwtag{color:color-mix(in srgb,var(--tc,var(--ink2)) 45%,var(--ink))}
+.pwsy{margin-right:7px}
+.pwk[data-s=S]{padding:8px 10px 8px 14px;border-radius:13px;gap:2px}.pwk[data-s=S] b{font-size:12.5px}.pwk[data-s=S] em{font-size:11.5px}.pwk[data-s=S] .pwtag{font-size:11px}
+.pwk[data-s=L]{padding:16px 18px 14px 20px;border-radius:18px;gap:5px}.pwk[data-s=L]::before{width:4px;top:16px;bottom:16px}
+.pwk[data-s=L] b{font-size:19px}.pwk[data-s=L] em{font-size:14.5px;-webkit-line-clamp:12}.pwk[data-s=L] .pwtag{font-size:13px}
+.pwk.sel{outline:calc(2.5px / var(--z,1)) solid var(--blue);outline-offset:calc(2px / var(--z,1));z-index:5}
+.pwh{position:absolute;right:-9px;bottom:-9px;width:18px;height:18px;border-radius:50%;background:#fff;border:2.5px solid var(--blue);box-shadow:0 1px 4px rgba(0,0,0,.25);cursor:nwse-resize;touch-action:none;transform:scale(calc(1 / var(--z,1)))}   /* bleibt bei jedem Zoom gleich groß */
+.pwh::before{content:"";position:absolute;inset:-10px}
+@media (pointer:coarse),(max-width:700px){.pwh{width:22px;height:22px;right:-11px;bottom:-11px}.pwh::before{inset:-14px}}
+.pwtb{position:fixed;z-index:70;display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:22px;background:color-mix(in srgb,var(--card) 96%,transparent);box-shadow:0 6px 24px rgba(0,0,0,.18),0 0 0 1px var(--sep);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.pwtb[hidden]{display:none}
+.pwtb button{color:var(--ink)}
+.pwdots{display:flex;gap:5px;align-items:center}
+.pwdt{width:20px;height:20px;border-radius:50%;border:1.5px solid rgba(0,0,0,.14);flex:none;position:relative;padding:0}
+.pwdt[data-v=""]{background:var(--card);border-color:var(--ink3)}
+.pwdt.on{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--blue)}
+.pwdt::before{content:"";position:absolute;inset:-5px}
+.pwsep{width:1px;height:22px;background:var(--sep);flex:none}
+.pwseg{display:flex;background:var(--fill);border-radius:8px;padding:2px}
+.pwseg button{padding:4px 11px;border-radius:6px;font-size:13px;font-weight:500}
+.pwseg button.on{background:var(--segon);box-shadow:0 1px 3px rgba(0,0,0,.18);font-weight:600}
+.pwic{width:34px;height:30px;display:grid;place-items:center;border-radius:8px;font-size:17px;line-height:1;flex:none}
+.pwic:hover{background:var(--fill)}.pwic.sym{background:var(--fill)}
+.pwic.weg{color:var(--red)!important;background:color-mix(in srgb,var(--red) 10%,transparent)}
+.pwic svg{width:17px;height:17px}
+.pwpop{position:absolute;left:50%;top:calc(100% + 8px);transform:translateX(-50%);width:268px;background:var(--card);border-radius:16px;padding:10px;box-shadow:0 8px 30px rgba(0,0,0,.22),0 0 0 1px var(--sep);display:flex;flex-direction:column;gap:8px}
+.pwpop[hidden]{display:none}
+.pwtb[data-pos=ueber] .pwpop,.pwtb[data-pos=mobil] .pwpop{top:auto;bottom:calc(100% + 8px)}
+.pwtb .pwpop.um{top:calc(100% + 8px);bottom:auto}.pwtb .pwpop.um2{top:auto;bottom:calc(100% + 8px)}
+.pwsyg{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.pwsyg button{height:40px;border-radius:10px;font-size:21px;background:var(--fill)}
+.pwsyr{display:flex;gap:6px;align-items:center}.pwsyr .inp{flex:1;min-width:0;height:34px;font-size:16px}
+.pwtoast{position:fixed;left:50%;transform:translateX(-50%);bottom:max(20px,env(safe-area-inset-bottom));z-index:75;min-height:38px;border-radius:19px;background:rgba(40,40,44,.94);color:#fff;display:flex;align-items:center;gap:12px;padding:0 18px;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.25);white-space:nowrap}
+.pwtoast button{color:#64B5FF;font-weight:600;font-size:14px;min-height:38px}
+.pwhin{position:fixed;left:50%;transform:translateX(-50%);bottom:max(66px,calc(env(safe-area-inset-bottom) + 46px));z-index:75;border-radius:14px;background:rgba(40,40,44,.94);color:#fff;padding:9px 16px;font-size:13.5px;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:calc(100vw - 24px)}
+.pwliste{display:flex;flex-direction:column;gap:2px;max-height:min(50vh,420px);overflow:auto}
+.pwrow{display:flex;align-items:center;gap:10px;padding:8px 2px;border-bottom:.5px solid var(--sep)}
+.pwrow>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.pwrow b{font:600 14px/1.3 var(--disp);overflow-wrap:anywhere}
+@media (max-width:700px){
+  .pwb .txt{display:none}.btn.pwb.ico{padding:0 11px}
+  .pwtb{left:8px;right:8px;top:auto;bottom:max(8px,env(safe-area-inset-bottom));flex-wrap:wrap;justify-content:center;border-radius:20px;padding:8px;gap:4px 6px}
+  .pwtb .pwdots{flex:1 0 100%;justify-content:space-between;padding:4px 6px}
+  .pwdt{width:30px;height:30px}.pwdt::before{inset:-7px}
+  .pwtb .pwsep{display:none}
+  .pwic{width:44px;height:44px}.pwseg button{min-width:44px;height:40px;font-size:15px}
+  .pwpop{width:min(300px,calc(100vw - 32px))}
+  .pwk.sel{scroll-margin-bottom:190px}
+  .pw.hatleiste .pwtoast{bottom:190px}
+  .pw.hatleiste .pwhin{bottom:240px}
+  .pw.hatleiste .pwsz{margin-bottom:190px}
+}
 </style>
 </head>
 <body class="pv-zu">
@@ -571,9 +689,10 @@ body.pv-zu .sheet[data-pv] .inp:not(:focus):not(:placeholder-shown),body.pv-zu .
 <div class="veil" id="veil"><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
 <div class="dlg" id="dlg"></div>
 <div class="toast" id="toast"></div>
+<div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Pinwand"></div>
 <script>
 "use strict";
-const ICONS = {"alarm-clock": "<circle cx=\"12\" cy=\"13\" r=\"8\" /> <path d=\"M12 9v4l2 2\" /> <path d=\"M5 3 2 6\" /> <path d=\"m22 6-3-3\" /> <path d=\"M6.38 18.7 4 21\" /> <path d=\"M17.64 18.67 20 21\" />", "arrow-left": "<path d=\"m12 19-7-7 7-7\" /> <path d=\"M19 12H5\" />", "arrow-right": "<path d=\"M5 12h14\" /> <path d=\"m12 5 7 7-7 7\" />", "arrow-right-left": "<path d=\"m16 3 4 4-4 4\" /> <path d=\"M20 7H4\" /> <path d=\"m8 21-4-4 4-4\" /> <path d=\"M4 17h16\" />", "arrow-up": "<path d=\"m5 12 7-7 7 7\" /> <path d=\"M12 19V5\" />", "badge": "<path d=\"M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z\" />", "ban": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"M4.929 4.929 19.07 19.071\" />", "battery-low": "<path d=\"M22 14v-4\" /> <path d=\"M6 14v-4\" /> <rect x=\"2\" y=\"6\" width=\"16\" height=\"12\" rx=\"2\" />", "book-open": "<path d=\"M12 5v16\" /> <path d=\"M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z\" />", "bot": "<path d=\"M12 8V4H8\" /> <rect width=\"16\" height=\"12\" x=\"4\" y=\"8\" rx=\"2\" /> <path d=\"M2 14h2\" /> <path d=\"M20 14h2\" /> <path d=\"M15 13v2\" /> <path d=\"M9 13v2\" />", "boxes": "<path d=\"M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z\" /> <path d=\"m7 16.5-4.74-2.85\" /> <path d=\"m7 16.5 5-3\" /> <path d=\"M7 16.5v5.17\" /> <path d=\"M12 13.5V19l3.97 2.38a2 2 0 0 0 2.06 0l3-1.8a2 2 0 0 0 .97-1.71v-3.24a2 2 0 0 0-.97-1.71L17 10.5l-5 3Z\" /> <path d=\"m17 16.5-5-3\" /> <path d=\"m17 16.5 4.74-2.85\" /> <path d=\"M17 16.5v5.17\" /> <path d=\"M7.97 4.42A2 2 0 0 0 7 6.13v4.37l5 3 5-3V6.13a2 2 0 0 0-.97-1.71l-3-1.8a2 2 0 0 0-2.06 0l-3 1.8Z\" /> <path d=\"M12 8 7.26 5.15\" /> <path d=\"m12 8 4.74-2.85\" /> <path d=\"M12 13.5V8\" />", "briefcase": "<path d=\"M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16\" /> <rect width=\"20\" height=\"14\" x=\"2\" y=\"6\" rx=\"2\" />", "broom": "<path d=\"M13.5 10.5 22 2\" /> <path d=\"M14.734 13.841a2 2 0 00-.314-2.42L12.58 9.58a2 2 0 00-2.421-.314l-7.657 4.461A1 1 0 002.3 15.3l6.403 6.403a1 1 0 001.571-.204z\" /> <path d=\"m5 18 2-2\" /> <path d=\"m7.699 10.7 5.602 5.601\" />", "calendar-days": "<path d=\"M8 2v3\" /> <path d=\"M16 2v3\" /> <rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" /> <path d=\"M3 9h18\" /> <path d=\"M8 13h.01\" /> <path d=\"M12 13h.01\" /> <path d=\"M16 13h.01\" /> <path d=\"M8 17h.01\" /> <path d=\"M12 17h.01\" /> <path d=\"M16 17h.01\" />", "calendar-plus": "<path d=\"M16 18h6\" /> <path d=\"M16 2v3\" /> <path d=\"M19 15v6\" /> <path d=\"M21 11.5V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h8.3\" /> <path d=\"M3 9h18\" /> <path d=\"M8 2v3\" />", "camera": "<path d=\"M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z\" /> <circle cx=\"12\" cy=\"13\" r=\"3\" />", "car": "<path d=\"M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2\" /> <circle cx=\"7\" cy=\"17\" r=\"2\" /> <path d=\"M9 17h6\" /> <circle cx=\"17\" cy=\"17\" r=\"2\" />", "chart-column": "<path d=\"M3 3v16a2 2 0 0 0 2 2h16\" /> <path d=\"M18 17V9\" /> <path d=\"M13 17V5\" /> <path d=\"M8 17v-3\" />", "check": "<path d=\"M20 6 9 17l-5-5\" />", "check-check": "<path d=\"M18 6 7 17l-5-5\" /> <path d=\"m22 10-7.5 7.5L13 16\" />", "chevron-down": "<path d=\"m6 9 6 6 6-6\" />", "chevron-left": "<path d=\"m15 18-6-6 6-6\" />", "chevron-right": "<path d=\"m9 18 6-6-6-6\" />", "circle": "<circle cx=\"12\" cy=\"12\" r=\"10\" />", "circle-alert": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <line x1=\"12\" x2=\"12\" y1=\"8\" y2=\"12\" /> <line x1=\"12\" x2=\"12.01\" y1=\"16\" y2=\"16\" />", "circle-check": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"m16 9-5.5 5.5L8 12\" />", "circle-dot": "<circle cx=\"12\" cy=\"12\" r=\"1\" /> <circle cx=\"12\" cy=\"12\" r=\"10\" />", "circle-x": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"m15 9-6 6\" /> <path d=\"m9 9 6 6\" />", "clock": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"M12 6v6l4 2\" />", "code": "<path d=\"m16 18 6-6-6-6\" /> <path d=\"m8 6-6 6 6 6\" />", "container": "<path d=\"M22 7.7c0-.6-.4-1.2-.8-1.5l-6.3-3.9a1.72 1.72 0 0 0-1.7 0l-10.3 6c-.5.2-.9.8-.9 1.4v6.6c0 .5.4 1.2.8 1.5l6.3 3.9a1.72 1.72 0 0 0 1.7 0l10.3-6c.5-.3.9-1 .9-1.5Z\" /> <path d=\"M10 21.9V14L2.1 9.1\" /> <path d=\"m10 14 11.9-6.9\" /> <path d=\"M14 19.8v-8.1\" /> <path d=\"M18 17.5V9.4\" />", "cpu": "<path d=\"M12 20v2\" /> <path d=\"M12 2v2\" /> <path d=\"M17 20v2\" /> <path d=\"M17 2v2\" /> <path d=\"M2 12h2\" /> <path d=\"M2 17h2\" /> <path d=\"M2 7h2\" /> <path d=\"M20 12h2\" /> <path d=\"M20 17h2\" /> <path d=\"M20 7h2\" /> <path d=\"M7 20v2\" /> <path d=\"M7 2v2\" /> <rect x=\"4\" y=\"4\" width=\"16\" height=\"16\" rx=\"2\" /> <rect x=\"8\" y=\"8\" width=\"8\" height=\"8\" rx=\"1\" />", "external-link": "<path d=\"M15 3h6v6\" /> <path d=\"M10 14 21 3\" /> <path d=\"M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6\" />", "eye": "<path d=\"M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0\" /> <circle cx=\"12\" cy=\"12\" r=\"3\" />", "eye-off": "<path d=\"M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49\" /> <path d=\"M14.084 14.158a3 3 0 0 1-4.242-4.242\" /> <path d=\"M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143\" /> <path d=\"m2 2 20 20\" />", "file": "<path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\" /> <path d=\"M14 2v5a1 1 0 0 0 1 1h5\" />", "file-spreadsheet": "<path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\" /> <path d=\"M14 2v5a1 1 0 0 0 1 1h5\" /> <path d=\"M8 13h2\" /> <path d=\"M14 13h2\" /> <path d=\"M8 17h2\" /> <path d=\"M14 17h2\" />", "file-text": "<path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\" /> <path d=\"M14 2v5a1 1 0 0 0 1 1h5\" /> <path d=\"M10 9H8\" /> <path d=\"M16 13H8\" /> <path d=\"M16 17H8\" />", "file-up": "<path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\" /> <path d=\"M14 2v5a1 1 0 0 0 1 1h5\" /> <path d=\"M12 12v6\" /> <path d=\"m15 15-3-3-3 3\" />", "film": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" /> <path d=\"M7 3v18\" /> <path d=\"M3 7.5h4\" /> <path d=\"M3 12h18\" /> <path d=\"M3 16.5h4\" /> <path d=\"M17 3v18\" /> <path d=\"M17 7.5h4\" /> <path d=\"M17 16.5h4\" />", "flask-conical": "<path d=\"M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2\" /> <path d=\"M6.453 15h11.094\" /> <path d=\"M8.5 2h7\" />", "folder": "<path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z\" />", "folder-open": "<path d=\"m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2\" />", "folder-plus": "<path d=\"M12 10v6\" /> <path d=\"M9 13h6\" /> <path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z\" />", "form": "<path d=\"M4 14h6\" /> <path d=\"M4 2h10\" /> <rect x=\"4\" y=\"18\" width=\"16\" height=\"4\" rx=\"1\" /> <rect x=\"4\" y=\"6\" width=\"16\" height=\"4\" rx=\"1\" />", "gamepad-2": "<line x1=\"6\" x2=\"10\" y1=\"11\" y2=\"11\" /> <line x1=\"8\" x2=\"8\" y1=\"9\" y2=\"13\" /> <line x1=\"15\" x2=\"15.01\" y1=\"12\" y2=\"12\" /> <line x1=\"18\" x2=\"18.01\" y1=\"10\" y2=\"10\" /> <path d=\"M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z\" />", "gauge": "<path d=\"m12 14 4-4\" /> <path d=\"M3.34 19a10 10 0 1 1 17.32 0\" />", "globe": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20\" /> <path d=\"M2 12h20\" />", "graduation-cap": "<path d=\"M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z\" /> <path d=\"M22 10v6\" /> <path d=\"M6 12.5V16a6 3 0 0 0 12 0v-3.5\" />", "group": "<path d=\"M3 7V5c0-1.1.9-2 2-2h2\" /> <path d=\"M17 3h2c1.1 0 2 .9 2 2v2\" /> <path d=\"M21 17v2c0 1.1-.9 2-2 2h-2\" /> <path d=\"M7 21H5c-1.1 0-2-.9-2-2v-2\" /> <rect width=\"7\" height=\"5\" x=\"7\" y=\"7\" rx=\"1\" /> <rect width=\"7\" height=\"5\" x=\"10\" y=\"12\" rx=\"1\" />", "hand": "<path d=\"M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2\" /> <path d=\"M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2\" /> <path d=\"M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8\" /> <path d=\"M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15\" />", "hard-drive": "<path d=\"M10 16h.01\" /> <path d=\"M2.212 11.577a2 2 0 0 0-.212.896V18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5.527a2 2 0 0 0-.212-.896L18.55 5.11A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z\" /> <path d=\"M21.946 12.013H2.054\" /> <path d=\"M6 16h.01\" />", "hd": "<path d=\"M10 12H6\" /> <path d=\"M10 15V9\" /> <path d=\"M14 14.5a.5.5 0 0 0 .5.5h1a2.5 2.5 0 0 0 2.5-2.5v-1A2.5 2.5 0 0 0 15.5 9h-1a.5.5 0 0 0-.5.5z\" /> <path d=\"M6 15V9\" /> <rect x=\"2\" y=\"5\" width=\"20\" height=\"14\" rx=\"2\" />", "heart": "<path d=\"M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5\" />", "house": "<path d=\"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8\" /> <path d=\"M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\" />", "image": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" ry=\"2\" /> <circle cx=\"9\" cy=\"9\" r=\"2\" /> <path d=\"m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21\" />", "inbox": "<polyline points=\"22 12 16 12 14 15 10 15 8 12 2 12\" /> <path d=\"M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z\" />", "info": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"M12 16v-4\" /> <path d=\"M12 8h.01\" />", "key-round": "<path d=\"M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z\" /> <circle cx=\"16.5\" cy=\"7.5\" r=\".5\" fill=\"currentColor\" />", "landmark": "<path d=\"M10 18v-7\" /> <path d=\"M11.119 2.205a2 2 0 0 1 1.762 0l7.84 3.846A.5.5 0 0 1 20.5 7h-17a.5.5 0 0 1-.22-.949z\" /> <path d=\"M14 18v-7\" /> <path d=\"M18 18v-7\" /> <path d=\"M3 22h18\" /> <path d=\"M6 18v-7\" />", "laptop": "<path d=\"M18 5a2 2 0 0 1 2 2v8.526a2 2 0 0 0 .212.897l1.068 2.127a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45l1.068-2.127A2 2 0 0 0 4 15.526V7a2 2 0 0 1 2-2z\" /> <path d=\"M20.054 15.987H3.946\" />", "layout-dashboard": "<rect width=\"7\" height=\"9\" x=\"3\" y=\"3\" rx=\"1\" /> <rect width=\"7\" height=\"5\" x=\"14\" y=\"3\" rx=\"1\" /> <rect width=\"7\" height=\"9\" x=\"14\" y=\"12\" rx=\"1\" /> <rect width=\"7\" height=\"5\" x=\"3\" y=\"16\" rx=\"1\" />", "leaf": "<path d=\"M11 20a10 10 0 0010-10 25.9 25.9 0 00-1.04-7.281 1 1 0 00-1.755-.325C15.833 5.5 13 5.5 9.8 6.1A7 7 0 0011 20\" /> <path d=\"M2 21a5 5 0 012.911-4.544C7.613 15.212 8.351 15.24 11 13\" />", "lightbulb": "<path d=\"M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5\" /> <path d=\"M9 18h6\" /> <path d=\"M10 22h4\" />", "link": "<path d=\"M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71\" /> <path d=\"M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71\" />", "list-checks": "<path d=\"M13 5h8\" /> <path d=\"M13 12h8\" /> <path d=\"M13 19h8\" /> <path d=\"m3 17 2 2 4-4\" /> <path d=\"m3 7 2 2 4-4\" />", "list-todo": "<path d=\"M13 5h8\" /> <path d=\"M13 12h8\" /> <path d=\"M13 19h8\" /> <path d=\"m3 17 2 2 4-4\" /> <rect x=\"3\" y=\"4\" width=\"6\" height=\"6\" rx=\"1\" />", "loader": "<path d=\"M12 2v4\" /> <path d=\"m16.2 7.8 2.9-2.9\" /> <path d=\"M18 12h4\" /> <path d=\"m16.2 16.2 2.9 2.9\" /> <path d=\"M12 18v4\" /> <path d=\"m4.9 19.1 2.9-2.9\" /> <path d=\"M2 12h4\" /> <path d=\"m4.9 4.9 2.9 2.9\" />", "mail": "<path d=\"m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7\" /> <rect x=\"2\" y=\"4\" width=\"20\" height=\"16\" rx=\"2\" />", "message-circle-question": "<path d=\"M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719\" /> <path d=\"M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3\" /> <path d=\"M12 17h.01\" />", "message-square": "<path d=\"M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z\" />", "message-square-text": "<path d=\"M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z\" /> <path d=\"M7 11h10\" /> <path d=\"M7 15h6\" /> <path d=\"M7 7h8\" />", "mic": "<path d=\"M12 19v3\" /> <path d=\"M19 10v2a7 7 0 0 1-14 0v-2\" /> <rect x=\"9\" y=\"2\" width=\"6\" height=\"13\" rx=\"3\" />", "minus": "<path d=\"M5 12h14\" />", "monitor": "<rect width=\"20\" height=\"14\" x=\"2\" y=\"3\" rx=\"2\" /> <line x1=\"8\" x2=\"16\" y1=\"21\" y2=\"21\" /> <line x1=\"12\" x2=\"12\" y1=\"17\" y2=\"21\" />", "music": "<path d=\"M21 16V3a1 1 0 0 0-1.28-.96l-10 2.917a1 1 0 0 0-.72.96V19\" /> <circle cx=\"18\" cy=\"16\" r=\"3\" /> <circle cx=\"6\" cy=\"19\" r=\"3\" />", "network": "<rect x=\"16\" y=\"16\" width=\"6\" height=\"6\" rx=\"1\" /> <rect x=\"2\" y=\"16\" width=\"6\" height=\"6\" rx=\"1\" /> <rect x=\"9\" y=\"2\" width=\"6\" height=\"6\" rx=\"1\" /> <path d=\"M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3\" /> <path d=\"M12 12V8\" />", "notebook-pen": "<path d=\"M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4\" /> <path d=\"M2 6h4\" /> <path d=\"M2 10h4\" /> <path d=\"M2 14h4\" /> <path d=\"M2 18h4\" /> <path d=\"M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z\" />", "package": "<path d=\"M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z\" /> <path d=\"M12 22V12\" /> <polyline points=\"3.29 7 12 12 20.71 7\" /> <path d=\"m7.5 4.27 9 5.15\" />", "palette": "<path d=\"M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z\" /> <circle cx=\"13.5\" cy=\"6.5\" r=\".5\" fill=\"currentColor\" /> <circle cx=\"17.5\" cy=\"10.5\" r=\".5\" fill=\"currentColor\" /> <circle cx=\"6.5\" cy=\"12.5\" r=\".5\" fill=\"currentColor\" /> <circle cx=\"8.5\" cy=\"7.5\" r=\".5\" fill=\"currentColor\" />", "panel-left-close": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" /> <path d=\"M9 3v18\" /> <path d=\"m16 15-3-3 3-3\" />", "panel-left-open": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" /> <path d=\"M9 3v18\" /> <path d=\"m14 9 3 3-3 3\" />", "pencil": "<path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\" /> <path d=\"m15 5 4 4\" />", "pi": "<line x1=\"9\" x2=\"9\" y1=\"4\" y2=\"20\" /> <path d=\"M4 7c0-1.7 1.3-3 3-3h13\" /> <path d=\"M18 20c-1.7 0-3-1.3-3-3V4\" />", "piggy-bank": "<path d=\"M11 17h3v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-3a3.16 3.16 0 0 0 2-2h1a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1h-1a5 5 0 0 0-2-4V3a4 4 0 0 0-3.2 1.6l-.3.4H11a6 6 0 0 0-6 6v1a5 5 0 0 0 2 4v3a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1z\" /> <path d=\"M16 10h.01\" /> <path d=\"M2 8v1a2 2 0 0 0 2 2h1\" />", "pill": "<path d=\"m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z\" /> <path d=\"m8.5 8.5 7 7\" />", "plus": "<path d=\"M5 12h14\" /> <path d=\"M12 5v14\" />", "printer": "<path d=\"M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2\" /> <path d=\"M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6\" /> <rect x=\"6\" y=\"14\" width=\"12\" height=\"8\" rx=\"1\" />", "receipt-euro": "<path d=\"M15.828 14.829a4 4 0 0 1-5.656 0 4 4 0 0 1 0-5.657 4 4 0 0 1 5.656 0\" /> <path d=\"M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z\" /> <path d=\"M8 12h5\" />", "refresh-cw": "<path d=\"M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8\" /> <path d=\"M21 3v5h-5\" /> <path d=\"M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16\" /> <path d=\"M8 16H3v5\" />", "repeat": "<path d=\"m17 2 4 4-4 4\" /> <path d=\"M3 11v-1a4 4 0 0 1 4-4h14\" /> <path d=\"m7 22-4-4 4-4\" /> <path d=\"M21 13v1a4 4 0 0 1-4 4H3\" />", "rocket": "<path d=\"M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5\" /> <path d=\"M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09\" /> <path d=\"M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z\" /> <path d=\"M9 12H4s.55-3.03 2-4c1.62-1.08 5 .05 5 .05\" />", "rotate-ccw": "<path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\" /> <path d=\"M3 3v5h5\" />", "scan-search": "<path d=\"M3 7V5a2 2 0 0 1 2-2h2\" /> <path d=\"M17 3h2a2 2 0 0 1 2 2v2\" /> <path d=\"M21 17v2a2 2 0 0 1-2 2h-2\" /> <path d=\"M7 21H5a2 2 0 0 1-2-2v-2\" /> <circle cx=\"12\" cy=\"12\" r=\"3\" /> <path d=\"m16 16-1.9-1.9\" />", "search": "<path d=\"m21 21-4.34-4.34\" /> <circle cx=\"11\" cy=\"11\" r=\"8\" />", "server": "<rect width=\"20\" height=\"8\" x=\"2\" y=\"2\" rx=\"2\" ry=\"2\" /> <rect width=\"20\" height=\"8\" x=\"2\" y=\"14\" rx=\"2\" ry=\"2\" /> <line x1=\"6\" x2=\"6.01\" y1=\"6\" y2=\"6\" /> <line x1=\"6\" x2=\"6.01\" y1=\"18\" y2=\"18\" />", "sheet": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" ry=\"2\" /> <line x1=\"3\" x2=\"21\" y1=\"9\" y2=\"9\" /> <line x1=\"3\" x2=\"21\" y1=\"15\" y2=\"15\" /> <line x1=\"9\" x2=\"9\" y1=\"9\" y2=\"21\" /> <line x1=\"15\" x2=\"15\" y1=\"9\" y2=\"21\" />", "shield-alert": "<path d=\"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z\" /> <path d=\"M12 8v4\" /> <path d=\"M12 16h.01\" />", "shield-check": "<path d=\"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z\" /> <path d=\"m9 12 2 2 4-4\" />", "shopping-cart": "<path d=\"m2.05 2.05 1.099-.028a1 1 0 0 1 1.008.815l2.69 14.347A1 1 0 0 0 7.83 18H18\" /> <path d=\"M4.563 5h16.435a1 1 0 0 1 .981 1.204l-1.026 6.226A2 2 0 0 1 18.962 14H6.25\" /> <circle cx=\"18\" cy=\"20\" r=\"2\" /> <circle cx=\"8\" cy=\"20\" r=\"2\" />", "smartphone": "<rect width=\"14\" height=\"20\" x=\"5\" y=\"2\" rx=\"2\" ry=\"2\" /> <path d=\"M12 18h.01\" />", "sparkles": "<path d=\"M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z\" /> <path d=\"M20 2v4\" /> <path d=\"M22 4h-4\" /> <circle cx=\"4\" cy=\"20\" r=\"2\" />", "square-pen": "<path d=\"M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7\" /> <path d=\"M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z\" />", "star": "<path d=\"M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z\" />", "star-off": "<path d=\"m10.344 4.688 1.181-2.393a.53.53 0 0 1 .95 0l2.31 4.679a2.12 2.12 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.237 3.152\" /> <path d=\"m17.945 17.945.43 2.505a.53.53 0 0 1-.771.56l-4.618-2.428a2.12 2.12 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.12 2.12 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a8 8 0 0 0 .4-.099\" /> <path d=\"m2 2 20 20\" />", "sun": "<circle cx=\"12\" cy=\"12\" r=\"4\" /> <path d=\"M12 2v2\" /> <path d=\"M12 20v2\" /> <path d=\"m4.93 4.93 1.41 1.41\" /> <path d=\"m17.66 17.66 1.41 1.41\" /> <path d=\"M2 12h2\" /> <path d=\"M20 12h2\" /> <path d=\"m6.34 17.66-1.41 1.41\" /> <path d=\"m19.07 4.93-1.41 1.41\" />", "terminal": "<path d=\"M12 19h8\" /> <path d=\"m4 17 6-6-6-6\" />", "text": "<path d=\"M21 5H3\" /> <path d=\"M15 12H3\" /> <path d=\"M17 19H3\" />", "thermometer": "<path d=\"M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z\" />", "trash-2": "<path d=\"M10 11v6\" /> <path d=\"M14 11v6\" /> <path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6\" /> <path d=\"M3 6h18\" /> <path d=\"M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\" />", "triangle-alert": "<path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\" /> <path d=\"M12 9v4\" /> <path d=\"M12 17h.01\" />", "unlink": "<path d=\"m18.84 12.25 1.72-1.71h-.02a5.004 5.004 0 0 0-.12-7.07 5.006 5.006 0 0 0-6.95 0l-1.72 1.71\" /> <path d=\"m5.17 11.75-1.71 1.71a5.004 5.004 0 0 0 .12 7.07 5.006 5.006 0 0 0 6.95 0l1.71-1.71\" /> <line x1=\"8\" x2=\"8\" y1=\"2\" y2=\"5\" /> <line x1=\"2\" x2=\"5\" y1=\"8\" y2=\"8\" /> <line x1=\"16\" x2=\"16\" y1=\"19\" y2=\"22\" /> <line x1=\"19\" x2=\"22\" y1=\"16\" y2=\"16\" />", "upload": "<path d=\"M12 3v12\" /> <path d=\"m17 8-5-5-5 5\" /> <path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\" />", "usb": "<circle cx=\"10\" cy=\"7\" r=\"1\" /> <circle cx=\"4\" cy=\"20\" r=\"1\" /> <path d=\"M4.7 19.3 19 5\" /> <path d=\"m21 3-3 1 2 2Z\" /> <path d=\"M9.26 7.68 5 12l2 5\" /> <path d=\"m10 14 5 2 3.5-3.5\" /> <path d=\"m18 12 1-1 1 1-1 1Z\" />", "user-round": "<circle cx=\"12\" cy=\"8\" r=\"5\" /> <path d=\"M20 21a8 8 0 0 0-16 0\" />", "wallet": "<path d=\"M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1\" /> <path d=\"M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4\" />", "wifi": "<path d=\"M12 20h.01\" /> <path d=\"M2 8.82a15 15 0 0 1 20 0\" /> <path d=\"M5 12.859a10 10 0 0 1 14 0\" /> <path d=\"M8.5 16.429a5 5 0 0 1 7 0\" />", "wifi-off": "<path d=\"M12 20h.01\" /> <path d=\"M8.5 16.429a5 5 0 0 1 7 0\" /> <path d=\"M5 12.859a10 10 0 0 1 5.17-2.69\" /> <path d=\"M19 12.859a10 10 0 0 0-2.007-1.523\" /> <path d=\"M2 8.82a15 15 0 0 1 4.177-2.643\" /> <path d=\"M22 8.82a15 15 0 0 0-11.288-3.764\" /> <path d=\"m2 2 20 20\" />", "wrench": "<path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z\" />", "x": "<path d=\"M18 6 6 18\" /> <path d=\"m6 6 12 12\" />", "zap": "<path d=\"M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z\" />"};
+const ICONS = {"alarm-clock": "<circle cx=\"12\" cy=\"13\" r=\"8\" /> <path d=\"M12 9v4l2 2\" /> <path d=\"M5 3 2 6\" /> <path d=\"m22 6-3-3\" /> <path d=\"M6.38 18.7 4 21\" /> <path d=\"M17.64 18.67 20 21\" />", "arrow-left": "<path d=\"m12 19-7-7 7-7\" /> <path d=\"M19 12H5\" />", "arrow-right": "<path d=\"M5 12h14\" /> <path d=\"m12 5 7 7-7 7\" />", "arrow-right-left": "<path d=\"m16 3 4 4-4 4\" /> <path d=\"M20 7H4\" /> <path d=\"m8 21-4-4 4-4\" /> <path d=\"M4 17h16\" />", "arrow-up": "<path d=\"m5 12 7-7 7 7\" /> <path d=\"M12 19V5\" />", "badge": "<path d=\"M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z\" />", "ban": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"M4.929 4.929 19.07 19.071\" />", "battery-low": "<path d=\"M22 14v-4\" /> <path d=\"M6 14v-4\" /> <rect x=\"2\" y=\"6\" width=\"16\" height=\"12\" rx=\"2\" />", "book-open": "<path d=\"M12 5v16\" /> <path d=\"M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z\" />", "bot": "<path d=\"M12 8V4H8\" /> <rect width=\"16\" height=\"12\" x=\"4\" y=\"8\" rx=\"2\" /> <path d=\"M2 14h2\" /> <path d=\"M20 14h2\" /> <path d=\"M15 13v2\" /> <path d=\"M9 13v2\" />", "boxes": "<path d=\"M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z\" /> <path d=\"m7 16.5-4.74-2.85\" /> <path d=\"m7 16.5 5-3\" /> <path d=\"M7 16.5v5.17\" /> <path d=\"M12 13.5V19l3.97 2.38a2 2 0 0 0 2.06 0l3-1.8a2 2 0 0 0 .97-1.71v-3.24a2 2 0 0 0-.97-1.71L17 10.5l-5 3Z\" /> <path d=\"m17 16.5-5-3\" /> <path d=\"m17 16.5 4.74-2.85\" /> <path d=\"M17 16.5v5.17\" /> <path d=\"M7.97 4.42A2 2 0 0 0 7 6.13v4.37l5 3 5-3V6.13a2 2 0 0 0-.97-1.71l-3-1.8a2 2 0 0 0-2.06 0l-3 1.8Z\" /> <path d=\"M12 8 7.26 5.15\" /> <path d=\"m12 8 4.74-2.85\" /> <path d=\"M12 13.5V8\" />", "briefcase": "<path d=\"M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16\" /> <rect width=\"20\" height=\"14\" x=\"2\" y=\"6\" rx=\"2\" />", "broom": "<path d=\"M13.5 10.5 22 2\" /> <path d=\"M14.734 13.841a2 2 0 00-.314-2.42L12.58 9.58a2 2 0 00-2.421-.314l-7.657 4.461A1 1 0 002.3 15.3l6.403 6.403a1 1 0 001.571-.204z\" /> <path d=\"m5 18 2-2\" /> <path d=\"m7.699 10.7 5.602 5.601\" />", "calendar-days": "<path d=\"M8 2v3\" /> <path d=\"M16 2v3\" /> <rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" /> <path d=\"M3 9h18\" /> <path d=\"M8 13h.01\" /> <path d=\"M12 13h.01\" /> <path d=\"M16 13h.01\" /> <path d=\"M8 17h.01\" /> <path d=\"M12 17h.01\" /> <path d=\"M16 17h.01\" />", "calendar-plus": "<path d=\"M16 18h6\" /> <path d=\"M16 2v3\" /> <path d=\"M19 15v6\" /> <path d=\"M21 11.5V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h8.3\" /> <path d=\"M3 9h18\" /> <path d=\"M8 2v3\" />", "camera": "<path d=\"M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z\" /> <circle cx=\"12\" cy=\"13\" r=\"3\" />", "car": "<path d=\"M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2\" /> <circle cx=\"7\" cy=\"17\" r=\"2\" /> <path d=\"M9 17h6\" /> <circle cx=\"17\" cy=\"17\" r=\"2\" />", "chart-column": "<path d=\"M3 3v16a2 2 0 0 0 2 2h16\" /> <path d=\"M18 17V9\" /> <path d=\"M13 17V5\" /> <path d=\"M8 17v-3\" />", "check": "<path d=\"M20 6 9 17l-5-5\" />", "check-check": "<path d=\"M18 6 7 17l-5-5\" /> <path d=\"m22 10-7.5 7.5L13 16\" />", "chevron-down": "<path d=\"m6 9 6 6 6-6\" />", "chevron-left": "<path d=\"m15 18-6-6 6-6\" />", "chevron-right": "<path d=\"m9 18 6-6-6-6\" />", "circle": "<circle cx=\"12\" cy=\"12\" r=\"10\" />", "circle-alert": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <line x1=\"12\" x2=\"12\" y1=\"8\" y2=\"12\" /> <line x1=\"12\" x2=\"12.01\" y1=\"16\" y2=\"16\" />", "circle-check": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"m16 9-5.5 5.5L8 12\" />", "circle-dot": "<circle cx=\"12\" cy=\"12\" r=\"1\" /> <circle cx=\"12\" cy=\"12\" r=\"10\" />", "circle-x": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"m15 9-6 6\" /> <path d=\"m9 9 6 6\" />", "clock": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"M12 6v6l4 2\" />", "code": "<path d=\"m16 18 6-6-6-6\" /> <path d=\"m8 6-6 6 6 6\" />", "container": "<path d=\"M22 7.7c0-.6-.4-1.2-.8-1.5l-6.3-3.9a1.72 1.72 0 0 0-1.7 0l-10.3 6c-.5.2-.9.8-.9 1.4v6.6c0 .5.4 1.2.8 1.5l6.3 3.9a1.72 1.72 0 0 0 1.7 0l10.3-6c.5-.3.9-1 .9-1.5Z\" /> <path d=\"M10 21.9V14L2.1 9.1\" /> <path d=\"m10 14 11.9-6.9\" /> <path d=\"M14 19.8v-8.1\" /> <path d=\"M18 17.5V9.4\" />", "copy": "<rect width=\"14\" height=\"14\" x=\"8\" y=\"8\" rx=\"2\" ry=\"2\" /> <path d=\"M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2\" />", "cpu": "<path d=\"M12 20v2\" /> <path d=\"M12 2v2\" /> <path d=\"M17 20v2\" /> <path d=\"M17 2v2\" /> <path d=\"M2 12h2\" /> <path d=\"M2 17h2\" /> <path d=\"M2 7h2\" /> <path d=\"M20 12h2\" /> <path d=\"M20 17h2\" /> <path d=\"M20 7h2\" /> <path d=\"M7 20v2\" /> <path d=\"M7 2v2\" /> <rect x=\"4\" y=\"4\" width=\"16\" height=\"16\" rx=\"2\" /> <rect x=\"8\" y=\"8\" width=\"8\" height=\"8\" rx=\"1\" />", "edit": "<path d=\"M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7\" /> <path d=\"M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z\" />", "external-link": "<path d=\"M15 3h6v6\" /> <path d=\"M10 14 21 3\" /> <path d=\"M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6\" />", "eye": "<path d=\"M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0\" /> <circle cx=\"12\" cy=\"12\" r=\"3\" />", "eye-off": "<path d=\"M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49\" /> <path d=\"M14.084 14.158a3 3 0 0 1-4.242-4.242\" /> <path d=\"M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143\" /> <path d=\"m2 2 20 20\" />", "file": "<path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\" /> <path d=\"M14 2v5a1 1 0 0 0 1 1h5\" />", "file-spreadsheet": "<path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\" /> <path d=\"M14 2v5a1 1 0 0 0 1 1h5\" /> <path d=\"M8 13h2\" /> <path d=\"M14 13h2\" /> <path d=\"M8 17h2\" /> <path d=\"M14 17h2\" />", "file-text": "<path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\" /> <path d=\"M14 2v5a1 1 0 0 0 1 1h5\" /> <path d=\"M10 9H8\" /> <path d=\"M16 13H8\" /> <path d=\"M16 17H8\" />", "file-up": "<path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\" /> <path d=\"M14 2v5a1 1 0 0 0 1 1h5\" /> <path d=\"M12 12v6\" /> <path d=\"m15 15-3-3-3 3\" />", "film": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" /> <path d=\"M7 3v18\" /> <path d=\"M3 7.5h4\" /> <path d=\"M3 12h18\" /> <path d=\"M3 16.5h4\" /> <path d=\"M17 3v18\" /> <path d=\"M17 7.5h4\" /> <path d=\"M17 16.5h4\" />", "flask-conical": "<path d=\"M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2\" /> <path d=\"M6.453 15h11.094\" /> <path d=\"M8.5 2h7\" />", "folder": "<path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z\" />", "folder-open": "<path d=\"m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2\" />", "folder-plus": "<path d=\"M12 10v6\" /> <path d=\"M9 13h6\" /> <path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z\" />", "form": "<path d=\"M4 14h6\" /> <path d=\"M4 2h10\" /> <rect x=\"4\" y=\"18\" width=\"16\" height=\"4\" rx=\"1\" /> <rect x=\"4\" y=\"6\" width=\"16\" height=\"4\" rx=\"1\" />", "gamepad-2": "<line x1=\"6\" x2=\"10\" y1=\"11\" y2=\"11\" /> <line x1=\"8\" x2=\"8\" y1=\"9\" y2=\"13\" /> <line x1=\"15\" x2=\"15.01\" y1=\"12\" y2=\"12\" /> <line x1=\"18\" x2=\"18.01\" y1=\"10\" y2=\"10\" /> <path d=\"M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z\" />", "gauge": "<path d=\"m12 14 4-4\" /> <path d=\"M3.34 19a10 10 0 1 1 17.32 0\" />", "globe": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20\" /> <path d=\"M2 12h20\" />", "graduation-cap": "<path d=\"M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z\" /> <path d=\"M22 10v6\" /> <path d=\"M6 12.5V16a6 3 0 0 0 12 0v-3.5\" />", "group": "<path d=\"M3 7V5c0-1.1.9-2 2-2h2\" /> <path d=\"M17 3h2c1.1 0 2 .9 2 2v2\" /> <path d=\"M21 17v2c0 1.1-.9 2-2 2h-2\" /> <path d=\"M7 21H5c-1.1 0-2-.9-2-2v-2\" /> <rect width=\"7\" height=\"5\" x=\"7\" y=\"7\" rx=\"1\" /> <rect width=\"7\" height=\"5\" x=\"10\" y=\"12\" rx=\"1\" />", "hand": "<path d=\"M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2\" /> <path d=\"M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2\" /> <path d=\"M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8\" /> <path d=\"M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15\" />", "hard-drive": "<path d=\"M10 16h.01\" /> <path d=\"M2.212 11.577a2 2 0 0 0-.212.896V18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5.527a2 2 0 0 0-.212-.896L18.55 5.11A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z\" /> <path d=\"M21.946 12.013H2.054\" /> <path d=\"M6 16h.01\" />", "hd": "<path d=\"M10 12H6\" /> <path d=\"M10 15V9\" /> <path d=\"M14 14.5a.5.5 0 0 0 .5.5h1a2.5 2.5 0 0 0 2.5-2.5v-1A2.5 2.5 0 0 0 15.5 9h-1a.5.5 0 0 0-.5.5z\" /> <path d=\"M6 15V9\" /> <rect x=\"2\" y=\"5\" width=\"20\" height=\"14\" rx=\"2\" />", "heart": "<path d=\"M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5\" />", "house": "<path d=\"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8\" /> <path d=\"M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\" />", "image": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" ry=\"2\" /> <circle cx=\"9\" cy=\"9\" r=\"2\" /> <path d=\"m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21\" />", "inbox": "<polyline points=\"22 12 16 12 14 15 10 15 8 12 2 12\" /> <path d=\"M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z\" />", "info": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"M12 16v-4\" /> <path d=\"M12 8h.01\" />", "key-round": "<path d=\"M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z\" /> <circle cx=\"16.5\" cy=\"7.5\" r=\".5\" fill=\"currentColor\" />", "landmark": "<path d=\"M10 18v-7\" /> <path d=\"M11.119 2.205a2 2 0 0 1 1.762 0l7.84 3.846A.5.5 0 0 1 20.5 7h-17a.5.5 0 0 1-.22-.949z\" /> <path d=\"M14 18v-7\" /> <path d=\"M18 18v-7\" /> <path d=\"M3 22h18\" /> <path d=\"M6 18v-7\" />", "laptop": "<path d=\"M18 5a2 2 0 0 1 2 2v8.526a2 2 0 0 0 .212.897l1.068 2.127a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45l1.068-2.127A2 2 0 0 0 4 15.526V7a2 2 0 0 1 2-2z\" /> <path d=\"M20.054 15.987H3.946\" />", "layout-dashboard": "<rect width=\"7\" height=\"9\" x=\"3\" y=\"3\" rx=\"1\" /> <rect width=\"7\" height=\"5\" x=\"14\" y=\"3\" rx=\"1\" /> <rect width=\"7\" height=\"9\" x=\"14\" y=\"12\" rx=\"1\" /> <rect width=\"7\" height=\"5\" x=\"3\" y=\"16\" rx=\"1\" />", "leaf": "<path d=\"M11 20a10 10 0 0010-10 25.9 25.9 0 00-1.04-7.281 1 1 0 00-1.755-.325C15.833 5.5 13 5.5 9.8 6.1A7 7 0 0011 20\" /> <path d=\"M2 21a5 5 0 012.911-4.544C7.613 15.212 8.351 15.24 11 13\" />", "lightbulb": "<path d=\"M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5\" /> <path d=\"M9 18h6\" /> <path d=\"M10 22h4\" />", "link": "<path d=\"M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71\" /> <path d=\"M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71\" />", "list-checks": "<path d=\"M13 5h8\" /> <path d=\"M13 12h8\" /> <path d=\"M13 19h8\" /> <path d=\"m3 17 2 2 4-4\" /> <path d=\"m3 7 2 2 4-4\" />", "list-todo": "<path d=\"M13 5h8\" /> <path d=\"M13 12h8\" /> <path d=\"M13 19h8\" /> <path d=\"m3 17 2 2 4-4\" /> <rect x=\"3\" y=\"4\" width=\"6\" height=\"6\" rx=\"1\" />", "loader": "<path d=\"M12 2v4\" /> <path d=\"m16.2 7.8 2.9-2.9\" /> <path d=\"M18 12h4\" /> <path d=\"m16.2 16.2 2.9 2.9\" /> <path d=\"M12 18v4\" /> <path d=\"m4.9 19.1 2.9-2.9\" /> <path d=\"M2 12h4\" /> <path d=\"m4.9 4.9 2.9 2.9\" />", "mail": "<path d=\"m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7\" /> <rect x=\"2\" y=\"4\" width=\"20\" height=\"16\" rx=\"2\" />", "maximize": "<path d=\"M8 3H5a2 2 0 0 0-2 2v3\" /> <path d=\"M21 8V5a2 2 0 0 0-2-2h-3\" /> <path d=\"M3 16v3a2 2 0 0 0 2 2h3\" /> <path d=\"M16 21h3a2 2 0 0 0 2-2v-3\" />", "message-circle-question": "<path d=\"M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719\" /> <path d=\"M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3\" /> <path d=\"M12 17h.01\" />", "message-square": "<path d=\"M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z\" />", "message-square-text": "<path d=\"M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z\" /> <path d=\"M7 11h10\" /> <path d=\"M7 15h6\" /> <path d=\"M7 7h8\" />", "mic": "<path d=\"M12 19v3\" /> <path d=\"M19 10v2a7 7 0 0 1-14 0v-2\" /> <rect x=\"9\" y=\"2\" width=\"6\" height=\"13\" rx=\"3\" />", "minus": "<path d=\"M5 12h14\" />", "monitor": "<rect width=\"20\" height=\"14\" x=\"2\" y=\"3\" rx=\"2\" /> <line x1=\"8\" x2=\"16\" y1=\"21\" y2=\"21\" /> <line x1=\"12\" x2=\"12\" y1=\"17\" y2=\"21\" />", "mouse": "<rect x=\"5\" y=\"2\" width=\"14\" height=\"20\" rx=\"7\" /> <path d=\"M12 6v4\" />", "music": "<path d=\"M21 16V3a1 1 0 0 0-1.28-.96l-10 2.917a1 1 0 0 0-.72.96V19\" /> <circle cx=\"18\" cy=\"16\" r=\"3\" /> <circle cx=\"6\" cy=\"19\" r=\"3\" />", "network": "<rect x=\"16\" y=\"16\" width=\"6\" height=\"6\" rx=\"1\" /> <rect x=\"2\" y=\"16\" width=\"6\" height=\"6\" rx=\"1\" /> <rect x=\"9\" y=\"2\" width=\"6\" height=\"6\" rx=\"1\" /> <path d=\"M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3\" /> <path d=\"M12 12V8\" />", "notebook-pen": "<path d=\"M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4\" /> <path d=\"M2 6h4\" /> <path d=\"M2 10h4\" /> <path d=\"M2 14h4\" /> <path d=\"M2 18h4\" /> <path d=\"M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z\" />", "package": "<path d=\"M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z\" /> <path d=\"M12 22V12\" /> <polyline points=\"3.29 7 12 12 20.71 7\" /> <path d=\"m7.5 4.27 9 5.15\" />", "palette": "<path d=\"M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z\" /> <circle cx=\"13.5\" cy=\"6.5\" r=\".5\" fill=\"currentColor\" /> <circle cx=\"17.5\" cy=\"10.5\" r=\".5\" fill=\"currentColor\" /> <circle cx=\"6.5\" cy=\"12.5\" r=\".5\" fill=\"currentColor\" /> <circle cx=\"8.5\" cy=\"7.5\" r=\".5\" fill=\"currentColor\" />", "panel-left-close": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" /> <path d=\"M9 3v18\" /> <path d=\"m16 15-3-3 3-3\" />", "panel-left-open": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" /> <path d=\"M9 3v18\" /> <path d=\"m14 9 3 3-3 3\" />", "pencil": "<path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\" /> <path d=\"m15 5 4 4\" />", "pi": "<line x1=\"9\" x2=\"9\" y1=\"4\" y2=\"20\" /> <path d=\"M4 7c0-1.7 1.3-3 3-3h13\" /> <path d=\"M18 20c-1.7 0-3-1.3-3-3V4\" />", "piggy-bank": "<path d=\"M11 17h3v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-3a3.16 3.16 0 0 0 2-2h1a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1h-1a5 5 0 0 0-2-4V3a4 4 0 0 0-3.2 1.6l-.3.4H11a6 6 0 0 0-6 6v1a5 5 0 0 0 2 4v3a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1z\" /> <path d=\"M16 10h.01\" /> <path d=\"M2 8v1a2 2 0 0 0 2 2h1\" />", "pill": "<path d=\"m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z\" /> <path d=\"m8.5 8.5 7 7\" />", "pin": "<path d=\"M12 17v5\" /> <path d=\"M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z\" />", "plus": "<path d=\"M5 12h14\" /> <path d=\"M12 5v14\" />", "presentation": "<path d=\"M2 3h20\" /> <path d=\"M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3\" /> <path d=\"m7 21 5-5 5 5\" />", "printer": "<path d=\"M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2\" /> <path d=\"M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6\" /> <rect x=\"6\" y=\"14\" width=\"12\" height=\"8\" rx=\"1\" />", "receipt-euro": "<path d=\"M15.828 14.829a4 4 0 0 1-5.656 0 4 4 0 0 1 0-5.657 4 4 0 0 1 5.656 0\" /> <path d=\"M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z\" /> <path d=\"M8 12h5\" />", "refresh-cw": "<path d=\"M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8\" /> <path d=\"M21 3v5h-5\" /> <path d=\"M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16\" /> <path d=\"M8 16H3v5\" />", "repeat": "<path d=\"m17 2 4 4-4 4\" /> <path d=\"M3 11v-1a4 4 0 0 1 4-4h14\" /> <path d=\"m7 22-4-4 4-4\" /> <path d=\"M21 13v1a4 4 0 0 1-4 4H3\" />", "rocket": "<path d=\"M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5\" /> <path d=\"M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09\" /> <path d=\"M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z\" /> <path d=\"M9 12H4s.55-3.03 2-4c1.62-1.08 5 .05 5 .05\" />", "rotate-ccw": "<path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\" /> <path d=\"M3 3v5h5\" />", "rotate-cw": "<path d=\"M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8\" /> <path d=\"M21 3v5h-5\" />", "scan-search": "<path d=\"M3 7V5a2 2 0 0 1 2-2h2\" /> <path d=\"M17 3h2a2 2 0 0 1 2 2v2\" /> <path d=\"M21 17v2a2 2 0 0 1-2 2h-2\" /> <path d=\"M7 21H5a2 2 0 0 1-2-2v-2\" /> <circle cx=\"12\" cy=\"12\" r=\"3\" /> <path d=\"m16 16-1.9-1.9\" />", "scroll": "<path d=\"M19 17V5a2 2 0 0 0-2-2H4\" /> <path d=\"M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3\" />", "search": "<path d=\"m21 21-4.34-4.34\" /> <circle cx=\"11\" cy=\"11\" r=\"8\" />", "section": "<path d=\"M16 5a4 3 0 0 0-8 0c0 4 8 3 8 7a4 3 0 0 1-8 0\" /> <path d=\"M8 19a4 3 0 0 0 8 0c0-4-8-3-8-7a4 3 0 0 1 8 0\" />", "server": "<rect width=\"20\" height=\"8\" x=\"2\" y=\"2\" rx=\"2\" ry=\"2\" /> <rect width=\"20\" height=\"8\" x=\"2\" y=\"14\" rx=\"2\" ry=\"2\" /> <line x1=\"6\" x2=\"6.01\" y1=\"6\" y2=\"6\" /> <line x1=\"6\" x2=\"6.01\" y1=\"18\" y2=\"18\" />", "sheet": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" ry=\"2\" /> <line x1=\"3\" x2=\"21\" y1=\"9\" y2=\"9\" /> <line x1=\"3\" x2=\"21\" y1=\"15\" y2=\"15\" /> <line x1=\"9\" x2=\"9\" y1=\"9\" y2=\"21\" /> <line x1=\"15\" x2=\"15\" y1=\"9\" y2=\"21\" />", "shield-alert": "<path d=\"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z\" /> <path d=\"M12 8v4\" /> <path d=\"M12 16h.01\" />", "shield-check": "<path d=\"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z\" /> <path d=\"m9 12 2 2 4-4\" />", "shopping-cart": "<path d=\"m2.05 2.05 1.099-.028a1 1 0 0 1 1.008.815l2.69 14.347A1 1 0 0 0 7.83 18H18\" /> <path d=\"M4.563 5h16.435a1 1 0 0 1 .981 1.204l-1.026 6.226A2 2 0 0 1 18.962 14H6.25\" /> <circle cx=\"18\" cy=\"20\" r=\"2\" /> <circle cx=\"8\" cy=\"20\" r=\"2\" />", "smartphone": "<rect width=\"14\" height=\"20\" x=\"5\" y=\"2\" rx=\"2\" ry=\"2\" /> <path d=\"M12 18h.01\" />", "smile": "<path d=\"M15 10V9\" /> <path d=\"M16.472 15a6 6 0 01-8.943 0\" /> <path d=\"M9 10V9\" /> <circle cx=\"12\" cy=\"12\" r=\"10\" />", "sparkles": "<path d=\"M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z\" /> <path d=\"M20 2v4\" /> <path d=\"M22 4h-4\" /> <circle cx=\"4\" cy=\"20\" r=\"2\" />", "square-pen": "<path d=\"M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7\" /> <path d=\"M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z\" />", "star": "<path d=\"M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z\" />", "star-off": "<path d=\"m10.344 4.688 1.181-2.393a.53.53 0 0 1 .95 0l2.31 4.679a2.12 2.12 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.237 3.152\" /> <path d=\"m17.945 17.945.43 2.505a.53.53 0 0 1-.771.56l-4.618-2.428a2.12 2.12 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.12 2.12 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a8 8 0 0 0 .4-.099\" /> <path d=\"m2 2 20 20\" />", "sun": "<circle cx=\"12\" cy=\"12\" r=\"4\" /> <path d=\"M12 2v2\" /> <path d=\"M12 20v2\" /> <path d=\"m4.93 4.93 1.41 1.41\" /> <path d=\"m17.66 17.66 1.41 1.41\" /> <path d=\"M2 12h2\" /> <path d=\"M20 12h2\" /> <path d=\"m6.34 17.66-1.41 1.41\" /> <path d=\"m19.07 4.93-1.41 1.41\" />", "terminal": "<path d=\"M12 19h8\" /> <path d=\"m4 17 6-6-6-6\" />", "text": "<path d=\"M21 5H3\" /> <path d=\"M15 12H3\" /> <path d=\"M17 19H3\" />", "thermometer": "<path d=\"M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z\" />", "trash-2": "<path d=\"M10 11v6\" /> <path d=\"M14 11v6\" /> <path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6\" /> <path d=\"M3 6h18\" /> <path d=\"M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\" />", "triangle-alert": "<path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\" /> <path d=\"M12 9v4\" /> <path d=\"M12 17h.01\" />", "unlink": "<path d=\"m18.84 12.25 1.72-1.71h-.02a5.004 5.004 0 0 0-.12-7.07 5.006 5.006 0 0 0-6.95 0l-1.72 1.71\" /> <path d=\"m5.17 11.75-1.71 1.71a5.004 5.004 0 0 0 .12 7.07 5.006 5.006 0 0 0 6.95 0l1.71-1.71\" /> <line x1=\"8\" x2=\"8\" y1=\"2\" y2=\"5\" /> <line x1=\"2\" x2=\"5\" y1=\"8\" y2=\"8\" /> <line x1=\"16\" x2=\"16\" y1=\"19\" y2=\"22\" /> <line x1=\"19\" x2=\"22\" y1=\"16\" y2=\"16\" />", "upload": "<path d=\"M12 3v12\" /> <path d=\"m17 8-5-5-5 5\" /> <path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\" />", "usb": "<circle cx=\"10\" cy=\"7\" r=\"1\" /> <circle cx=\"4\" cy=\"20\" r=\"1\" /> <path d=\"M4.7 19.3 19 5\" /> <path d=\"m21 3-3 1 2 2Z\" /> <path d=\"M9.26 7.68 5 12l2 5\" /> <path d=\"m10 14 5 2 3.5-3.5\" /> <path d=\"m18 12 1-1 1 1-1 1Z\" />", "user-round": "<circle cx=\"12\" cy=\"8\" r=\"5\" /> <path d=\"M20 21a8 8 0 0 0-16 0\" />", "wallet": "<path d=\"M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1\" /> <path d=\"M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4\" />", "wifi": "<path d=\"M12 20h.01\" /> <path d=\"M2 8.82a15 15 0 0 1 20 0\" /> <path d=\"M5 12.859a10 10 0 0 1 14 0\" /> <path d=\"M8.5 16.429a5 5 0 0 1 7 0\" />", "wifi-off": "<path d=\"M12 20h.01\" /> <path d=\"M8.5 16.429a5 5 0 0 1 7 0\" /> <path d=\"M5 12.859a10 10 0 0 1 5.17-2.69\" /> <path d=\"M19 12.859a10 10 0 0 0-2.007-1.523\" /> <path d=\"M2 8.82a15 15 0 0 1 4.177-2.643\" /> <path d=\"M22 8.82a15 15 0 0 0-11.288-3.764\" /> <path d=\"m2 2 20 20\" />", "wrench": "<path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z\" />", "x": "<path d=\"M18 6 6 18\" /> <path d=\"m6 6 12 12\" />", "zap": "<path d=\"M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z\" />"};
 
 /* ---------- Werkzeuge ---------- */
 const $ = id => document.getElementById(id);
@@ -709,7 +828,7 @@ async function post(pfad, body){
 }
 
 /* ---------- Daten ---------- */
-const FASSUNG = "2026-11-08";   // gleich wie hub.FASSUNG
+const FASSUNG = "2026-11-09";   // gleich wie hub.FASSUNG
 const D = {pos: null, wuensche: null, berichte: null, notizen: null, agenten: null, laeufe: null, papierkorb: null, ich: null, fehler: ""};
 async function laden(){
   if (!KEY) return;
@@ -1368,6 +1487,7 @@ SHEETS.projekt = id => {
   return {lead: sq(posSym(p.symbol), p.farbe || "gray", "xl"), title: p.name, sub: `${{aktiv: "Aktiv", ruht: "Ruht", archiv: "Archiv"}[p.status]} · geändert ${ago(p.geaendert)}`,
     body: `<div class="acts"><button class="btn" type="button" data-act="schritt" data-id="${esc(id)}">${icon("arrow-right")}Als Nächstes</button>${["aktiv", "ruht", "archiv"].filter(s => s !== p.status).map(s => `<button class="btn" type="button" data-act="pstatus" data-id="${esc(id)}" data-wert="${s}">${{aktiv: "Aktiv setzen", ruht: "Ruhen lassen", archiv: "Ins Archiv"}[s]}</button>`).join("")}</div>`
       + gh2("Angaben") + grp(kv("Als Nächstes", esc(p.naechster_schritt || "–")) + kv("Beschreibung", esc(p.beschreibung)) + (p.orte || []).map(o => kv(esc(o.geraet || "Ort"), `<code>${esc(o.pfad)}</code>`)).join("") + (p.repos || []).map(r => kv("Repo", esc(r))).join(""))
+      + grp(row(sq("pin", "blue"), "Pinwand", p.pinwand ? "Karten ansehen, verschieben und gestalten" : "Noch leer. Hier pinnst du Ideen, Material und offene Fragen an.", "", `data-act="pwoeffnen" data-id="${esc(id)}"`))
       + gh2(`Aufgaben (${offen.length} offen)`) + (A.length ? grp(offen.map(a => posZeile(a, false)).join("") + more("pf-" + id, fertig, 0, a => posZeile(a, false)).replace("Alle ", "Erledigte ")) : "")
       + `<div class="grp posform inrow" style="margin-top:10px">${posNeuForm(id)}</div>`};
 };
@@ -2108,6 +2228,634 @@ function ueMail(){
   return `<div class="tile">${th("mail", "blue", W.length > 1 ? "Wichtige Mails" : "Wichtige Mail", `<button class="lnk" type="button" data-nav="mail">Alle</button>`)}${X.length ? row(sq("shield-alert", "red"), X.length === 1 ? "1 Mail sieht nach Betrug aus" : `${X.length} Mails sehen nach Betrug aus`, "Nichts anklicken, erst ansehen.", "", ` data-nav="mail"`) : ""}${W.length ? W.slice(0, 3).map(m => row("", `${m.gelesen ? "" : '<span class="mlneu"></span>'}${esc(m.betreff)}`, esc(m.kurz || m.von_name), val(esc(mlDatum(m.zeit))), sh("mail:" + m.nr))).join("") : `<p class="muted hruhig">${icon("circle-check")}Gerade nichts Wichtiges.</p>`}</div>`;
 }
 
+/* ---------- Pinwand (pw…, Baustein wie im Vorbild, „Freie Wand“) ----------
+   Im Starter gibt es keine Projektseite: Die Zeile „Pinwand“ im Projektblatt öffnet die Wand im Vollbild (pwOeffnen), „Fertig“ führt
+   zurück ins Blatt. Karten liegen frei auf einer Wand (Koordinaten in px bei 100 %), der Rahmen einer Gruppe wird aus den Karten der
+   Gruppe berechnet. Die Wand ist ein eigenes Element (PW.wrap) im #viewer, außerhalb der Seite: Neu zeichnen der Seite stört sie nicht.
+   Jeder Text aus den Daten geht durch esc(). */
+const PW = {pid: null, pins: [], geladen: false, zeit: 0, zoom: 1, wrap: null, drag: null, dlg: null, voll: false, fsAn: false, ung: new Map(), speichert: 0, schreibZ: 0,
+  fehler: "", nachholen: false, sl: 0, st: 0, sig: "", hash: "", ungMerk: new Map(), zoomVorher: 0, autoFit: false,
+  sel: null, menu: null, toast: 0, nachPlatz: [], barFuer: null, ungWeg: new Map(), hinT: 0};
+const PW_PALETTE = ["blue", "indigo", "green", "orange", "pink", "teal", "purple", "cyan", "brown", "mint", "yellow", "red"];
+const PW_MARKEN = {"im inventar": {punkt: "green"}, "fehlt": {punkt: "orange"}, "vorgabe": {farbe: "blue"}, "vorschlag": {farbe: "indigo"}, "nicht nachgeprüft": {farbe: "warnink"}};
+const PW_MARKEN_VORSCHLAG = ["im Inventar", "fehlt", "Vorschlag", "Vorgabe", "nicht nachgeprüft"];
+const PW_MAX = 5000, PW_BREITE = 190, PW_LUFT = 12, PW_B_MIN = 120, PW_B_MAX = 480, PW_H_MIN = 40, PW_H_MAX = 1200;
+const PW_FARBEN = ["blau", "gruen", "orange", "rot", "lila", "gelb", "grau"];
+const PW_FARBNAME = {blau: "Blau", gruen: "Grün", orange: "Orange", rot: "Rot", lila: "Lila", gelb: "Gelb", grau: "Grau"};
+const PW_PUNKT = {blau: "var(--blue)", gruen: "var(--green)", orange: "var(--orange)", rot: "var(--red)", lila: "var(--purple)", gelb: "#FFCC00", grau: "#8E8E93"};
+const PW_GROESSE = {S: 150, M: 190, L: 320};   // Breite je Größe; M ist das heutige Aussehen
+const PW_SYMBOLE = ["📌", "⭐", "💡", "❗", "❓", "✅", "⚠️", "🔥", "🎯", "📝", "🔧", "🛒", "💰", "📅", "🔒", "🔌", "🤖", "🧩", "🚀", "📦"];
+const pwMobil = () => matchMedia("(max-width:700px)").matches;
+/* „beschäftigt“ heißt: Die Seite darf nicht neu gezeichnet werden. Ungespeicherte Karten zählen nur, solange die Wand angezeigt wird; ein Seitenwechsel muss immer gehen. */
+const pwSichtbarAn = () => !!(PW.wrap && PW.wrap.isConnected);
+const pwBeschaeftigt = () => !!(PW.pid && (PW.drag && PW.drag.aktiv || PW.dlg || PW.menu || (pwSichtbarAn() && (PW.ung.size || PW.speichert))));
+const pwUngenau = () => !!(PW.ung.size || [...PW.ungMerk.values()].some(m => m.size));   // irgendwo liegen ungespeicherte Änderungen: die Seite lädt sich nicht von selbst neu
+const pwGruppen = () => [...new Set(PW.pins.map(k => k.gruppe))];
+const pwFarbe = g => PW_PALETTE[Math.max(0, pwGruppen().indexOf(g)) % PW_PALETTE.length];
+function pwMarke(m){
+  if (!m) return "";
+  const d = PW_MARKEN[String(m).trim().toLowerCase()] || {};
+  return `<span class="pwtag"${d.farbe ? ` style="--tc:var(--${d.farbe})"` : ""}>${d.punkt ? `<i style="--m:var(--${d.punkt})"></i>` : ""}${esc(m)}</span>`;
+}
+function pwBauen(){
+  const w = document.createElement("section"); w.className = "pw"; w.setAttribute("aria-label", "Pinwand");
+  w.innerHTML = `<div class="pwbar vbar"><h2>Pinwand</h2><span class="grow"></span>
+    <div class="pwzoom"><button type="button" data-pw="minus" aria-label="Verkleinern">${icon("minus")}</button><button type="button" data-pw="fit" class="pwpz" title="Einpassen">100 %</button><button type="button" data-pw="plus" aria-label="Vergrößern">${icon("plus")}</button></div>
+    <button class="btn pwb ico" type="button" data-pw="entf" aria-label="Entfernte Karten" title="Entfernte Karten">${icon("trash-2")}<span class="txt">Entfernte Karten</span></button>
+    <button class="btn pwb pri" type="button" data-pw="neu">${icon("pin")}Anpinnen</button>
+    <button class="btn pwb vb" type="button" data-pw="voll">${icon("maximize")}Vollbild</button>
+    <button class="btn pwb pri fin" type="button" data-pw="fertig" style="box-shadow:none">${icon("check")}Fertig</button>
+    <span class="pwhint"><span class="hm">Doppelklick auf eine freie Stelle: neue Karte</span><span class="ht">Tippen wählt eine Karte aus, kurz halten und ziehen verschiebt</span></span></div>
+    <div class="pwmeld" hidden></div><div class="pwview" tabindex="-1"><div class="pwsz"><div class="pwcv"></div></div></div>
+    <div class="pwtb" role="toolbar" aria-label="Karte gestalten" hidden></div>`;
+  w.addEventListener("pointerdown", pwDown);
+  w.addEventListener("click", pwKlick);
+  w.addEventListener("dblclick", pwDbl);
+  w.addEventListener("keydown", e => {
+    const k = e.target.closest && e.target.closest(".pwk");
+    if (k && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); if (PW.sel === k.dataset.id) pwKarte(k.dataset.id); else pwWaehlen(k.dataset.id); }
+    else if (e.key === "Enter" && e.target.classList && e.target.classList.contains("pwsyin")) { e.preventDefault(); pwSymbolEigen(); }
+  });
+  w.addEventListener("contextmenu", e => { if (e.target.closest(".pwk, [data-gz]")) e.preventDefault(); });
+  w.addEventListener("touchmove", e => { if (PW.drag && PW.drag.bereit) e.preventDefault(); }, {passive: false});
+  w.querySelector(".pwview").addEventListener("scroll", e => { PW.sl = e.target.scrollLeft; PW.st = e.target.scrollTop; pwBarLater(); }, {passive: true});
+  return w;
+}
+const pwEl = s => PW.wrap.querySelector(s);
+function pwStart(pid){
+  if (PW.pid && PW.ung.size) PW.ungMerk.set(PW.pid, PW.ung);   // ungespeicherte Änderungen bleiben je Projekt erhalten
+  clearTimeout(PW.toast); clearTimeout(PW.hinT); if (PW.wrap) PW.wrap.querySelectorAll(".pwtoast, .pwhin").forEach(t => t.remove());   // Meldungen gehören zu ihrer Wand
+  PW.sel = null; PW.menu = null; PW.barFuer = null; PW.nachPlatz = []; PW.pid = pid; PW.pins = []; PW.geladen = false; PW.zeit = 0; PW.fehler = ""; PW.ung = PW.ungMerk.get(pid) || new Map(); PW.ungMerk.delete(pid); PW.sl = PW.st = 0; PW.sig = "";
+  if (PW.ung.size) PW.fehler = "Einige Änderungen sind noch nicht gespeichert.";
+  let z = NaN; try { z = parseFloat(localStorage.getItem("zentrale-pinwand-zoom-" + pid)); } catch(e) {}
+  PW.zoom = z >= .5 && z <= 1.5 ? z : 0;   // 0 = beim ersten Zeichnen einpassen
+  if (!PW.wrap) PW.wrap = pwBauen();
+  pwEl(".pwcv").innerHTML = ""; pwMeldung();
+  pwLaden();
+}
+/* Aus dem Projektblatt: Blatt zu, Wand im Vollbild; „Fertig“ öffnet das Blatt wieder */
+function pwOeffnen(pid){
+  if (PW.voll) return;
+  PW.zurueck = "projekt:" + pid; closeSheet();
+  if (PW.pid !== pid || !PW.wrap) pwStart(pid); else if (Date.now() - PW.zeit > 8000) pwLaden();
+  PW.einpassen = true; pwVoll(true); pwZeichnen(true);
+}
+function pwRestore(){ const v = pwEl(".pwview"); v.scrollLeft = PW.sl; v.scrollTop = PW.st; }
+async function pwLaden(){
+  if (!PW.pid || !KEY) return;
+  const pid = PW.pid, z = PW.schreibZ; PW.zeit = Date.now();
+  try {
+    const r = await fetch(`/api/pinwand/${pid}`, {cache: "no-store", headers: {Authorization: "Bearer " + KEY}});
+    const j = await r.json();
+    if (!r.ok) { if (!PW.geladen) { PW.fehler = j.fehler || "Die Pinwand ließ sich nicht laden."; pwMeldung(); } return; }
+    if (pid !== PW.pid || z !== PW.schreibZ || PW.speichert) return;   // während des Ladens wurde gespeichert: veraltet
+    const neu = j.pins.map(k => PW.ung.has(k.id) ? Object.assign({}, k, PW.ung.get(k.id)) : k);
+    const sig = JSON.stringify(neu);
+    if (!PW.geladen || sig !== PW.sig) { PW.pins = neu; PW.sig = sig; PW.geladen = true; PW.nachholen = true; }
+    if (PW.sel && !PW.pins.some(x => x.id === PW.sel)) PW.sel = null;
+    PW.fehler = PW.fehler && PW.ung.size ? PW.fehler : "";
+    pwMeldung();
+    if (PW.nachholen && !PW.drag && !PW.dlg && !PW.menu) { PW.nachholen = false; pwZeichnen(); }
+  } catch(e) { if (!PW.geladen) { PW.fehler = "Die Pinwand ließ sich nicht laden."; pwMeldung(); } }
+}
+function pwMeldung(){
+  const m = pwEl(".pwmeld"); if (!m) return;
+  m.hidden = !PW.fehler;
+  m.innerHTML = PW.fehler ? `${icon("triangle-alert")}<span>${esc(PW.fehler)}</span>${PW.ung.size ? `<button class="btn sm" type="button" data-pw="nochmal">${icon("rotate-cw")}Nochmal speichern</button>` : ""}` : "";
+}
+function pwZeichnen(ersatz){
+  if (!PW.wrap || (PW.drag && PW.drag.aktiv)) return;
+  if (PW.sel && !PW.pins.some(x => x.id === PW.sel)) PW.sel = null;
+  const cv = pwEl(".pwcv");
+  if (!PW.geladen) { cv.innerHTML = ""; pwEl(".pwsz").style.cssText = ""; const v = pwEl(".pwview"); if (!v.querySelector(".pwleer")) v.insertAdjacentHTML("afterbegin", `<p class="pwleer">Wird geladen …</p>`); return; }
+  const leer = pwEl(".pwleer"); if (leer) leer.remove();
+  if (!PW.pins.length) { cv.innerHTML = ""; pwEl(".pwview").insertAdjacentHTML("afterbegin", `<p class="pwleer">Noch keine Karten. Mit „Anpinnen“ die erste Karte setzen.</p>`); pwMass(); pwBarZeichnen(); return; }
+  const G = pwGruppen();
+  cv.innerHTML = G.map(g => `<div class="pwg" data-g="${esc(g)}" style="--c:var(--${pwFarbe(g)})"><h3 data-gz="${esc(g)}" title="Ziehen verschiebt die ganze Gruppe"><i></i>${esc(g)}</h3></div>`).join("") +
+    PW.pins.map(k => `<div class="pwk${PW.ung.has(k.id) ? " ung" : ""}" role="button" tabindex="0" data-id="${esc(k.id)}" data-g="${esc(k.gruppe)}"${PW_FARBEN.includes(k.farbe) ? ` data-f="${k.farbe}"` : ""} data-s="${k.groesse === "S" || k.groesse === "L" ? k.groesse : "M"}" style="left:${+k.x}px;top:${+k.y}px;width:${+k.b || PW_BREITE}px;${+k.h ? `min-height:${+k.h}px;` : ""}--c:var(--${pwFarbe(k.gruppe)})"><b>${k.symbol ? `<span class="pwsy">${esc(k.symbol)}</span>` : ""}${esc(k.titel)}</b>${k.text ? `<em>${esc(k.text)}</em>` : ""}${pwMarke(k.marke)}</div>`).join("");
+  if (!PW.zoom) { const v = pwEl(".pwview"); pwMass(); PW.zoom = Math.max(.5, Math.min(1, Math.floor(((v.clientWidth - 56) / Math.max(300, PW.mx)) * 10) / 10)) || 1; }
+  pwMass(); pwSelMark(); pwBarZeichnen();
+  if (PW.voll && PW.einpassen) { PW.einpassen = false; pwEinpassen(); }   // erst wenn die Karten da sind, passt das Einpassen
+  while (PW.nachPlatz.length) pwPlatzSchaffen(PW.nachPlatz.shift());   // zurückgeholte Karten: bei Überdeckung rücken die anderen beiseite
+}
+/* Rahmen der Gruppen aus den Karten, Größe der Fläche, Zoom */
+function pwMass(){
+  const cv = pwEl(".pwcv"), sz = pwEl(".pwsz"); if (!cv) return;
+  let mx = 0, my = 0;
+  for (const g of cv.querySelectorAll(".pwg")) {
+    const K = [...cv.querySelectorAll(".pwk")].filter(el => el.dataset.g === g.dataset.g); if (!K.length) { g.hidden = true; continue; }
+    let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    for (const el of K) { const x = el.offsetLeft, y = el.offsetTop; x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x + el.offsetWidth); y1 = Math.max(y1, y + el.offsetHeight); }
+    g.hidden = false; g.style.left = (x0 - 16) + "px"; g.style.top = (y0 - 44) + "px"; g.style.width = (x1 - x0 + 32) + "px"; g.style.height = (y1 - y0 + 60) + "px";
+    mx = Math.max(mx, x1 + 16); my = Math.max(my, y1 + 16);
+  }
+  PW.mx = mx; PW.my = my; PW.cb = PW.autoFit ? mx : Math.max(700, mx + 140); PW.ch = PW.autoFit ? my : Math.max(300, my + 120);   // eingepasst (Vollbild): keine Reserve, damit nichts scrollt
+  const s = PW.zoom || 1;
+  cv.style.width = PW.cb + "px"; cv.style.height = PW.ch + "px"; cv.style.transform = `scale(${s})`; cv.style.setProperty("--z", s);
+  sz.style.width = PW.cb * s + "px"; sz.style.height = PW.ch * s + "px";
+  pwEl(".pwpz").textContent = Math.round(s * 100) + " %";
+  pwEl("[data-pw=minus]").disabled = s <= pwZMin() + .0001; pwEl("[data-pw=plus]").disabled = s >= 1.4999;
+  if (PW.sel) pwBarPos();
+}
+const pwZMin = () => PW.voll ? .25 : .5;   // im Vollbild darf die Wand kleiner sein, damit alle Karten ins Bild passen
+function pwZoom(z, mitte = true){
+  const v = pwEl(".pwview"), alt = PW.zoom || 1; z = Math.max(pwZMin(), Math.min(1.5, Math.round(z * 100) / 100)); PW.autoFit = false;
+  const cx = (v.scrollLeft + v.clientWidth / 2) / alt, cy = (v.scrollTop + v.clientHeight / 2) / alt;
+  PW.zoom = z; if (!PW.voll) { try { localStorage.setItem("zentrale-pinwand-zoom-" + PW.pid, String(z)); } catch(e) {} }   // der Zoom des Vollbilds gilt nur dort
+  pwMass();
+  if (mitte) { v.scrollLeft = Math.max(0, cx * z - v.clientWidth / 2); v.scrollTop = Math.max(0, cy * z - v.clientHeight / 2); }
+}
+/* Vollbild: Zoom so wählen, dass die ganze Wand in die Fläche passt (Breite und Höhe), nicht größer als 150 %. Gespeichert wird er nicht. */
+function pwEinpassen(){
+  const v = pwEl(".pwview"); if (!v || !PW.mx || !PW.my) return;
+  const cs = getComputedStyle(v), bw = v.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), bh = v.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+  const z = Math.min(bw / PW.mx, bh / (PW.my + 4));
+  // Am Handy ist das Vollbild die einzige Ansicht: nicht kleiner als 60 %, sonst ist nichts mehr lesbar, die Wand scrollt dann
+  PW.zoom = Math.max(pwMobil() ? .6 : pwZMin(), Math.min(1.5, Math.floor(z * 100) / 100)); PW.autoFit = true;
+  pwMass(); v.scrollLeft = v.scrollTop = 0; PW.sl = PW.st = 0;
+}
+window.addEventListener("resize", () => { if (PW.voll && PW.autoFit && PW.wrap) pwEinpassen(); });
+/* ---------- Ziehen (Pointer Events, Maus und Finger) ---------- */
+function pwDown(e){
+  const gh = e.target.closest && e.target.closest(".pwh"); if (gh) return pwGriffDown(e, gh);
+  if (PW.drag || (e.pointerType === "mouse" && e.button !== 0) || !e.isPrimary) return;
+  const k = e.target.closest(".pwk"), gt = e.target.closest("[data-gz]"), el = k || gt; if (!el) return;
+  const touch = e.pointerType !== "mouse", gruppe = el.dataset.g || el.dataset.gz;
+  const ids = k ? [k.dataset.id] : PW.pins.filter(p => p.gruppe === gruppe).map(p => p.id);
+  const d = PW.drag = {el, art: k ? "karte" : "gruppe", ids, start: new Map(ids.map(i => { const p = PW.pins.find(x => x.id === i); return [i, {x: p.x, y: p.y}]; })),
+    x0: e.clientX, y0: e.clientY, pid: e.pointerId, aktiv: false, bereit: !touch, touch, bewegt: false, timer: 0};
+  if (touch) d.timer = setTimeout(() => { d.bereit = true; el.classList.add("zieh"); try { el.setPointerCapture(d.pid); } catch(x) {} if (navigator.vibrate) navigator.vibrate(12); }, 260);
+  else { try { el.setPointerCapture(e.pointerId); } catch(x) {} }
+  d.hm = ev => pwBewegt(ev); d.hu = ev => pwLos(ev, false); d.hc = ev => pwLos(ev, true);
+  el.addEventListener("pointermove", d.hm); el.addEventListener("pointerup", d.hu); el.addEventListener("pointercancel", d.hc);
+}
+function pwBewegt(e){
+  const d = PW.drag; if (!d || e.pointerId !== d.pid) return;
+  const dx = e.clientX - d.x0, dy = e.clientY - d.y0, dist = Math.hypot(dx, dy);
+  if (dist > 6) d.bewegt = true;
+  if (!d.bereit) { if (dist > 8) { clearTimeout(d.timer); d.abgebrochen = true; } return; }   // Finger bewegt sich vor dem Halten: die Seite scrollt
+  if (!d.aktiv && dist < 4) return;
+  if (d.abgebrochen) return;
+  if (!d.aktiv) { d.aktiv = true; d.el.classList.add("zieh"); }
+  const z = PW.zoom || 1;   // der Zoom wird eingerechnet: Bildschirm-px / Zoom = Wand-px
+  let mx = dx / z, my = dy / z;
+  for (const s of d.start.values()) { mx = Math.max(mx, -s.x); my = Math.max(my, -s.y); mx = Math.min(mx, PW_MAX - s.x); my = Math.min(my, PW_MAX - s.y); }
+  d.mx = Math.round(mx); d.my = Math.round(my);
+  for (const [id, s] of d.start) { const el = [...pwEl(".pwcv").querySelectorAll(".pwk")].find(x => x.dataset.id === id); if (el) { el.style.left = (s.x + d.mx) + "px"; el.style.top = (s.y + d.my) + "px"; } }
+  if (!d.raf) d.raf = requestAnimationFrame(() => { d.raf = 0; pwMass(); });
+}
+function pwLos(e, abbruch){
+  const d = PW.drag; if (!d || e.pointerId !== d.pid) return;
+  clearTimeout(d.timer); d.el.removeEventListener("pointermove", d.hm); d.el.removeEventListener("pointerup", d.hu); d.el.removeEventListener("pointercancel", d.hc);
+  try { d.el.releasePointerCapture(d.pid); } catch(x) {}
+  d.el.classList.remove("zieh"); if (d.raf) cancelAnimationFrame(d.raf);
+  const aktiv = d.aktiv; PW.drag = null;
+  if (aktiv && abbruch) {   // Browser hat die Geste übernommen: alles zurück, nichts speichern
+    for (const [id, s] of d.start) { const el = [...pwEl(".pwcv").querySelectorAll(".pwk")].find(x => x.dataset.id === id); if (el) { el.style.left = s.x + "px"; el.style.top = s.y + "px"; } }
+    pwMass(); pwNachholen(); return;
+  }
+  if (aktiv) { pwSpeichernNeu(d); return; }
+  pwNachholen();
+  if (!abbruch && !d.bewegt && d.art === "karte") pwWaehlen(d.ids[0]);   // Tippen wählt aus; das Kartenfenster öffnet der Doppelklick oder der Stift
+}
+function pwNachholen(){
+  if (pwBeschaeftigt()) return;
+  if (PW.nachholen) { PW.nachholen = false; pwZeichnen(); }
+}
+function pwSpeichernNeu(d){
+  const neu = [];
+  for (const [id, s] of d.start) { const p = PW.pins.find(x => x.id === id); if (!p) continue; p.x = s.x + d.mx; p.y = s.y + d.my; neu.push(p); pwMerke(id, {x: p.x, y: p.y}); }
+  PW.sig = JSON.stringify(PW.pins);
+  pwZeichnen(); pwSpeichern();
+}
+const pwMerke = (id, f) => PW.ung.set(id, Object.assign({}, PW.ung.get(id) || {}, f));   // ungespeicherte Änderungen einer Karte (Position, Gestaltung)
+async function pwSpeichern(){
+  if (PW.speichert || !PW.ung.size) return;
+  const pid = PW.pid, ung = PW.ung, gesendet = new Map([...ung].map(([id, v]) => [id, Object.assign({}, v)]));   // Momentaufnahme dessen, was jetzt wirklich losgeht
+  PW.speichert++;
+  const nurPos = [], einzeln = [];
+  for (const e of gesendet) (Object.keys(e[1]).every(k => k === "x" || k === "y") ? nurPos : einzeln).push(e);
+  const erg = [];   // je Anfrage: [Liste der Karten, Antwort]
+  if (nurPos.length) erg.push([nurPos, await pwApi(`/api/pinwand/${pid}/verschieben`, {pins: nurPos.map(([id, v]) => ({id, x: v.x, y: v.y}))})]);
+  for (const e of einzeln) erg.push([[e], await pwApi(`/api/pinwand/${pid}/pins/${e[0]}`, e[1])]);
+  PW.speichert--; PW.schreibZ++;
+  let fehl = "";
+  for (const [liste, r] of erg) {
+    if (r.ok) { for (const [id, s] of liste) { const a = ung.get(id); if (a && JSON.stringify(a) === JSON.stringify(s)) ung.delete(id); } }   // nur entfernen, was noch genau so in der Warteschlange steht; wurde die Karte inzwischen weiter geändert, bleibt der neue Wert und geht gleich hinterher
+    else if (liste.some(([id]) => ung.has(id))) fehl = r.fehler;
+  }
+  if (pid !== PW.pid) return;   // inzwischen ist eine andere Wand dran: die Warteschlange dieses Projekts bleibt in ungMerk
+  if (!fehl) { PW.fehler = PW.ung.size ? PW.fehler : ""; PW.zeit = 0; }
+  else PW.fehler = `Das Speichern hat nicht geklappt (${fehl}). Die Änderungen bleiben hier sichtbar, orange umrandet, und gehen nicht verloren.`;
+  pwMeldung(); PW.nachholen = true; pwZeichnen(); if (PW.ung.size && !fehl) pwSpeichern(); pwNachholen();
+}
+async function pwApi(pfad, body){
+  if (!KEY) return {ok: false, fehler: "kein Schlüssel, bitte neu anmelden"};
+  try {
+    const r = await fetch(pfad, {method: "POST", headers: {Authorization: "Bearer " + KEY, "Content-Type": "application/json"}, body: JSON.stringify(body)});
+    const j = await r.json().catch(() => ({}));
+    return r.ok ? {ok: true, d: j} : {ok: false, fehler: j.fehler || "Die Zentrale hat abgelehnt (" + r.status + ")"};
+  } catch(e) { return {ok: false, fehler: "Die Zentrale ist nicht erreichbar"}; }
+}
+/* ---------- Klicks auf Knöpfe ---------- */
+function pwKlick(e){
+  const t = e.target.closest("[data-pwt]"); if (t) return pwBarKlick(t);
+  if (PW.menu && !e.target.closest(".pwpop")) pwMenuZu();
+  if (PW.sel && e.target.closest(".pwview") && !e.target.closest(".pwk, [data-gz]")) pwWaehlen(null);   // Tippen auf freie Fläche hebt die Auswahl auf
+  const b = e.target.closest("[data-pw]"); if (!b) return;
+  const a = b.dataset.pw;
+  if (a === "minus") pwZoom((PW.zoom || 1) - .1);
+  else if (a === "plus") pwZoom((PW.zoom || 1) + .1);
+  else if (a === "fit" && PW.voll) pwEinpassen();
+  else if (a === "fit") { const v = pwEl(".pwview"); pwZoom(Math.max(.5, Math.min(1.5, Math.floor(((v.clientWidth - 56) / Math.max(300, PW.mx)) * 10) / 10)), false); v.scrollLeft = v.scrollTop = 0; }
+  else if (a === "neu") pwFormular(null);
+  else if (a === "entf") pwEntfernte();
+  else if (a === "voll") pwVoll(true);
+  else if (a === "fertig") pwVoll(false);
+  else if (a === "nochmal") { PW.fehler = ""; pwMeldung(); pwSpeichern(); }
+}
+/* ---------- Vollbild: .viewer / .vbar wie im Vorbild, dazu requestFullscreen, wo der Browser es erlaubt ---------- */
+function pwVoll(an){
+  const v = $("viewer"), w = PW.wrap;
+  if (an === PW.voll || !w) return;
+  const sl = pwEl(".pwview").scrollLeft, st = pwEl(".pwview").scrollTop;
+  if (an) {
+    if (PW.dlg) pwDlgZu();
+    PW.zoomVorher = PW.zoom; PW.voll = true;
+    w.classList.add("voll"); v.innerHTML = ""; v.append(w); v.classList.add("open"); $("app").inert = true; document.body.classList.add("noscroll");
+    PW.fsAn = false;
+    try { const p = v.requestFullscreen && v.requestFullscreen(); if (p && p.then) p.then(() => { PW.fsAn = !!document.fullscreenElement; if (PW.fsAn && navigator.keyboard && navigator.keyboard.lock) navigator.keyboard.lock(["Escape"]).catch(() => {}); }, () => {}); } catch(x) {}   // Tastatursperre: Esc kommt bei der Pinwand an (erst Auswahl aufheben, dann Vollbild verlassen), wo der Browser es erlaubt
+  } else {
+    PW.voll = false; PW.autoFit = false; if (PW.zoomVorher) PW.zoom = PW.zoomVorher; const fs = PW.fsAn && document.fullscreenElement; PW.fsAn = false;
+    if (fs) { try { document.exitFullscreen().catch(() => {}); } catch(x) {} }
+    try { if (navigator.keyboard && navigator.keyboard.unlock) navigator.keyboard.unlock(); } catch(x) {}
+    w.classList.remove("voll"); v.classList.remove("open"); v.innerHTML = ""; $("app").inert = false; document.body.classList.remove("noscroll");
+    pwWaehlen(null); clearTimeout(PW.toast); clearTimeout(PW.hinT); w.querySelectorAll(".pwtoast, .pwhin").forEach(t => t.remove());
+    const z = PW.zurueck; PW.zurueck = null; if (z) { openSheet(z); laden(); }   // neu laden: Die erste Karte setzt am Projekt das Feld „pinwand“
+  }
+  const nv = pwEl(".pwview"); nv.scrollLeft = sl; nv.scrollTop = st; PW.sl = sl; PW.st = st;
+  pwMass();
+  if (an) pwEinpassen();   // beim Öffnen sich selbst einpassen
+}
+document.addEventListener("fullscreenchange", () => { if (PW.voll && PW.fsAn && !document.fullscreenElement) pwVoll(false); });
+window.addEventListener("hashchange", () => { if (PW.dlg) pwDlgZu(); if (PW.voll) { PW.zurueck = null; pwVoll(false); } });
+window.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  if (PW.dlg) { e.preventDefault(); e.stopPropagation(); pwDlgZu(); }
+  else if (PW.menu) { e.preventDefault(); e.stopPropagation(); pwMenuZu(); }   // Reihenfolge: Fenster, Menü, Auswahl, erst dann das Vollbild
+  else if (PW.sel && pwSichtbarAn() && !SHEET) { e.preventDefault(); e.stopPropagation(); pwWaehlen(null); }
+  else if (PW.voll) { e.preventDefault(); e.stopPropagation(); pwVoll(false); }
+}, true);
+/* ---------- Dialoge: Karte lesen, bearbeiten, entfernen, anpinnen ---------- */
+function pwDlgOffnen(html){
+  pwDlgZu(true);
+  const d = document.createElement("div"); d.className = "pwdlg"; d.innerHTML = `<div class="pwbox" role="dialog" aria-modal="true" aria-label="Pinwand">${html}</div>`;
+  d.addEventListener("pointerdown", e => { if (e.target === d) pwDlgZu(); });
+  d.addEventListener("click", pwDlgKlick); d.addEventListener("submit", pwDlgSenden);
+  (PW.voll ? $("viewer") : document.body).append(d); PW.dlg = d;
+  const f = d.querySelector("[autofocus], input, textarea, button"); if (f) setTimeout(() => f.focus({preventScroll: true}), 30);
+  return d;
+}
+function pwDlgZu(still){
+  const d = PW.dlg; if (!d) return;
+  PW.dlg = null; d.remove();
+  if (!still) { const k = PW.vorher; if (k && k.isConnected && k.focus) k.focus({preventScroll: true}); PW.nachholen = true; pwNachholen(); if (!pwBeschaeftigt()) { pwZeichnen(); } }
+}
+function pwKarte(id){
+  const k = PW.pins.find(x => x.id === id); if (!k) return;
+  PW.vorher = document.activeElement;
+  pwDlgOffnen(`<h3>${esc(k.titel)}</h3>${k.text ? `<p class="pwtext">${esc(k.text)}</p>` : `<p class="pwmeta">Kein Text.</p>`}
+    <div class="pwchips"><span class="pwchip" style="color:var(--${pwFarbe(k.gruppe)})">${esc(k.gruppe)}</span>${pwMarke(k.marke)}</div>
+    <p class="pwmeta">Angepinnt von ${esc(posWer(k.von))}, ${esc(ago(k.erstellt))}${k.geaendert && k.geaendert !== k.erstellt ? `, geändert ${esc(ago(k.geaendert))}` : ""}.</p>
+    <p class="pwfehler" role="alert" hidden></p>
+    <div class="pwakt" data-pwk="${esc(k.id)}"><button class="btn danger" type="button" data-pwd="weg">${icon("trash-2")}Entfernen</button><span class="grow"></span><button class="btn" type="button" data-pwd="aendern">${icon("pencil")}Bearbeiten</button><button class="btn pri" type="button" data-pwd="zu" autofocus>Schließen</button></div>`);
+}
+function pwFormular(id, vor){
+  const k = id ? PW.pins.find(x => x.id === id) : null, G = pwGruppen(), gv = vor ? (vor.gruppe || "") : G[0] || "";
+  PW.vorher = document.activeElement;
+  const chips = (L, ziel, cur) => `<div class="pwchips">${L.map(x => `<button class="pwchip${x === cur ? " on" : ""}" type="button" data-pwc="${ziel}" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div>`;
+  pwDlgOffnen(`<form id="pwform" data-id="${esc(k ? k.id : "")}"${vor ? ` data-x="${+vor.x}" data-y="${+vor.y}"` : ""} novalidate><h3 style="margin-bottom:12px">${k ? "Karte bearbeiten" : "Karte anpinnen"}</h3>
+    <label>Titel<input class="inp" name="titel" maxlength="120" value="${esc(k ? k.titel : "")}" autocomplete="off" autofocus required></label>
+    <label style="margin-top:10px">Text (optional)<textarea class="inp" name="text" maxlength="2000">${esc(k ? k.text : "")}</textarea></label>
+    <label style="margin-top:10px">Gruppe<input class="inp" name="gruppe" maxlength="60" value="${esc(k ? k.gruppe : gv)}" autocomplete="off" placeholder="vorhandene wählen oder neue eingeben"></label>${G.length ? chips(G, "gruppe", k ? k.gruppe : gv) : ""}
+    <label style="margin-top:10px">Marke (optional)<input class="inp" name="marke" maxlength="30" value="${esc(k ? k.marke : "")}" autocomplete="off" placeholder="kurzes Etikett"></label>${chips(PW_MARKEN_VORSCHLAG, "marke", k ? k.marke : "")}
+    <p class="pwfehler" role="alert" hidden style="margin-top:10px"></p>
+    <div class="pwakt" style="margin-top:12px"><button class="btn" type="button" data-pwd="zu">Abbrechen</button><button class="btn pri" type="submit">${k ? "Speichern" : "Anpinnen"}</button></div></form>`);
+}
+function pwFehlerZeigen(t){ const p = PW.dlg && PW.dlg.querySelector(".pwfehler"); if (p) { p.hidden = !t; p.textContent = t || ""; } }
+async function pwDlgKlick(e){
+  const c = e.target.closest("[data-pwc]");
+  if (c) { const f = PW.dlg.querySelector("#pwform"), i = f.elements[c.dataset.pwc]; i.value = i.value === c.dataset.v && c.dataset.pwc === "marke" ? "" : c.dataset.v; PW.dlg.querySelectorAll(`[data-pwc="${c.dataset.pwc}"]`).forEach(x => x.classList.toggle("on", x.dataset.v === i.value)); return; }
+  const b = e.target.closest("[data-pwd]"); if (!b) return;
+  const a = b.dataset.pwd, id = (b.closest("[data-pwk]") || {dataset: {}}).dataset.pwk;
+  if (a === "zu") pwDlgZu();
+  else if (a === "aendern") { const k = id; pwDlgZu(true); pwFormular(k); }
+  else if (a === "weg") {
+    b.disabled = true;
+    const r = await pwEntfernen(id);
+    if (!r.ok) { b.disabled = false; pwFehlerZeigen("Entfernen hat nicht geklappt: " + r.fehler); return; }
+    pwDlgZu();
+  }
+  else if (a === "zurueck") {
+    b.disabled = true;
+    const pid = PW.pid, r = await pwApi(`/api/pinwand/${pid}/pins/${id}/zurueck`, {});
+    if (!r.ok) { b.disabled = false; pwFehlerZeigen("Zurückholen hat nicht geklappt: " + r.fehler); return; }
+    if (pid !== PW.pid) return;   // Wand inzwischen gewechselt: nichts an der angezeigten Wand ändern
+    PW.pins = PW.pins.filter(x => x.id !== id).concat([pwZurueckUng(pid, r.d)]); if (PW.ung.size) pwSpeichern(); PW.sig = JSON.stringify(PW.pins); PW.schreibZ++; PW.zeit = 0; PW.nachholen = true; PW.nachPlatz.push(id);
+    const z = b.closest(".pwrow"), l = z.parentElement; z.remove(); pwFehlerZeigen("");
+    if (!l.querySelector(".pwrow")) l.innerHTML = `<p class="pwmeta">Keine entfernten Karten.</p>`;
+  }
+}
+async function pwDlgSenden(e){
+  e.preventDefault(); const f = e.target; if (f.id !== "pwform") return;
+  const titel = f.elements.titel.value.trim(); if (!titel) { pwFehlerZeigen("Der Titel fehlt."); f.elements.titel.focus(); return; }
+  const k = f.dataset.id ? PW.pins.find(x => x.id === f.dataset.id) : null;
+  const b = {titel, text: f.elements.text.value.trim(), gruppe: f.elements.gruppe.value.trim() || "Ohne Gruppe", marke: f.elements.marke.value.trim()};
+  const knopf = f.querySelector("[type=submit]"); knopf.disabled = true; pwFehlerZeigen("");
+  if (!k && f.dataset.x) { b.x = Math.max(0, Math.min(PW_MAX - PW_BREITE, +f.dataset.x)); b.y = Math.max(0, Math.min(PW_MAX, +f.dataset.y)); }   // Doppelklick auf eine freie Stelle: dort entsteht die Karte
+  else if (!k) { const p = pwPlatz(b.gruppe, PW_BREITE, 70 + 18 * Math.ceil(b.text.length / 28) + (b.marke ? 20 : 0)); if (p) { b.x = p.x; b.y = p.y; } }
+  const r = k ? await pwApi(`/api/pinwand/${PW.pid}/pins/${k.id}`, b) : await pwApi(`/api/pinwand/${PW.pid}/pins`, b);
+  if (!r.ok) { knopf.disabled = false; pwFehlerZeigen("Das hat nicht geklappt: " + r.fehler); return; }
+  PW.schreibZ++; PW.zeit = 0;
+  if (k) { Object.assign(k, r.d); } else PW.pins.push(r.d);
+  PW.sig = JSON.stringify(PW.pins);
+  pwDlgZu(true); PW.dlg = null; PW.nachholen = false; pwZeichnen();
+  if (!k) await pwSichtbar(r.d.id);
+  pwNachholen();
+}
+/* Freier Platz: zuerst in der Gruppe, sonst darunter; nie auf einer Karte und nicht in den Rahmen anderer Gruppen. Gemessen wird am echten Bild. */
+function pwKarten(){ return [...pwEl(".pwcv").querySelectorAll(".pwk")].map(el => ({id: el.dataset.id, g: el.dataset.g, x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight})); }
+function pwPlatz(gruppe, b, h){
+  if (!PW.wrap || !PW.wrap.isConnected) return null;
+  const K = pwKarten(), eig = K.filter(k => k.g === gruppe), fr = K.filter(k => k.g !== gruppe), L = PW_LUFT;
+  const rahmen = {}; for (const k of fr) { const r = rahmen[k.g] = rahmen[k.g] || [1e9, 1e9, -1e9, -1e9]; r[0] = Math.min(r[0], k.x - 18); r[1] = Math.min(r[1], k.y - 46); r[2] = Math.max(r[2], k.x + k.w + 18); r[3] = Math.max(r[3], k.y + k.h + 18); }
+  const R = Object.values(rahmen), schnitt = (a, c, luft) => a[0] < c[2] + luft && c[0] < a[2] + luft && a[1] < c[3] + luft && c[1] < a[3] + luft;
+  const frei = (x, y) => { const r = [x, y, x + b, y + h]; return !K.some(k => schnitt(r, [k.x, k.y, k.x + k.w, k.y + k.h], L)) && !R.some(a => schnitt(r, a, 0)); };
+  if (!eig.length) { const unten = Math.max(0, ...K.map(k => k.y + k.h)); return {x: 24, y: Math.min(K.length ? unten + 70 : 46, PW_MAX)}; }
+  const x0 = Math.min(...eig.map(k => k.x)), y0 = Math.min(...eig.map(k => k.y)), x1 = Math.max(...eig.map(k => k.x + k.w)), y1 = Math.max(...eig.map(k => k.y + k.h));
+  for (let y = y0; y <= y1; y += 10) for (let x = x0; x <= Math.max(x0, x1 - b); x += 10) if (frei(x, y)) return {x, y};
+  let y = y1 + L; while (y < PW_MAX && !frei(x0, y)) y += 10;
+  return {x: x0, y: Math.min(y, PW_MAX)};
+}
+/* Nach dem Anpinnen: nachmessen (die Höhe war nur geschätzt), nötigenfalls nach unten schieben, dann ins Bild holen */
+async function pwSichtbar(id){
+  const el = [...pwEl(".pwcv").querySelectorAll(".pwk")].find(x => x.dataset.id === id), p = PW.pins.find(x => x.id === id); if (!el || !p) return;
+  for (let i = 0; i < 30; i++) {
+    const r = {x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight};
+    const T = pwKarten().filter(k => k.id !== id && r.x < k.x + k.w + 8 && k.x < r.x + r.w + 8 && r.y < k.y + k.h + 8 && k.y < r.y + r.h + 8);
+    if (!T.length) break;
+    el.style.top = Math.min(PW_MAX, Math.max(...T.map(k => k.y + k.h)) + PW_LUFT) + "px";
+  }
+  const y = parseInt(el.style.top, 10);
+  if (y !== p.y) { p.y = y; pwMerke(id, {x: p.x, y}); PW.sig = JSON.stringify(PW.pins); pwMass(); pwSpeichern(); }
+  pwMass();
+  const v = pwEl(".pwview"), z = PW.zoom || 1, ev = el.getBoundingClientRect(), vv = v.getBoundingClientRect();
+  if (ev.top < vv.top || ev.bottom > vv.bottom || ev.left < vv.left || ev.right > vv.right) v.scrollTo({left: Math.max(0, p.x * z - v.clientWidth / 2 + el.offsetWidth * z / 2), top: Math.max(0, y * z - v.clientHeight / 3), behavior: "smooth"});
+  el.classList.add("zieh"); setTimeout(() => el.classList.remove("zieh"), 900);
+}
+/* ---------- Auswahl, schwebende Leiste, Gestalten ---------- */
+const pwKarteEl = id => [...pwEl(".pwcv").querySelectorAll(".pwk")].find(x => x.dataset.id === id);
+function pwSelMark(){
+  if (!PW.wrap) return;
+  for (const el of pwEl(".pwcv").querySelectorAll(".pwk")) {
+    const an = el.dataset.id === PW.sel; el.classList.toggle("sel", an); el.setAttribute("aria-pressed", an ? "true" : "false");
+    const h = el.querySelector(".pwh");
+    if (an && !h) el.insertAdjacentHTML("beforeend", `<span class="pwh" role="presentation" title="Größe ziehen"></span>`); else if (!an && h) h.remove();
+  }
+}
+function pwWaehlen(id){
+  if ((PW.sel || null) === (id || null)) { if (id) pwBarPos(); return; }
+  PW.sel = id || null; PW.menu = null; pwSelMark(); pwBarZeichnen();
+  if (id && pwMobil()) { const el = pwKarteEl(id); if (el) el.scrollIntoView({block: "nearest", inline: "nearest"}); }
+  pwNachholen();
+}
+function pwBarZeichnen(){
+  const bar = PW.wrap && pwEl(".pwtb"); if (!bar) return;
+  const k = PW.sel && PW.pins.find(x => x.id === PW.sel);
+  if (!k) { bar.hidden = true; bar.innerHTML = ""; PW.barFuer = null; PW.menu = null; PW.wrap.classList.remove("hatleiste"); return; }
+  if (PW.barFuer !== k.id || !bar.firstChild) {
+    PW.barFuer = k.id; PW.menu = null;
+    bar.innerHTML = `<div class="pwdots" role="group" aria-label="Farbe">${["", ...PW_FARBEN].map(f => `<button type="button" class="pwdt" data-pwt="farbe" data-v="${f}" aria-label="${f ? PW_FARBNAME[f] : "Standard"}" title="${f ? PW_FARBNAME[f] : "Standard"}"${f ? ` style="background:${PW_PUNKT[f]}"` : ""}></button>`).join("")}</div><i class="pwsep"></i>
+      <div class="pwseg" role="group" aria-label="Größe">${["S", "M", "L"].map(g => `<button type="button" data-pwt="gr" data-v="${g}" aria-label="Größe ${g}">${g}</button>`).join("")}</div><i class="pwsep"></i>
+      <button type="button" class="pwic sym" data-pwt="sym" aria-label="Symbol" title="Symbol"></button>
+      <button type="button" class="pwic" data-pwt="edit" aria-label="Karte öffnen" title="Öffnen und bearbeiten">${icon("pencil")}</button>
+      <button type="button" class="pwic" data-pwt="dup" aria-label="Duplizieren" title="Duplizieren">${icon("copy")}</button>
+      <button type="button" class="pwic weg" data-pwt="weg" aria-label="Entfernen" title="Entfernen">${icon("trash-2")}</button>
+      <div class="pwpop" hidden role="dialog" aria-label="Symbol wählen"><div class="pwsyg">${PW_SYMBOLE.map(x => `<button type="button" data-pwt="sym-set" data-v="${esc(x)}" aria-label="Symbol ${esc(x)}">${esc(x)}</button>`).join("")}</div>
+        <div class="pwsyr"><button type="button" class="btn sm" data-pwt="sym-set" data-v="">Kein</button><input class="inp pwsyin" maxlength="16" placeholder="Eigenes Emoji" aria-label="Eigenes Emoji" autocomplete="off"><button type="button" class="btn sm pri" data-pwt="sym-eigen">OK</button></div></div>`;
+  }
+  const f = PW_FARBEN.includes(k.farbe) ? k.farbe : "", g = k.groesse === "S" || k.groesse === "L" ? k.groesse : "M";
+  for (const b of bar.querySelectorAll('[data-pwt=farbe]')) b.classList.toggle("on", b.dataset.v === f);
+  for (const b of bar.querySelectorAll('[data-pwt=gr]')) b.classList.toggle("on", b.dataset.v === g);
+  const sy = bar.querySelector('[data-pwt=sym]'); sy.innerHTML = k.symbol ? esc(k.symbol) : icon("smile");
+  bar.querySelector(".pwpop").hidden = PW.menu !== "sym";
+  bar.hidden = false; PW.wrap.classList.add("hatleiste"); pwBarPos();
+}
+/* Größe bleibt bei jedem Zoom (die Leiste liegt außerhalb der skalierten Wand, fest am Bildschirm). Über der Karte; verdeckt sie dort einen Gruppentitel
+   oder ragt aus dem sichtbaren Bereich, steht sie unter der Karte. Am Handy fest am unteren Rand. */
+function pwBarPos(){
+  const bar = PW.wrap && pwEl(".pwtb"); if (!bar || bar.hidden) return;
+  const el = PW.sel && pwKarteEl(PW.sel);
+  if (!el) { bar.style.visibility = "hidden"; return; }
+  if (pwMobil()) { bar.dataset.pos = "mobil"; bar.style.left = bar.style.top = ""; bar.style.visibility = ""; return; }
+  const vr = pwEl(".pwview").getBoundingClientRect(), V = {l: Math.max(vr.left, 0), t: Math.max(vr.top, 0), r: Math.min(vr.right, innerWidth), b: Math.min(vr.bottom, innerHeight)};
+  if (V.r - V.l < 60 || V.b - V.t < 60) { bar.style.visibility = "hidden"; return; }
+  bar.style.visibility = "";
+  const c = el.getBoundingClientRect(), bw = bar.offsetWidth, bh = bar.offsetHeight, M = 6, gap = 10;
+  const ts = [...pwEl(".pwcv").querySelectorAll("[data-gz]")].map(h => h.getBoundingClientRect()).filter(r => r.width > 0);
+  const left = Math.max(V.l + M, Math.min(c.left + c.width / 2 - bw / 2, V.r - bw - M));
+  const trifft = t => ts.some(r => left < r.right && r.left < left + bw && t < r.bottom && r.top < t + bh);
+  const innen = t => t >= V.t + M && t + bh <= V.b - M, klemm = t => Math.max(V.t + M, Math.min(t, V.b - bh - M));
+  const oben = c.top - bh - gap, unten = c.bottom + gap;
+  let top, pos;
+  if (innen(oben) && !trifft(oben)) { top = oben; pos = "ueber"; }
+  else if (innen(unten) && !trifft(unten)) { top = unten; pos = "unter"; }
+  else {   // Notlösung: im sichtbaren Bereich bleiben, möglichst ohne Titel zu verdecken
+    const K = [[oben, "ueber"], [unten, "unter"], [V.t + M, "ueber"], [V.b - bh - M, "unter"]].map(([t, p]) => [klemm(t), p]);
+    [top, pos] = K.find(([t]) => !trifft(t)) || K[0];
+  }
+  bar.dataset.pos = pos; bar.style.left = Math.round(left) + "px"; bar.style.top = Math.round(top) + "px";
+}
+let pwBarRaf = 0;
+function pwBarLater(){ if (PW.sel && !pwBarRaf) pwBarRaf = requestAnimationFrame(() => { pwBarRaf = 0; pwBarPos(); }); }
+window.addEventListener("scroll", pwBarLater, true); window.addEventListener("resize", pwBarLater);
+function pwMenuZu(){ if (!PW.menu) return; PW.menu = null; const p = PW.wrap && pwEl(".pwpop"); if (p) p.hidden = true; pwNachholen(); }
+async function pwBarKlick(t){
+  const a = t.dataset.pwt, v = t.dataset.v, id = PW.sel;
+  if (a === "rueck") return pwRueckgaengig(t.dataset.id, t.dataset.pid);
+  if (!id) return;
+  if (a === "farbe") pwAendere(id, {farbe: v});
+  else if (a === "gr") pwAendere(id, {groesse: v, b: PW_GROESSE[v], h: null});
+  else if (a === "sym") { PW.menu = PW.menu ? null : "sym"; pwEl(".pwpop").hidden = PW.menu !== "sym"; if (PW.menu) { const i = pwEl(".pwsyin"), p = pwEl(".pwpop"); i.value = ""; p.classList.remove("um", "um2"); const r = p.getBoundingClientRect(); if (r.top < 0) p.classList.add("um"); else if (r.bottom > innerHeight) p.classList.add("um2"); } else pwNachholen(); }
+  else if (a === "sym-set") { pwMenuZu(); pwAendere(id, {symbol: v}); }
+  else if (a === "sym-eigen") pwSymbolEigen();
+  else if (a === "edit") pwKarte(id);
+  else if (a === "dup") pwDuplizieren(id);
+  else if (a === "weg") pwEntfernen(id);
+}
+function pwSymbolEigen(){
+  const i = PW.wrap && pwEl(".pwsyin"), id = PW.sel; if (!i || !id) return;
+  const t = i.value.trim(); if (!t) return;
+  const erst = window.Intl && Intl.Segmenter ? [...new Intl.Segmenter(undefined, {granularity: "grapheme"}).segment(t)][0].segment : Array.from(t)[0];
+  pwMenuZu(); pwAendere(id, {symbol: erst});
+}
+/* Eine Gestaltung ändern: sofort sichtbar, dann über die Warteschlange sichern (bei Fehler bleibt sie orange und lässt sich erneut speichern) */
+function pwAendere(id, f){
+  const p = PW.pins.find(x => x.id === id); if (!p) return;
+  const e0 = pwKarteEl(id), b0 = e0 ? e0.offsetWidth : 0, h0 = e0 ? e0.offsetHeight : 0;
+  Object.assign(p, f); pwMerke(id, f); PW.sig = JSON.stringify(PW.pins);
+  pwZeichnen();
+  const e1 = pwKarteEl(id);
+  if (e1 && (e1.offsetWidth > b0 || e1.offsetHeight > h0)) pwPlatzSchaffen(id);   // nur wenn die Karte wirklich größer wurde (Farbe und Symbol schieben nichts)
+  pwSpeichern();
+}
+/* Kurzer Hinweis (nicht die Rückgängig-Meldung) */
+function pwHinweis(text){
+  if (!PW.wrap) return; clearTimeout(PW.hinT); const alt = PW.wrap.querySelector(".pwhin"); if (alt) alt.remove();
+  PW.wrap.insertAdjacentHTML("beforeend", `<div class="pwhin" role="status">${esc(text)}</div>`);
+  PW.hinT = setTimeout(() => { const t = PW.wrap && PW.wrap.querySelector(".pwhin"); if (t) t.remove(); }, 6000);
+}
+/* Platz schaffen: Überdeckt eine Karte (nach Vergrößern, Zurückholen, Duplizieren) andere, rücken diese mit kleinster Verschiebung beiseite, bis nichts mehr überdeckt ist. */
+function pwPlatzSchaffen(id, pid = PW.pid){
+  if (pid !== PW.pid || !PW.wrap || !PW.wrap.isConnected || !pwEl(".pwcv")) return 0;
+  const K = pwKarten(), L = PW_LUFT, bewegt = new Set(), schlange = [id];
+  const schnitt = (a, o) => a.x < o.x + o.w + L && o.x < a.x + a.w + L && a.y < o.y + o.h + L && o.y < a.y + a.h + L;
+  for (let n = 0; n < 600 && schlange.length; n++) {   // begrenzt: es endet immer
+    const aid = schlange.shift(), a = K.find(k => k.id === aid); if (!a) continue;
+    for (const o of K) {
+      if (o.id === a.id || !schnitt(a, o)) continue;
+      const dx = a.x + a.w + L - o.x, dy = a.y + a.h + L - o.y;
+      if ((dy <= dx || o.x + dx + o.w > PW_MAX) && o.y + dy <= PW_MAX) o.y += dy; else if (o.x + dx + o.w <= PW_MAX) o.x += dx; else continue;
+      bewegt.add(o.id); schlange.push(o.id);
+    }
+  }
+  for (const oid of bewegt) {
+    const o = K.find(k => k.id === oid), p = PW.pins.find(x => x.id === oid), el = pwKarteEl(oid); if (!p || !el) continue;
+    p.x = o.x; p.y = o.y; el.style.left = o.x + "px"; el.style.top = o.y + "px"; pwMerke(oid, {x: o.x, y: o.y});
+  }
+  if (bewegt.size) { PW.sig = JSON.stringify(PW.pins); pwMass(); pwSpeichern(); }
+  const T = [id, ...bewegt].map(i => K.find(k => k.id === i)).filter(Boolean);   // blieb trotz Grenze oder Rand eine Überdeckung?
+  if (T.some(a => K.some(o => o.id !== a.id && schnitt(a, o) && a.x < o.x + o.w && o.x < a.x + a.w && a.y < o.y + o.h && o.y < a.y + a.h))) pwHinweis("Hier ist kein Platz mehr: Karten überdecken sich noch. Bitte eine Karte verschieben.");
+  return bewegt.size;
+}
+/* Griff unten rechts: Breite und Mindesthöhe frei ziehen (Maus und Finger, Zoom eingerechnet) */
+function pwGriffDown(e, gh){
+  if (PW.drag || (e.pointerType === "mouse" && e.button !== 0) || !e.isPrimary) return;
+  const el = gh.closest(".pwk"), p = el && PW.pins.find(x => x.id === el.dataset.id); if (!p) return;
+  e.preventDefault(); e.stopPropagation();
+  const d = PW.drag = {el: gh, art: "griff", id: p.id, kart: el, pid: e.pointerId, aktiv: true, x0: e.clientX, y0: e.clientY, b0: el.offsetWidth, h0: el.offsetHeight, bewegt: false, nb: el.offsetWidth, nh: p.h || null};
+  try { gh.setPointerCapture(e.pointerId); } catch(x) {}
+  d.hm = ev => pwGriffBewegt(ev); d.hu = ev => pwGriffLos(ev, false); d.hc = ev => pwGriffLos(ev, true);
+  gh.addEventListener("pointermove", d.hm); gh.addEventListener("pointerup", d.hu); gh.addEventListener("pointercancel", d.hc);
+}
+function pwGriffBewegt(e){
+  const d = PW.drag; if (!d || d.art !== "griff" || e.pointerId !== d.pid) return;
+  const z = PW.zoom || 1, dx = (e.clientX - d.x0) / z, dy = (e.clientY - d.y0) / z;
+  if (Math.hypot(dx, dy) * z > 3) d.bewegt = true;
+  d.nb = Math.max(PW_B_MIN, Math.min(PW_B_MAX, Math.round(d.b0 + dx)));
+  d.kart.style.width = d.nb + "px";
+  if (Math.abs(dy) >= 3) { d.nh = Math.max(PW_H_MIN, Math.min(PW_H_MAX, Math.round(d.h0 + dy))); d.kart.style.minHeight = d.nh + "px"; }
+  if (!d.raf) d.raf = requestAnimationFrame(() => { d.raf = 0; pwMass(); });
+}
+function pwGriffLos(e, abbruch){
+  const d = PW.drag; if (!d || d.art !== "griff" || e.pointerId !== d.pid) return;
+  d.el.removeEventListener("pointermove", d.hm); d.el.removeEventListener("pointerup", d.hu); d.el.removeEventListener("pointercancel", d.hc);
+  try { d.el.releasePointerCapture(d.pid); } catch(x) {}
+  if (d.raf) cancelAnimationFrame(d.raf);
+  PW.drag = null;
+  const p = PW.pins.find(x => x.id === d.id);
+  if (!p || abbruch || !d.bewegt) { if (p && d.kart.isConnected) { d.kart.style.width = (+p.b || PW_BREITE) + "px"; d.kart.style.minHeight = +p.h ? p.h + "px" : ""; } pwMass(); pwNachholen(); return; }
+  const f = {b: d.nb}; if (d.nh !== (p.h || null)) f.h = d.nh;
+  const gr = d.nb > d.b0 || (f.h && f.h > d.h0);
+  Object.assign(p, f); pwMerke(d.id, f); PW.sig = JSON.stringify(PW.pins);
+  pwZeichnen(); if (gr) pwPlatzSchaffen(d.id); pwSpeichern();
+}
+/* ---------- Duplizieren, Entfernen, Rückgängig, Entfernte Karten ---------- */
+function pwFremdeRahmen(gruppe){ return [...pwEl(".pwcv").querySelectorAll(".pwg")].filter(g => !g.hidden && g.dataset.g !== gruppe).map(g => [g.offsetLeft, g.offsetTop, g.offsetLeft + g.offsetWidth, g.offsetTop + g.offsetHeight]); }
+function pwNah(k, b, h){   // freier Platz daneben oder darunter, nie auf einer Karte und nicht im Rahmen einer anderen Gruppe
+  const K = pwKarten(), R = pwFremdeRahmen(k.gruppe), L = PW_LUFT, q = K.find(x => x.id === k.id) || {x: k.x, y: k.y, w: b, h};
+  const frei = (x, y) => x >= 0 && y >= 0 && x + b <= PW_MAX && y + h <= PW_MAX && !K.some(o => x < o.x + o.w + L && o.x < x + b + L && y < o.y + o.h + L && o.y < y + h + L) && !R.some(a => x < a[2] && a[0] < x + b && y < a[3] && a[1] < y + h);
+  for (const [x, y] of [[q.x + q.w + L, q.y], [q.x, q.y + q.h + L]]) if (frei(x, y)) return {x, y};
+  let best = null, bd = 1e12;
+  for (let dy = -500; dy <= 700; dy += 10) for (let dx = -500; dx <= 700; dx += 10) {
+    const x = q.x + dx, y = q.y + dy; if (!frei(x, y)) continue;
+    const dist = dx * dx + dy * dy + (dx < -5 || dy < -5 ? 90000 : 0);
+    if (dist < bd) { bd = dist; best = {x, y}; }
+  }
+  return best || pwPlatz(k.gruppe, b, h);
+}
+async function pwDuplizieren(id){
+  const k = PW.pins.find(x => x.id === id), el = k && pwKarteEl(id); if (!k || !el) return;
+  const pid = PW.pid, b = +k.b || PW_BREITE, p = pwNah(k, b, el.offsetHeight);
+  const body = {titel: k.titel, text: k.text || "", gruppe: k.gruppe, marke: k.marke || "", b};
+  for (const n of ["farbe", "groesse", "symbol", "h"]) if (k[n]) body[n] = k[n];
+  if (p) { body.x = Math.max(0, p.x); body.y = Math.max(0, p.y); }
+  const r = await pwApi(`/api/pinwand/${pid}/pins`, body);
+  if (pid !== PW.pid) return;   // inzwischen ist eine andere Wand dran: die Kopie gehört zu ihrem Projekt und erscheint dort beim nächsten Laden
+  if (!r.ok) { PW.fehler = "Duplizieren hat nicht geklappt: " + r.fehler; pwMeldung(); return; }
+  PW.pins.push(r.d); PW.sig = JSON.stringify(PW.pins); PW.schreibZ++; PW.zeit = 0; PW.sel = r.d.id; PW.barFuer = null;
+  pwZeichnen(); await pwSichtbar(r.d.id); pwPlatzSchaffen(r.d.id, pid);
+}
+/* Ungespeicherte Änderungen eines Projekts: die der angezeigten Wand oder die gemerkten einer anderen */
+const pwUngFuer = pid => pid === PW.pid ? PW.ung : (PW.ungMerk.get(pid) || PW.ungMerk.set(pid, new Map()).get(pid));
+async function pwEntfernen(id){
+  const pid = PW.pid;
+  if (PW.ung.has(id)) {   // ausstehende Änderungen vor dem Entfernen speichern (läuft gerade ein Speichern: erst abwarten)
+    for (let i = 0; i < 100 && PW.speichert; i++) await new Promise(r => setTimeout(r, 50));
+    if (pid === PW.pid) await pwSpeichern();
+  }
+  const r = await pwApi(`/api/pinwand/${pid}/pins/${id}`, {entfernen: true});
+  if (!r.ok) { if (pid === PW.pid && !PW.dlg) { PW.fehler = "Entfernen hat nicht geklappt: " + r.fehler; pwMeldung(); } return r; }
+  const wand = pwUngFuer(pid), rest = wand.get(id); wand.delete(id);
+  if (rest) PW.ungWeg.set(pid + "/" + id, rest);   // ließ sich nicht speichern: fürs Zurückholen aufheben, nicht verwerfen
+  if (pid !== PW.pid) return r;   // Wand inzwischen gewechselt: die angezeigte Wand bleibt unberührt
+  PW.pins = PW.pins.filter(x => x.id !== id); if (PW.sel === id) PW.sel = null; PW.sig = JSON.stringify(PW.pins); PW.schreibZ++; PW.zeit = 0;
+  if (!PW.ung.size) PW.fehler = "";
+  pwMeldung(); pwZeichnen(); pwToast(rest ? "Karte entfernt (letzte Änderung nicht gespeichert)" : "Karte entfernt", id, pid);
+  return r;
+}
+function pwToast(text, id, pid){
+  clearTimeout(PW.toast); const alt = PW.wrap.querySelector(".pwtoast"); if (alt) alt.remove();
+  PW.wrap.insertAdjacentHTML("beforeend", `<div class="pwtoast" role="status"><span>${esc(text)}</span><span style="opacity:.4">·</span><button type="button" data-pwt="rueck" data-id="${esc(id)}" data-pid="${esc(pid)}">Rückgängig</button></div>`);
+  PW.toast = setTimeout(() => { const t = PW.wrap && PW.wrap.querySelector(".pwtoast"); if (t) t.remove(); }, 8000);
+}
+/* Eine Karte kommt zurück: ungesicherte Änderungen von vorher gehen wieder in die Warteschlange ihres Projekts */
+function pwZurueckUng(pid, k){
+  const rest = PW.ungWeg.get(pid + "/" + k.id); if (!rest) return k;
+  PW.ungWeg.delete(pid + "/" + k.id);
+  const m = pwUngFuer(pid); m.set(k.id, Object.assign({}, m.get(k.id) || {}, rest));
+  return Object.assign({}, k, rest);
+}
+async function pwRueckgaengig(id, pid){
+  pid = pid || PW.pid;
+  clearTimeout(PW.toast); const t = PW.wrap.querySelector(".pwtoast"); if (t) t.remove();
+  if (pid !== PW.pid) return;
+  const r = await pwApi(`/api/pinwand/${pid}/pins/${id}/zurueck`, {});
+  if (pid !== PW.pid) return;   // Wand gewechselt: die Karte ist auf dem Server zurück, die fremde Wand bleibt unberührt
+  if (!r.ok) { PW.fehler = "Zurückholen hat nicht geklappt: " + r.fehler; pwMeldung(); return; }
+  const k = pwZurueckUng(pid, r.d);
+  PW.pins = PW.pins.filter(x => x.id !== id).concat([k]); PW.sig = JSON.stringify(PW.pins); PW.schreibZ++; PW.zeit = 0; PW.sel = id; PW.barFuer = null; PW.nachPlatz.push(id);
+  pwZeichnen(); if (PW.ung.size) pwSpeichern();
+}
+async function pwEntfernte(){
+  PW.vorher = document.activeElement;
+  const d = pwDlgOffnen(`<h3>Entfernte Karten</h3><div class="pwliste"><p class="pwmeta">Wird geladen …</p></div><p class="pwfehler" role="alert" hidden></p><div class="pwakt"><button class="btn pri" type="button" data-pwd="zu" autofocus>Schließen</button></div>`);
+  let j = null, fehler = "";
+  try { const r = await fetch(`/api/pinwand/${PW.pid}?entfernte=1`, {cache: "no-store", headers: {Authorization: "Bearer " + KEY}}); j = await r.json(); if (!r.ok) fehler = j.fehler || "Die Liste ließ sich nicht laden."; } catch(e) { fehler = "Die Zentrale ist nicht erreichbar"; }
+  if (PW.dlg !== d) return;
+  const l = d.querySelector(".pwliste"), E = (j && j.entfernte) || [];
+  l.innerHTML = fehler ? `<p class="pwfehler">${esc(fehler)}</p>` : E.length ? E.map(k => `<div class="pwrow" data-pwk="${esc(k.id)}"><div><b>${k.symbol ? esc(k.symbol) + " " : ""}${esc(k.titel)}</b><span class="pwmeta">${esc(k.gruppe)} · entfernt ${esc(ago(k.entfernt))}</span></div><button class="btn sm" type="button" data-pwd="zurueck">${icon("rotate-ccw")}Zurückholen</button></div>`).join("") : `<p class="pwmeta">Keine entfernten Karten.</p>`;
+}
+/* Doppelklick: auf eine Karte öffnet das Kartenfenster, auf eine freie Stelle den Dialog „Anpinnen“ (Karte entsteht dort, Gruppe aus dem Rahmen) */
+function pwDbl(e){
+  const k = e.target.closest(".pwk"); if (k) { pwKarte(k.dataset.id); return; }
+  if (!e.target.closest(".pwview") || e.target.closest("[data-gz]") || !PW.geladen || PW.dlg) return;
+  const r = pwEl(".pwcv").getBoundingClientRect(), z = PW.zoom || 1;
+  const x = Math.max(0, Math.round((e.clientX - r.left) / z)), y = Math.max(0, Math.round((e.clientY - r.top) / z));
+  const g = [...pwEl(".pwcv").querySelectorAll(".pwg")].find(f => !f.hidden && x >= f.offsetLeft && x <= f.offsetLeft + f.offsetWidth && y >= f.offsetTop && y <= f.offsetTop + f.offsetHeight);
+  pwFormular(null, {x, y, gruppe: g ? g.dataset.g : ""});
+}
+
 /* ---------- Klicks und Formulare ---------- */
 document.addEventListener("click", async e => {
   const t = e.target.closest("[data-sheet],[data-nav],[data-more],[data-sicht],[data-act]");
@@ -2120,6 +2868,7 @@ document.addEventListener("click", async e => {
   if (t.dataset.act && await neuKnopf(t.dataset.act, id, w, t)) return;
   switch (t.dataset.act) {
     case "zu": return closeSheet();
+    case "pwoeffnen": return pwOeffnen(id);
     case "abmelden": e.preventDefault(); return abmelden();
     case "hlvergessen":
       if (await bestaetigen("Gerät vergessen?", "Es verschwindet aus der Liste. Meldet es sich wieder, erscheint es neu. Seinen Schlüssel machst du ungültig mit: py start.py agent-weg geraet-" + id, "Vergessen", true)
